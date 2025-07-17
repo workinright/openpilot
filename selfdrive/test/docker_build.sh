@@ -29,7 +29,10 @@ args_add=
   args_add=--push
 #fi
 
-DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use
+sudo mkdir -p /mnt/buildkit-tmp
+sudo mount -t tmpfs -o size=8G tmpfs /mnt/buildkit-tmp
+
+DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use --buildkitd-flags '--root /mnt/buildkit-tmp'
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
 #sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
