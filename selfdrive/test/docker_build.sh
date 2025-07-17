@@ -35,8 +35,10 @@ args_add=
 #sudo swapon /swapfile
 
 sudo mkdir -p /mnt/buildkit-tmp /mnt/buildkit-tmp1
-#sudo mount -t tmpfs -o size=32G tmpfs /mnt/buildkit-tmp
+sudo mount -t tmpfs -o size=32G tmpfs /mnt/buildkit-tmp
 sudo mount -t tmpfs -o size=32G tmpfs /mnt/buildkit-tmp1
+
+mount
 
 DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use --buildkitd-flags '--root /mnt/buildkit-tmp'
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
