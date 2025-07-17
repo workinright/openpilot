@@ -12,7 +12,7 @@ jobs:
     container:
       image: ghcr.io/commaai/openpilot-base:latest
     runs-on: ubuntu-latest
-    if: github.repository == 'commaai/openpilot'
+    #if: github.repository == 'commaai/openpilot'
     permissions:
       checks: read
       contents: write

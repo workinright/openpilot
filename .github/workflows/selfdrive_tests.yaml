@@ -65,7 +65,7 @@ jobs:
         cd $STRIPPED_DIR
         ${{ env.RUN }} "release/check-dirty.sh"
     - name: Check submodules
-      if: github.repository == 'commaai/openpilot'
+      #if: github.repository == 'commaai/openpilot'
       timeout-minutes: 3
       run: release/check-submodules.sh
 
