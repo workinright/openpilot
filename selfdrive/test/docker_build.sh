@@ -26,7 +26,7 @@ args_add=
   #docker tag $REMOTE_TAG $REMOTE_SHA_TAG
   #docker push $REMOTE_SHA_TAG
 #else
-  args_add=--pull
+  args_add=--push
 #fi
 
 DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use
