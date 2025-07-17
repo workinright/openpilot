@@ -29,8 +29,11 @@ else
   args_add=--pull
 fi
 
+DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use
+DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+
 echo docker buildx build --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG,type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
-DOCKER_BUILDKIT=1 docker buildx build --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG,type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
+DOCKER_BUILDKIT=1 docker buildx build --builder shared-builder --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG,type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
 #DOCKER_BUILDKIT=1 docker buildx build --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG,type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
 
 
