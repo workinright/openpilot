@@ -81,7 +81,7 @@ jobs:
       with:
         submodules: true
     - name: Setup docker push
-      if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'workinright/openpilot'
+      #if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'workinright/openpilot'
       run: |
         echo "PUSH_IMAGE=true" >> "$GITHUB_ENV"
         $DOCKER_LOGIN
@@ -91,7 +91,7 @@ jobs:
 
   build_mac:
     name: build macOS
-    runs-on: ${{ ((github.repository == 'commaai/openpilot') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))) && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+    runs-on: ${{ ((github.repository == 'workinright/openpilot') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))) && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
     - uses: actions/checkout@v4
       with:
