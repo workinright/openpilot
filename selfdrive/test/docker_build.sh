@@ -5,6 +5,8 @@ set -e
 # mkdir -p .ci_cache/scons_cache
 # sudo mount --bind /tmp/scons_cache/ .ci_cache/scons_cache
 
+echo ARGS $@
+
 SCRIPT_DIR=$(dirname "$0")
 OPENPILOT_DIR=$SCRIPT_DIR/../../
 if [ -n "$TARGET_ARCHITECTURE" ]; then
