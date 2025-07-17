@@ -29,10 +29,10 @@ args_add=
   args_add=--push
 #fi
 
-sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
-sudo chmod 0600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
+#sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+#sudo chmod 0600 /swapfile
+#sudo mkswap /swapfile
+#sudo swapon /swapfile
 
 sudo mkdir -p /mnt/buildkit-tmp /mnt/buildkit-tmp1
 #sudo mount -t tmpfs -o size=32G tmpfs /mnt/buildkit-tmp
