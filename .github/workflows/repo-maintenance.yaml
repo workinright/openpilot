@@ -36,7 +36,7 @@ jobs:
     name: package_updates
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/commaai/openpilot-base:latest
+      image: ghcr.io/workinright/openpilot-base:latest
     #if: github.repository == 'commaai/openpilot'
     steps:
     - uses: actions/checkout@v4
