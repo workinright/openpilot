@@ -17,7 +17,12 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-DOCKER_BUILDKIT=1 docker buildx build --output type=image,compression=zstd,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+docker buildx create \
+  --name amd64_builder \
+  --node linux_amd64_builder \
+  --platform linux/amd64
+
+DOCKER_BUILDKIT=1 docker buildx build --builder amd64_builder --output type=image,compression=zstd,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 
 #if [ -n "$PUSH_IMAGE" ]; then
 #  docker push $REMOTE_TAG
