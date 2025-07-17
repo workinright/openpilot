@@ -81,7 +81,7 @@ jobs:
       with:
         submodules: true
     - name: Setup docker push
-      if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/openpilot'
+      if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'workinright/openpilot'
       run: |
         echo "PUSH_IMAGE=true" >> "$GITHUB_ENV"
         $DOCKER_LOGIN
