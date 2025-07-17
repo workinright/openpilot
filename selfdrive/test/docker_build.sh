@@ -29,11 +29,14 @@ args_add=
   args_add=--push
 #fi
 
-sudo mkdir -p /mnt/buildkit-tmp
+sudo mkdir -p /mnt/buildkit-tmp /mnt/buildkit-tmp1
 sudo mount -t tmpfs -o size=8G tmpfs /mnt/buildkit-tmp
+sudo mount -t tmpfs -o size=8G tmpfs /mnt/buildkit-tmp1
 
-DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use --buildkitd-flags '--root /mnt/buildkit-tmp'
+DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use --buildkitd-flags '--root /mnt/buildkit-tmp' --output type=docker,dest=/mnt/buildkit-tmp1/myimage.tar
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+umount /mnt/buildkit-tmp
+docker load -i /mnt/buildkit-tmp1/myimage.tar
 
 #sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
 #sudo chmod 0600 /swapfile
