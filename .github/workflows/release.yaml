@@ -10,7 +10,7 @@ jobs:
     env:
       ImageOS: ubuntu24
     container:
-      image: ghcr.io/workinright/openpilot-base:latest
+      image: ghcr.io/commaai/openpilot-base:latest
     runs-on: ubuntu-latest
     #if: github.repository == 'commaai/openpilot'
     permissions:
