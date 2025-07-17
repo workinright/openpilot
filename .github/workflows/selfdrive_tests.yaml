@@ -32,12 +32,7 @@ env:
 jobs:
   build_release:
     name: build release
-    runs-on: ${{
-      (github.repository == 'workinright/openpilot') &&
-      ((github.event_name != 'pull_request') ||
-      (github.event.pull_request.head.repo.full_name == 'workinright/openpilot'))
-      && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
-      || fromJSON('["ubuntu-24.04"]') }}
+    runs-on: ubuntu-24.04
     env:
       STRIPPED_DIR: /tmp/releasepilot
     steps:
@@ -70,12 +65,7 @@ jobs:
       run: release/check-submodules.sh
 
   build:
-    runs-on: ${{
-      (github.repository == 'workinright/openpilot') &&
-      ((github.event_name != 'pull_request') ||
-      (github.event.pull_request.head.repo.full_name == 'workinright/openpilot'))
-      && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
-      || fromJSON('["ubuntu-24.04"]') }}
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
       with:
@@ -91,7 +81,7 @@ jobs:
 
   build_mac:
     name: build macOS
-    runs-on: ${{ ((github.repository == 'workinright/openpilot') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))) && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
       with:
