@@ -35,8 +35,8 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 
 sudo mkdir -p /mnt/buildkit-tmp /mnt/buildkit-tmp1
-sudo mount -t tmpfs -o size=16G tmpfs /mnt/buildkit-tmp
-sudo mount -t tmpfs -o size=16G tmpfs /mnt/buildkit-tmp1
+sudo mount -t tmpfs -o size=32G tmpfs /mnt/buildkit-tmp
+sudo mount -t tmpfs -o size=32G tmpfs /mnt/buildkit-tmp1
 
 DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use --buildkitd-flags '--root /mnt/buildkit-tmp'
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
@@ -47,7 +47,7 @@ DOCKER_BUILDKIT=1 docker buildx build --builder shared-builder --provenance fals
 sudo umount /mnt/buildkit-tmp
 
 sudo systemctl stop dockerd
-sudo mount -t tmpfs -o size=16G tmpfs /var/lib/docker
+sudo mount -t tmpfs -o size=32G tmpfs /var/lib/docker
 sudo systemctl start dockerd
 
 docker load -i /mnt/buildkit-tmp1/myimage.tar
