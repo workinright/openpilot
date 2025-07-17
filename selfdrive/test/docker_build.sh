@@ -42,7 +42,7 @@ DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 #sudo swapon /swapfile
 
 echo docker buildx build --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG,type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
-DOCKER_BUILDKIT=1 docker buildx build --builder shared-builder --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add  --output type=oci,dest=/mnt/buildkit-tmp1/myimage.tar
+DOCKER_BUILDKIT=1 docker buildx build --builder shared-builder --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add  --output type=oci,dest=/mnt/buildkit-tmp1/myimage.tar,compression=uncompressed
 #DOCKER_BUILDKIT=1 docker buildx build --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG,type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
 sudo umount /mnt/buildkit-tmp
 docker load -i /mnt/buildkit-tmp1/myimage.tar
