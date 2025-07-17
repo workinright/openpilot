@@ -21,7 +21,7 @@ docker pull ghcr.io/workinright/openpilot-base:latest
 docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
 docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
-#DOCKER_BUILDKIT=1 docker buildx build --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+BUILDKIT_COMPRESSION=zstd BUILDKIT_COMPRESSION_LEVEL=1 DOCKER_BUILDKIT=1 docker buildx build --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 
 if [ -n "$PUSH_IMAGE" ]; then
   docker push $REMOTE_TAG
