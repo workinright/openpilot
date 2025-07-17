@@ -65,6 +65,7 @@ function install_ubuntu_common_requirements() {
     libqt5x11extras5-dev \
     libqt5opengl5-dev \
     xvfb
+    apt-get clean
 }
 
 # Install Ubuntu 24.04 LTS packages
@@ -79,6 +80,7 @@ function install_ubuntu_lts_latest_requirements() {
     qtbase5-dev-tools \
     python3-dev \
     python3-venv
+    apt-get clean
 }
 
 # Detect OS using /etc/os-release file
