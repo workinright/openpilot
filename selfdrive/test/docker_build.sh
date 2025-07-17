@@ -20,22 +20,22 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #sudo apt-get -y install strace
 
 args_add=
-if [ -n "$PUSH_IMAGE" ]; then
-  args_add=--push
+#if [ -n "$PUSH_IMAGE" ]; then
+  #args_add=--push
   #docker push $REMOTE_TAG
   #docker tag $REMOTE_TAG $REMOTE_SHA_TAG
   #docker push $REMOTE_SHA_TAG
-else
+#else
   args_add=--pull
-fi
+#fi
 
 DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
-sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
-sudo chmod 0600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
+#sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+#sudo chmod 0600 /swapfile
+#sudo mkswap /swapfile
+#sudo swapon /swapfile
 
 echo docker buildx build --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG,type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
 DOCKER_BUILDKIT=1 docker buildx build --builder shared-builder --output type=image,compression=zstd --provenance false --platform $PLATFORM --load --build-arg BUILDKIT_INLINE_CACHE=1 --cache-to type=registry,ref=$REMOTE_TAG --cache-from type=registry,ref=$REMOTE_TAG -t $REMOTE_SHA_TAG -t $REMOTE_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR $args_add
