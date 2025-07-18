@@ -90,19 +90,7 @@ MANIFEST_SIZE=$(wc -c < "$MANIFEST_FILE")
 
 echo '[*] Writing index.json'
 cat > "$OUTPUT_DIR/index.json" <<EOF
-{
-  "schemaVersion": 2,
-  "manifests": [
-    {
-      "mediaType": "$MEDIA_TYPE",
-      "digest": "sha256:$MANIFEST_DIGEST",
-      "size": $MANIFEST_SIZE,
-      "annotations": {
-        "org.opencontainers.image.ref.name": "$TAG"
-      }
-    }
-  ]
-}
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.docker.distribution.manifest.v2+json","digest":"sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374","size":1654,"annotations":{"io.containerd.image.name":"ghcr.io/workinright/openpilot-base:latest","org.opencontainers.image.created":"2025-07-18T04:48:02Z","org.opencontainers.image.ref.name":"latest"},"platform":{"architecture":"amd64","os":"linux"}}]}
 EOF
 
 echo "OCI image layout saved to '$OUTPUT_DIR'"
