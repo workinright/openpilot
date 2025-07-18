@@ -19,10 +19,17 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-docker pull ghcr.io/workinright/openpilot-base:latest
+wget "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz"
+tar xf oras_1.2.3_linux_amd64.tar.gz
+rm oras_1.2.3_linux_amd64.tar.gz
+
+mkdir container
+./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
+
+#docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
-docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
-docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
+#docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
+#docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
 #DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
 #DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
