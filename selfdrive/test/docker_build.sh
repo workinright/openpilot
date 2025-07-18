@@ -112,7 +112,7 @@ echo "OCI image layout saved to '$OUTPUT_DIR'"
 cd container
 tar cf ../cnt.tar *
 cd ..
-id="$(docker load cnt.tar)"
+id="$(docker load cnt.tar ghcr.io/workinright/openpilot-base:latest)"
 echo "$id"
 docker tag $id ghcr.io/workinright/openpilot-base:latest
 rm -rf container
