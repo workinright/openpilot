@@ -26,9 +26,14 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker --use
 #DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
-#docker login -u workinright -p 
+#docker login -u workinright -p
 
-docker buildx build --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+docker buildx create --name mybuilder --driver docker-container \
+  --driver-opt network=host \
+  --driver-opt "docker-config=$HOME/.docker" \
+  --use
+
+docker buildx build --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 #exit 1
 
 #if [ -n "$PUSH_IMAGE" ]; then
