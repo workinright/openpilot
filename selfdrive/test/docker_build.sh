@@ -99,7 +99,7 @@ done
 
 date
 
-time bash -c "docker load - < tar.tar"
+time bash -c "docker load < tar.tar"
 cd ..
 
 
