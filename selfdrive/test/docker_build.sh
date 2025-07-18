@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 ###set -e
+set -x
 
 # To build sim and docs, you can run the following to mount the scons cache to the same place as in CI:
 # mkdir -p .ci_cache/scons_cache
@@ -49,12 +50,17 @@ declare -a pids
 for DIGEST in $LAYER_DIGESTS; do
   HASH=$(echo "$DIGEST" | cut -d ':' -f2)
   echo "    ↳ sha256:$HASH"
+  #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
   curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
     -o "$OUTPUT_DIR/blobs/sha256/$HASH" &
     pids+=($!)
 
 done
+
+cd container
+time bash -c "tar cf - * | docker load"
+cd ..
 
 for pid in ${pids[@]}
 do
@@ -114,12 +120,12 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #cd container
 
 func
-cd container
+#cd container
 #tar cf ../cnt.tar *
 #cd ..
 #id="$(tar cf - * | docker load)"
-tar cf - * | docker load
-cd ..
+#tar cf - * | docker load
+#cd ..
 rm -rf container
 #echo "$id"
 #docker tag $id ghcr.io/workinright/openpilot-base:latest
