@@ -29,7 +29,9 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
 sudo apt-get -y install skopeo
 
-id=$(skopeo copy docker://ghcr.io/workinright/openpilot-base:latest docker-archive:/dev/stdout | docker import -)
+mkfifo fif1
+skopeo copy docker://ghcr.io/workinright/openpilot-base:latest docker-archive:fif1 &
+id=$(sudo docker import fif1)
 docker tag $id ghcr.io/workinright/openpilot-base:latest
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
