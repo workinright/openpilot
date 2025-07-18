@@ -26,7 +26,49 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #chmod +x oras
 #./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 #cd container
-REPO="commaai/openpilot-base"
+
+mkfifo fifo1
+skopeo copy docker://ghcr.io/commaai/openpilot-base:latest   docker-archive:fifo1 &
+docker load < fifo1
+
+#cd container
+#tar cf ../cnt.tar *
+#cd ..
+id="$(docker load < fifo1)"
+echo "$id"
+docker tag $id ghcr.io/workinright/openpilot-base:latest
+rm -rf container
+
+#docker pull ghcr.io/workinright/openpilot-base:latest
+#docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
+docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
+docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
+
+docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
+
+journalctl -xu docker.service
+
+#DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+#DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+
+#docker login -u workinright -p
+
+#docker buildx create --name mybuilder --driver docker-container \
+#  --driver-opt network=host \
+#  --driver-opt "docker-config=$HOME/.docker" \
+#  --use
+
+#DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+#exit 1
+
+#if [ -n "$PUSH_IMAGE" ]; then
+#  docker push $REMOTE_TAG
+#  docker tag $REMOTE_TAG $REMOTE_SHA_TAG
+#  docker push $REMOTE_SHA_TAG
+#fi
+
+func() {
+  REPO="commaai/openpilot-base"
 TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
@@ -108,39 +150,4 @@ EOF
 #{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.docker.distribution.manifest.v2+json","digest":"sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374","size":1654,"annotations":{"io.containerd.image.name":"ghcr.io/workinright/openpilot-base:latest","org.opencontainers.image.created":"2025-07-18T04:48:02Z","org.opencontainers.image.ref.name":"latest"},"platform":{"architecture":"amd64","os":"linux"}}]}
 
 echo "OCI image layout saved to '$OUTPUT_DIR'"
-
-cd container
-tar cf ../cnt.tar *
-cd ..
-id="$(docker load < cnt.tar)"
-echo "$id"
-docker tag $id ghcr.io/workinright/openpilot-base:latest
-rm -rf container
-
-#docker pull ghcr.io/workinright/openpilot-base:latest
-#docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
-docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
-docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
-
-docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
-
-journalctl -xu docker.service
-
-#DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
-#DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
-
-#docker login -u workinright -p
-
-#docker buildx create --name mybuilder --driver docker-container \
-#  --driver-opt network=host \
-#  --driver-opt "docker-config=$HOME/.docker" \
-#  --use
-
-#DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
-#exit 1
-
-#if [ -n "$PUSH_IMAGE" ]; then
-#  docker push $REMOTE_TAG
-#  docker tag $REMOTE_TAG $REMOTE_SHA_TAG
-#  docker push $REMOTE_SHA_TAG
-#fi
+}
