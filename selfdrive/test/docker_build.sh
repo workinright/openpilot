@@ -95,7 +95,7 @@ do
   wait $pid
 done
 
-time bash -c "ctr images import - < tar.tar"
+time bash -c "sudo ctr images import - < tar.tar"
 cd ..
 
 
