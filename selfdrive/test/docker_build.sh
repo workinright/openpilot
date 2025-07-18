@@ -19,14 +19,14 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-docker pull ghcr.io/workinright/openpilot-base:latest
-docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
-docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
+#docker pull ghcr.io/workinright/openpilot-base:latest
+#docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
+#docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
-#DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use
+DOCKER_BUILDKIT=1 docker buildx create --name shared-builder --driver docker-container --use
 #DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
-#echo docker buildx build --builder shared-builder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=zstd,compression-level=0,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+docker buildx build --builder shared-builder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 #exit 1
 
 #if [ -n "$PUSH_IMAGE" ]; then
