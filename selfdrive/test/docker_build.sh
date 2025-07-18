@@ -27,7 +27,7 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 #cd container
 
-apt-get -y install skopeo
+sudo apt-get -y install skopeo
 
 id=$(skopeo copy docker://ghcr.io/workinright/openpilot-base:latest docker-archive:/dev/stdout | docker import -)
 docker tag $id ghcr.io/workinright/openpilot-base:latest
