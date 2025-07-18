@@ -117,9 +117,12 @@ func
 cd container
 #tar cf ../cnt.tar *
 #cd ..
-id="$(tar cf - * | docker load)"
-echo "$id"
-docker tag $id ghcr.io/workinright/openpilot-base:latest
+#id="$(tar cf - * | docker load)"
+tar cf - * | docker load
+cd ..
+rm -rf container
+#echo "$id"
+#docker tag $id ghcr.io/workinright/openpilot-base:latest
 #rm -rf container
 
 #mkfifo fifo1
