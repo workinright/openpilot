@@ -73,6 +73,8 @@ tar cf ../tar.tar *
 touch tar.tar.lock
 cd ..
 
+date
+
 # Download each layer
 echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
@@ -95,7 +97,9 @@ do
   wait $pid
 done
 
-time bash -c "sudo ctr images import - < tar.tar"
+date
+
+time bash -c "docker load - < tar.tar"
 cd ..
 
 
@@ -125,10 +129,7 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 #cd container
 
-#func
-
-skopeo copy docker://ghcr.io/workinright/openpilot-base:latest docker-daemon:openpilot-base:latest
-
+func
 #cd container
 #tar cf ../cnt.tar *
 #cd ..
