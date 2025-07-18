@@ -43,7 +43,7 @@ curl -L -s -H "Authorization: Bearer $TOKEN" \
   -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST"
 
 cd container
-tar cf ../tar.tar *.json oc-layout
+tar cf ../tar.tar *.json oci-layout
 cd ..
 
 # Download each layer
