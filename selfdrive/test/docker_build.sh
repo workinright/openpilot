@@ -42,6 +42,10 @@ curl -L -s -H "Authorization: Bearer $TOKEN" \
   "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST" \
   -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST"
 
+cd container
+tar cf ../tar.tar *.json oc-layout
+cd ..
+
 # Download each layer
 echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
@@ -51,9 +55,9 @@ for DIGEST in $LAYER_DIGESTS; do
   HASH=$(echo "$DIGEST" | cut -d ':' -f2)
   echo "    ↳ sha256:$HASH"
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
-  curl -L -s -H "Authorization: Bearer $TOKEN" \
+  ( curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    -o "$OUTPUT_DIR/blobs/sha256/$HASH" &
+    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; tar rf ../tar.tar blobs/sha256/$HASH ) &
     pids+=($!)
 
 done
