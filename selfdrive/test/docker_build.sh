@@ -24,6 +24,7 @@ tar xf oras_1.2.3_linux_amd64.tar.gz
 rm oras_1.2.3_linux_amd64.tar.gz
 
 mkdir container
+chmod +x oras
 ./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
