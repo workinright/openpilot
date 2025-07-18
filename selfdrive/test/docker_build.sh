@@ -28,7 +28,7 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #cd container
 
 mkfifo fifo1
-skopeo copy docker://ghcr.io/commaai/openpilot-base:latest   docker-archive:fifo1 &
+skopeo copy docker://ghcr.io/workinright/openpilot-base:latest   docker-archive:fifo1 &
 docker load < fifo1
 
 #cd container
