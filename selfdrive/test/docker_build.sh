@@ -69,7 +69,7 @@ for DIGEST in $LAYER_DIGESTS; do
   echo "    ↳ sha256:$HASH"
   curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    -o "$OUTPUT_DIR/blobs/sha256/$HASH"
+    -o "$OUTPUT_DIR/blobs/sha256/$HASH" &
 done
 
 # Write oci-layout file
