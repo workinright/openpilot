@@ -98,8 +98,9 @@ cat > "$OUTPUT_DIR/index.json" <<EOF
 EOF
 
 echo "OCI image layout saved to '$OUTPUT_DIR'"
+
 cd container
-docker tag $(tar cf - * | sudo docker import -) ghcr.io/workinright/openpilot-base:latest
+docker tag $(tar cf - * | docker import -) ghcr.io/workinright/openpilot-base:latest
 rm -rf container
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
