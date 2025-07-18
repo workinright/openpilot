@@ -42,36 +42,6 @@ curl -L -s -H "Authorization: Bearer $TOKEN" \
   "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST" \
   -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST"
 
-cd container
-tar cf ../tar.tar *
-touch tar.tar.lock
-cd ..
-
-# Download each layer
-echo "[*] Downloading layer blobs..."
-LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
-
-declare -a pids
-for DIGEST in $LAYER_DIGESTS; do
-  HASH=$(echo "$DIGEST" | cut -d ':' -f2)
-  echo "    ↳ sha256:$HASH"
-  #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
-  ( curl -L -s -H "Authorization: Bearer $TOKEN" \
-    "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; exec 200>tar.tar.lock ; while ! flock -n 200; do sleep 0.1; done; tar rf ../tar.tar blobs/sha256/$HASH ; exec 200>&- ; rm blobs/sha256/$HASH ) &
-    pids+=($!)
-
-done
-
-for pid in ${pids[@]}
-do
-  echo waiting for
-  wait $pid
-done
-
-time bash -c "docker load < tar.tar"
-cd ..
-
 # Write oci-layout file
 echo '[*] Writing oci-layout'
 echo '{"imageLayoutVersion": "1.0.0"}' > "$OUTPUT_DIR/oci-layout"
@@ -97,6 +67,38 @@ cat > "$OUTPUT_DIR/index.json" <<EOF
 }
 EOF
 #{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.docker.distribution.manifest.v2+json","digest":"sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374","size":1654,"annotations":{"io.containerd.image.name":"ghcr.io/workinright/openpilot-base:latest","org.opencontainers.image.created":"2025-07-18T04:48:02Z","org.opencontainers.image.ref.name":"latest"},"platform":{"architecture":"amd64","os":"linux"}}]}
+
+cd container
+tar cf ../tar.tar *
+touch tar.tar.lock
+cd ..
+
+# Download each layer
+echo "[*] Downloading layer blobs..."
+LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
+
+declare -a pids
+for DIGEST in $LAYER_DIGESTS; do
+  HASH=$(echo "$DIGEST" | cut -d ':' -f2)
+  echo "    ↳ sha256:$HASH"
+  #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
+  ( curl -L -s -H "Authorization: Bearer $TOKEN" \
+    "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
+    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; exec 200>tar.tar.lock ; while ! flock -n 200; do sleep 0.1; echo attempt lock; done; tar rf ../tar.tar blobs/sha256/$HASH ; exec 200>&- ; rm blobs/sha256/$HASH ) &
+    pids+=($!)
+
+done
+
+for pid in ${pids[@]}
+do
+  echo waiting for
+  wait $pid
+done
+
+time bash -c "docker load < tar.tar"
+cd ..
+
+
 
 echo "OCI image layout saved to '$OUTPUT_DIR'"
 }
