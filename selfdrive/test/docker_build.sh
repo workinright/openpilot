@@ -20,7 +20,7 @@ fi
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
 wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
-  | tar xf -
+  | pigz -d | tar xf -
 
 mkdir container
 chmod +x oras
