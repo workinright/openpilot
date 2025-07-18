@@ -43,7 +43,8 @@ curl -L -s -H "Authorization: Bearer $TOKEN" \
   -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST"
 
 cd container
-tar cf ../tar.tar *.json oci-layout
+tar cf ../tar.tar *
+touch tar.tar.lock
 cd ..
 
 # Download each layer
@@ -57,7 +58,7 @@ for DIGEST in $LAYER_DIGESTS; do
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
   ( curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; tar rf ../tar.tar blobs/sha256/$HASH ; rm blobs/sha256/$HASH ) &
+    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; exec 200>tar.tar.lock ; while ! flock -n 200; do sleep 0.1; done; tar rf ../tar.tar blobs/sha256/$HASH ; exec 200>&- ; rm blobs/sha256/$HASH ) &
     pids+=($!)
 
 done
@@ -129,7 +130,7 @@ func
 #id="$(tar cf - * | docker load)"
 #tar cf - * | docker load
 #cd ..
-rm -rf container
+#####rm -rf container
 #echo "$id"
 #docker tag $id ghcr.io/workinright/openpilot-base:latest
 #rm -rf container
