@@ -26,82 +26,11 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #chmod +x oras
 #./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 #cd container
-REPO="workinright/openpilot-base"
-TAG="latest"
-IMAGE="ghcr.io/$REPO"
-OUTPUT_DIR="container"
 
-echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
-mkdir -p "$OUTPUT_DIR/blobs/sha256"
+apt-get -y install skopeo
 
-echo "[*] Requesting Bearer token from GHCR..."
-TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)
-
-echo "[*] Fetching manifest for $IMAGE:$TAG"
-MANIFEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
-  -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
-  "https://ghcr.io/v2/$REPO/manifests/$TAG")
-
-# Save manifest to file
-MANIFEST_FILE="$OUTPUT_DIR/manifest.json"
-#echo "$MANIFEST" > "$MANIFEST_FILE"
-echo '[{"Config":"blobs/sha256/7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a","RepoTags":["ghcr.io/workinright/openpilot-base:latest"],"Layers":["blobs/sha256/107cbdaeec042e6154640c94972c638f4e2fee795902b149e8ce9acbd03d59d7","blobs/sha256/217fab191c7c42284a939d32f1bab746921065cfd7f3fa1674e684a227974d8d","blobs/sha256/c03653e5cf5402c8ee1dd925ea7a5972ec57ca22ff5a4a5f4ba394b00e164c42","blobs/sha256/a59bbb8a8d17760fa86eb0784b64715e95c659e0f4475d9ecbd5def390766c4a","blobs/sha256/c816f3bba8b8f27500566fda3ab26401efb9e78301741df45a589eea1a28d328","blobs/sha256/22ed7fbdb74871ed4101fc509dd5523bd3f57f8b307e71964d8ed95e48ed8e5f","blobs/sha256/53d8ca3de39bc19aa653c7e56319e3b92980ba5e066288e11e33ef7dd9e709e3"]}]' > container/manifest.json
-
-# Calculate SHA256 of the manifest
-MANIFEST_DIGEST=$(sha256sum "$MANIFEST_FILE" | cut -d ' ' -f1)
-cp "$MANIFEST_FILE" "$OUTPUT_DIR/blobs/sha256/$MANIFEST_DIGEST"
-
-echo "[*] Manifest digest: sha256:$MANIFEST_DIGEST"
-
-# Download config blob
-CONFIG_DIGEST=$(echo "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)
-echo "[*] Downloading config blob: sha256:$CONFIG_DIGEST"
-
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST" \
-  -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST"
-
-# Download each layer
-echo "[*] Downloading layer blobs..."
-LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
-
-declare -a pids
-for DIGEST in $LAYER_DIGESTS; do
-  HASH=$(echo "$DIGEST" | cut -d ':' -f2)
-  echo "    ↳ sha256:$HASH"
-  curl -L -s -H "Authorization: Bearer $TOKEN" \
-    "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    -o "$OUTPUT_DIR/blobs/sha256/$HASH" &
-    pids+=($!)
-
-done
-
-for pid in ${pids[@]}
-do
-  echo waiting for $pid
-  wait $pid
-done
-
-# Write oci-layout file
-echo '[*] Writing oci-layout'
-echo '{"imageLayoutVersion": "1.0.0"}' > "$OUTPUT_DIR/oci-layout"
-
-# Create index.json
-MEDIA_TYPE=$(echo "$MANIFEST" | jq -r .mediaType)
-MANIFEST_SIZE=$(wc -c < "$MANIFEST_FILE")
-
-echo '[*] Writing index.json'
-cat > "$OUTPUT_DIR/index.json" <<EOF
-{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.docker.distribution.manifest.v2+json","digest":"sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374","size":1654,"annotations":{"io.containerd.image.name":"ghcr.io/workinright/openpilot-base:latest","org.opencontainers.image.created":"2025-07-18T04:48:02Z","org.opencontainers.image.ref.name":"latest"},"platform":{"architecture":"amd64","os":"linux"}}]}
-EOF
-
-echo "OCI image layout saved to '$OUTPUT_DIR'"
-
-cd container
-id="$(tar cf - * | docker import -)"
-echo "$id"
+id=$(skopeo copy docker://ghcr.io/workinright/openpilot-base:latest docker-archive:/dev/stdout | docker import -)
 docker tag $id ghcr.io/workinright/openpilot-base:latest
-rm -rf container
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
