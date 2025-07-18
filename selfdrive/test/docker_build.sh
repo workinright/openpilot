@@ -77,6 +77,7 @@ done
 
 for pid in ${pids[@]}
 do
+  echo waiting for $pid
   wait $pid
 done
 
