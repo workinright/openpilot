@@ -19,15 +19,15 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-wget "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz"
-tar xf oras_1.2.3_linux_amd64.tar.gz
-rm oras_1.2.3_linux_amd64.tar.gz
+wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
+  tar xf -
 
 mkdir container
 chmod +x oras
 ./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 cd container
 docker tag $(tar cf - * | sudo docker import -) ghcr.io/workinright/openpilot-base:latest
+rm -rf container
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
