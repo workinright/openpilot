@@ -62,8 +62,7 @@ for DIGEST in $LAYER_DIGESTS; do
 
 done
 
-cd container
-time bash -c "tar cf - * | docker load"
+time bash -c "docker load < tar.ttttar"
 cd ..
 
 for pid in ${pids[@]}
