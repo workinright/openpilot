@@ -6,8 +6,8 @@
 # sudo mount --bind /tmp/scons_cache/ .ci_cache/scons_cache
 
 func() {
-  REPO="commaai/openpilot-base"
-TAG="openpilot-base:latest"
+  REPO="workinright/openpilot-base"
+TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
@@ -24,7 +24,8 @@ MANIFEST=$(curl -L -s -H "Authorization: Bearer $TOKEN" \
 
 # Save manifest to file
 MANIFEST_FILE="$OUTPUT_DIR/manifest.json"
-echo "$MANIFEST" > "$MANIFEST_FILE"
+#echo "$MANIFEST" > "$MANIFEST_FILE"
+echo '[{"Config":"blobs/sha256/7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a","RepoTags":["ghcr.io/workinright/openpilot-base:latest"],"Layers":["blobs/sha256/107cbdaeec042e6154640c94972c638f4e2fee795902b149e8ce9acbd03d59d7","blobs/sha256/217fab191c7c42284a939d32f1bab746921065cfd7f3fa1674e684a227974d8d","blobs/sha256/c03653e5cf5402c8ee1dd925ea7a5972ec57ca22ff5a4a5f4ba394b00e164c42","blobs/sha256/a59bbb8a8d17760fa86eb0784b64715e95c659e0f4475d9ecbd5def390766c4a","blobs/sha256/c816f3bba8b8f27500566fda3ab26401efb9e78301741df45a589eea1a28d328","blobs/sha256/22ed7fbdb74871ed4101fc509dd5523bd3f57f8b307e71964d8ed95e48ed8e5f","blobs/sha256/53d8ca3de39bc19aa653c7e56319e3b92980ba5e066288e11e33ef7dd9e709e3"]}]' > "$MANIFEST_FILE"
 
 # Calculate SHA256 of the manifest
 MANIFEST_DIGEST=$(sha256sum "$MANIFEST_FILE" | cut -d ' ' -f1)
@@ -114,16 +115,16 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
 func
 cd container
-tar cf ../cnt.tar *
-cd ..
-id="$(docker load < cnt.tar)"
+#tar cf ../cnt.tar *
+#cd ..
+id="$(tar xf - * | docker load < cnt.tar)"
 echo "$id"
 docker tag $id ghcr.io/workinright/openpilot-base:latest
-rm -rf container
+#rm -rf container
 
-mkfifo fifo1
-skopeo copy docker://ghcr.io/workinright/openpilot-base:latest   docker-archive:fifo1 &
-docker load < fifo1
+#mkfifo fifo1
+#skopeo copy docker://ghcr.io/workinright/openpilot-base:latest   docker-archive:fifo1 &
+#docker load < fifo1
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
