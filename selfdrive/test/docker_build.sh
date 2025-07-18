@@ -125,7 +125,10 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 #cd container
 
-func
+#func
+
+skopeo copy docker://ghcr.io/workinright/openpilot-base:latest docker-daemon:openpilot-base:latest
+
 #cd container
 #tar cf ../cnt.tar *
 #cd ..
