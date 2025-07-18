@@ -29,7 +29,7 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 REPO="workinright/openpilot-base"
 TAG="latest"
 IMAGE="ghcr.io/$REPO"
-OUTPUT_DIR="oci"
+OUTPUT_DIR="container"
 
 echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR/blobs/sha256"
