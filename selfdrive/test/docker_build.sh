@@ -95,7 +95,7 @@ do
   wait $pid
 done
 
-time bash -c "docker load < tar.tar"
+time bash -c "ctr images import - < tar.tar"
 cd ..
 
 
