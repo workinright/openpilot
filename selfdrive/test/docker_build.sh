@@ -27,26 +27,27 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 #cd container
 
-mkfifo fifo1
-skopeo copy docker://ghcr.io/workinright/openpilot-base:latest   docker-archive:fifo1 &
-docker load < fifo1
-
-#cd container
-#tar cf ../cnt.tar *
-#cd ..
-id="$(docker load < fifo1)"
+func
+cd container
+tar cf ../cnt.tar *
+cd ..
+id="$(docker load < cnt.tar)"
 echo "$id"
 docker tag $id ghcr.io/workinright/openpilot-base:latest
 rm -rf container
+
+mkfifo fifo1
+skopeo copy docker://ghcr.io/workinright/openpilot-base:latest   docker-archive:fifo1 &
+docker load < fifo1
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
 docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
 docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
-docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
+#docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
 
-journalctl -xu docker.service
+#journalctl -xu docker.service
 
 #DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
 #DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
@@ -69,7 +70,7 @@ journalctl -xu docker.service
 
 func() {
   REPO="commaai/openpilot-base"
-TAG="latest"
+TAG="openpilot-base:latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
