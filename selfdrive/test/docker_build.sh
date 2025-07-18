@@ -100,7 +100,9 @@ EOF
 echo "OCI image layout saved to '$OUTPUT_DIR'"
 
 cd container
-docker tag $(tar cf - * | docker import -) ghcr.io/workinright/openpilot-base:latest
+id="$(tar cf - * | docker import -)"
+echo "$id"
+docker tag $id ghcr.io/workinright/openpilot-base:latest
 rm -rf container
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
