@@ -19,13 +19,13 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-#docker pull ghcr.io/workinright/openpilot-baseaaa:latest
+docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-baseaaa:latest ghcr.io/workinright/openpilot-base:latest
-#docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
-#docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
+docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
+docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
-DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
-DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+#DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+#DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
 #docker login -u workinright -p
 
@@ -34,7 +34,7 @@ DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 #  --driver-opt "docker-config=$HOME/.docker" \
 #  --use
 
-DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+#DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 #exit 1
 
 #if [ -n "$PUSH_IMAGE" ]; then
