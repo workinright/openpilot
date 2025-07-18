@@ -5,69 +5,6 @@
 # mkdir -p .ci_cache/scons_cache
 # sudo mount --bind /tmp/scons_cache/ .ci_cache/scons_cache
 
-echo ARGS $@
-
-SCRIPT_DIR=$(dirname "$0")
-OPENPILOT_DIR=$SCRIPT_DIR/../../
-if [ -n "$TARGET_ARCHITECTURE" ]; then
-  PLATFORM="linux/$TARGET_ARCHITECTURE"
-  TAG_SUFFIX="-$TARGET_ARCHITECTURE"
-else
-  PLATFORM="linux/$(uname -m)"
-  TAG_SUFFIX=""
-fi
-
-source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
-
-#wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
-#  | pigz -d | tar xf -
-
-#mkdir container
-#chmod +x oras
-#./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
-#cd container
-
-func
-cd container
-tar cf ../cnt.tar *
-cd ..
-id="$(docker load < cnt.tar)"
-echo "$id"
-docker tag $id ghcr.io/workinright/openpilot-base:latest
-rm -rf container
-
-mkfifo fifo1
-skopeo copy docker://ghcr.io/workinright/openpilot-base:latest   docker-archive:fifo1 &
-docker load < fifo1
-
-#docker pull ghcr.io/workinright/openpilot-base:latest
-#docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
-docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
-docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
-
-#docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
-
-#journalctl -xu docker.service
-
-#DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
-#DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
-
-#docker login -u workinright -p
-
-#docker buildx create --name mybuilder --driver docker-container \
-#  --driver-opt network=host \
-#  --driver-opt "docker-config=$HOME/.docker" \
-#  --use
-
-#DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
-#exit 1
-
-#if [ -n "$PUSH_IMAGE" ]; then
-#  docker push $REMOTE_TAG
-#  docker tag $REMOTE_TAG $REMOTE_SHA_TAG
-#  docker push $REMOTE_SHA_TAG
-#fi
-
 func() {
   REPO="commaai/openpilot-base"
 TAG="openpilot-base:latest"
@@ -152,3 +89,66 @@ EOF
 
 echo "OCI image layout saved to '$OUTPUT_DIR'"
 }
+
+echo ARGS $@
+
+SCRIPT_DIR=$(dirname "$0")
+OPENPILOT_DIR=$SCRIPT_DIR/../../
+if [ -n "$TARGET_ARCHITECTURE" ]; then
+  PLATFORM="linux/$TARGET_ARCHITECTURE"
+  TAG_SUFFIX="-$TARGET_ARCHITECTURE"
+else
+  PLATFORM="linux/$(uname -m)"
+  TAG_SUFFIX=""
+fi
+
+source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
+
+#wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
+#  | pigz -d | tar xf -
+
+#mkdir container
+#chmod +x oras
+#./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
+#cd container
+
+func
+cd container
+tar cf ../cnt.tar *
+cd ..
+id="$(docker load < cnt.tar)"
+echo "$id"
+docker tag $id ghcr.io/workinright/openpilot-base:latest
+rm -rf container
+
+mkfifo fifo1
+skopeo copy docker://ghcr.io/workinright/openpilot-base:latest   docker-archive:fifo1 &
+docker load < fifo1
+
+#docker pull ghcr.io/workinright/openpilot-base:latest
+#docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
+docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
+docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
+
+#docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
+
+#journalctl -xu docker.service
+
+#DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+#DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+
+#docker login -u workinright -p
+
+#docker buildx create --name mybuilder --driver docker-container \
+#  --driver-opt network=host \
+#  --driver-opt "docker-config=$HOME/.docker" \
+#  --use
+
+#DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,push=true,compression=gzip,compression-level=1,force-compression=true --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t workinright/openpilot-base:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+#exit 1
+
+#if [ -n "$PUSH_IMAGE" ]; then
+#  docker push $REMOTE_TAG
+#  docker tag $REMOTE_TAG $REMOTE_SHA_TAG
+#  docker push $REMOTE_SHA_TAG
+#fi
