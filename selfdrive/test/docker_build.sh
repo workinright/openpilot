@@ -35,10 +35,10 @@ echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR/blobs/sha256"
 
 echo "[*] Requesting Bearer token from GHCR..."
-TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)
+TOKEN=$(curl -L -s "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)
 
 echo "[*] Fetching manifest for $IMAGE:$TAG"
-MANIFEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
+MANIFEST=$(curl -L -s -H "Authorization: Bearer $TOKEN" \
   -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
   "https://ghcr.io/v2/$REPO/manifests/$TAG")
 
@@ -56,7 +56,7 @@ echo "[*] Manifest digest: sha256:$MANIFEST_DIGEST"
 CONFIG_DIGEST=$(echo "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)
 echo "[*] Downloading config blob: sha256:$CONFIG_DIGEST"
 
-curl -s -H "Authorization: Bearer $TOKEN" \
+curl -L -s -H "Authorization: Bearer $TOKEN" \
   "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST" \
   -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST"
 
