@@ -19,8 +19,8 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-docker pull ghcr.io/workinright/openpilot-base:latest
-#docker tag ghcr.io/workinright/openpilot-baseaaa:latest ghcr.io/workinright/openpilot-base:latest
+docker pull ghcr.io/workinright/openpilot-base121:latest
+docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
 docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
 docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
