@@ -64,12 +64,20 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
+declare -a pids
 for DIGEST in $LAYER_DIGESTS; do
   HASH=$(echo "$DIGEST" | cut -d ':' -f2)
   echo "    ↳ sha256:$HASH"
   curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
     -o "$OUTPUT_DIR/blobs/sha256/$HASH" &
+    pids+=($!)
+
+done
+
+for pid in ${pids[@]}
+do
+  wait $pid
 done
 
 # Write oci-layout file
