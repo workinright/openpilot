@@ -23,7 +23,7 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
 #docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
-DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker --use
+DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
 #docker login -u workinright -p
