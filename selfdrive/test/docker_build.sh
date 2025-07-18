@@ -19,12 +19,85 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
-  | gzip -d | tar xf -
+#wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
+#  | pigz -d | tar xf -
 
-mkdir container
-chmod +x oras
-./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
+#mkdir container
+#chmod +x oras
+#./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
+#cd container
+REPO="workinright/openpilot-base"
+TAG="latest"
+IMAGE="ghcr.io/$REPO"
+OUTPUT_DIR="oci"
+
+echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR/blobs/sha256"
+
+echo "[*] Requesting Bearer token from GHCR..."
+TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)
+
+echo "[*] Fetching manifest for $IMAGE:$TAG"
+MANIFEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
+  -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
+  "https://ghcr.io/v2/$REPO/manifests/$TAG")
+
+# Save manifest to file
+MANIFEST_FILE="$OUTPUT_DIR/manifest.json"
+echo "$MANIFEST" > "$MANIFEST_FILE"
+
+# Calculate SHA256 of the manifest
+MANIFEST_DIGEST=$(sha256sum "$MANIFEST_FILE" | cut -d ' ' -f1)
+cp "$MANIFEST_FILE" "$OUTPUT_DIR/blobs/sha256/$MANIFEST_DIGEST"
+
+echo "[*] Manifest digest: sha256:$MANIFEST_DIGEST"
+
+# Download config blob
+CONFIG_DIGEST=$(echo "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)
+echo "[*] Downloading config blob: sha256:$CONFIG_DIGEST"
+
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST" \
+  -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST"
+
+# Download each layer
+echo "[*] Downloading layer blobs..."
+LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
+
+for DIGEST in $LAYER_DIGESTS; do
+  HASH=$(echo "$DIGEST" | cut -d ':' -f2)
+  echo "    ↳ sha256:$HASH"
+  curl -s -H "Authorization: Bearer $TOKEN" \
+    "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
+    -o "$OUTPUT_DIR/blobs/sha256/$HASH"
+done
+
+# Write oci-layout file
+echo '[*] Writing oci-layout'
+echo '{"imageLayoutVersion": "1.0.0"}' > "$OUTPUT_DIR/oci-layout"
+
+# Create index.json
+MEDIA_TYPE=$(echo "$MANIFEST" | jq -r .mediaType)
+MANIFEST_SIZE=$(wc -c < "$MANIFEST_FILE")
+
+echo '[*] Writing index.json'
+cat > "$OUTPUT_DIR/index.json" <<EOF
+{
+  "schemaVersion": 2,
+  "manifests": [
+    {
+      "mediaType": "$MEDIA_TYPE",
+      "digest": "sha256:$MANIFEST_DIGEST",
+      "size": $MANIFEST_SIZE,
+      "annotations": {
+        "org.opencontainers.image.ref.name": "$TAG"
+      }
+    }
+  ]
+}
+EOF
+
+echo "OCI image layout saved to '$OUTPUT_DIR'"
 cd container
 docker tag $(tar cf - * | sudo docker import -) ghcr.io/workinright/openpilot-base:latest
 rm -rf container
