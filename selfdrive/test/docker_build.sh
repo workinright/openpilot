@@ -57,19 +57,19 @@ for DIGEST in $LAYER_DIGESTS; do
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
   ( curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; tar rf ../tar.tar blobs/sha256/$HASH ) &
+    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; tar rf ../tar.tar blobs/sha256/$HASH ; rm blobs/sha256/$HASH ) &
     pids+=($!)
 
 done
-
-time bash -c "docker load < tar.ttttar"
-cd ..
 
 for pid in ${pids[@]}
 do
   echo waiting for
   wait $pid
 done
+
+time bash -c "docker load < tar.tar"
+cd ..
 
 # Write oci-layout file
 echo '[*] Writing oci-layout'
