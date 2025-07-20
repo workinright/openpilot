@@ -149,7 +149,7 @@ wait $pid2
 echo "OCI image layout saved to '$OUTPUT_DIR'"
 }
 
-echo ARGS $@
+#echo ARGS $@
 
 SCRIPT_DIR=$(dirname "$0")
 OPENPILOT_DIR=$SCRIPT_DIR/../../
