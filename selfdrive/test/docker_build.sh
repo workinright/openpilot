@@ -161,7 +161,13 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 #./oras copy ghcr.io/workinright/openpilot-base:latest --to-oci-layout container
 #cd container
 
-func
+#func
+
+sudo systemctl stop docker ; sleep 1 ; sudo rm -rf /var/lib/docker ; sudo mkdir /var/lib/docker ; sudo chmod 744 /var/lib/docker ; sudo mount -t tmpfs tmpfs /var/lib/docker ; sleep 1 ; sudo systemctl start docker
+
+docker pull ghcr.io/workinright/openpilot-base
+
+
 #cd container
 #tar cf ../cnt.tar *
 #cd ..
