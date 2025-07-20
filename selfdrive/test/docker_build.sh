@@ -6,6 +6,8 @@
 # mkdir -p .ci_cache/scons_cache
 # sudo mount --bind /tmp/scons_cache/ .ci_cache/scons_cache
 
+source $SCRIPT_DIR/basher
+
 func() {
   REPO="workinright/openpilot-base"
 TAG="latest"
@@ -85,29 +87,29 @@ LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 mkdir docker ; sudo mount -t tmpfs tmpfs docker
 
-source $SCRIPT_DIR/basher ; basher_glob "container" "docker"
+ basher_glob "container" "docker"
 
-i=0
-declare -a pids
-prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=;
-for DIGEST in $LAYER_DIGESTS; do
-  HASH=$(echo "$DIGEST" | cut -d ':' -f2)
-  echo "    ↳ sha256:$HASH"
+ basher_layers "container" "docker"
+
+#i=0
+#declare -a pids
+#prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=;
+#for DIGEST in $LAYER_DIGESTS; do
+#  HASH=$(echo "$DIGEST" | cut -d ':' -f2)
+#  echo "    ↳ sha256:$HASH"
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
   # (
-   assign_id "$HASH";
-   echo HASH $HASH new_id $new_id; SOURCE_DIR="container";
-   TARGET_DIR="docker";
-   sha256="$HASH";
-   basher_layer ;
+#   assign_id "$HASH";
+#   echo HASH $HASH new_id $new_id; SOURCE_DIR="container";
+#   TARGET_DIR="docker";
+#   sha256="$HASH";
+#   basher_layer ;
    
-   curl -L -s -H "Authorization: Bearer $TOKEN" \
-    "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    | tar -xf - -C docker/overlay2/$new_id/diff/ # ) &
+   # ) &
 
     #pids+=($!)
-    ((++i))
-done
+   # ((++i))
+#done
 
 #for pid in ${pids[@]}
 #do
