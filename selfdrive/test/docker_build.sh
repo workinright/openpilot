@@ -127,19 +127,16 @@ sudo bash -c "source $SCRIPT_DIR/basher ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$
 
 #rm -rf container
 
-echo -n "{"Repositories":{"ghcr.io/workinright/openpilot-base":{"ghcr.io/workinright/openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a","ghcr.io/workinright/openpilot-base@sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
+echo -n "{"Repositories":{"ghcr.io/workinright/openpilot-base":{"ghcr.io/workinright/openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
 
 wait $stop_docker_pid
 sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
-sudo systemctl start docker &
-pid1=$!
 sudo umount container &
 pid2=$!
 
 wait $pid2
-wait $pid1
 
-systemctl status docker
+#systemctl status docker
 
 
 #sudo dockerd -D -l debug --log-driver none &

@@ -76,6 +76,9 @@ basher_layers() {
         ((++i))
     done < <(jq -r '.[0].Layers[]' "$SOURCE_DIR/manifest.json")
 
+    sudo systemctl start docker &
+    pid1=$!
+
     #echo pids ${pids[@]}
 
     for pid in ${pids[@]}
@@ -83,6 +86,8 @@ basher_layers() {
         #echo waiting for
         wait $pid
     done
+
+    wait $pid1
 }
 
 basher_layer() {
