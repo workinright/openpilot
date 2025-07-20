@@ -104,6 +104,10 @@ basher_layers() {
     sudo dockerd -D -l debug --log-driver none &
     #pid1=$!
 
+    sleep 10
+
+    docker run -it openpilot-base:latest bash
+
     #wait $pid1
 
     #docker images
