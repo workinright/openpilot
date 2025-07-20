@@ -129,7 +129,8 @@ date
 
 rm -rf container
 
-sudo systemctl start docker
+#sudo systemctl start docker
+sudo dockerd -D -l debug --log-driver none &
 
 
 #time bash -c "docker load < tar.tar"
