@@ -86,12 +86,13 @@ date
 echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
+#mkdir -p docker ; sudo mount -t tmpfs tmpfs docker ; sleep 2
 
-mkdir -p docker ; sudo mount -t tmpfs tmpfs docker ; sleep 2
+wait $stop_docker_pid
 
- basher_glob "container" "docker"
+ sudo bash -c "source $SCRIPT_DIR/basher ; basher_glob "container" "/var/lib/docker""
 
- basher_layers "container" "docker"
+ sudo bash -c "source $SCRIPT_DIR/basher ; basher_layers "container" "/var/lib/docker""
 
 #i=0
 #declare -a pids
@@ -119,11 +120,10 @@ mkdir -p docker ; sudo mount -t tmpfs tmpfs docker ; sleep 2
 #  wait $pid
 #done
 
-wait $stop_docker_pid
 
-sudo rsync -a docker/ /var/lib/docker/
-mount
-sudo umount docker
+#sudo rsync -a docker/ /var/lib/docker/
+#mount
+#sudo umount docker
 
 date
 
