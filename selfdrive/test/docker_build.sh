@@ -87,7 +87,7 @@ echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 
-mkdir docker ; sudo mount -t tmpfs tmpfs docker
+mkdir -p docker ; sudo mount -t tmpfs tmpfs docker ; sleep 2
 
  basher_glob "container" "docker"
 

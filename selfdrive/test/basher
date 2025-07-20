@@ -59,6 +59,9 @@ basher_layers() {
         sha256="$(echo -n "$layer" | rev | cut -d'/' -f1 | rev)"
         assign_id "$sha256"
 
+        echo SOURCE_DIR $SOURCE_DIR
+        echo TARGET_DIR $TARGET_DIR
+
         basher_layer
 
         ( TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; curl -L -s -H "Authorization: Bearer $TOKEN1" \
