@@ -130,8 +130,8 @@ basher_layer() {
     
     #TODO
     #echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
-    echo 10000 > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
-    
+    echo -n 10000 > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+
     echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
 
     if [ "$i" != 0 ]
