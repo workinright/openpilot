@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+#set -e
 
 #if [ $# -lt 2 ]
 #then
@@ -18,6 +18,9 @@ basher_glob() {
 
     SOURCE_DIR="$1"
     TARGET_DIR="$2"
+
+    echo SOURCE_DIR "$SOURCE_DIR"
+    echo TARGET_DIR "$TARGET_DIR"
 
     mkdir -p "$TARGET_DIR/image/overlay2/l"
     mkdir -p "$TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"
@@ -142,5 +145,5 @@ basher_layer() {
 
 }
 
-basher_glob "$1" "$2"
-basher_layers "$1" "$2"
+#basher_glob "$1" "$2"
+#basher_layers "$1" "$2"

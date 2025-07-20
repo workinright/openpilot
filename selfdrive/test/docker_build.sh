@@ -79,18 +79,18 @@ date
 echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
-source $SCRIPT_DIR/basher
 
-basher_glob container /var/lib/docker
+
+sudo bash -c "source $SCRIPT_DIR/basher ; basher_glob "container" "/var/lib/docker""
 
 declare -a pids
 for DIGEST in $LAYER_DIGESTS; do
   HASH=$(echo "$DIGEST" | cut -d ':' -f2)
   echo "    ↳ sha256:$HASH"
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
-  ( new_id="$(assign_id "$HASH")"; curl -L -s -H "Authorization: Bearer $TOKEN" \
+  ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    | tar -xf - -C  $TARGET_DIR/overlay2/$new_id/diff/ ; i=0; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; basher_layer) &
+    | sudo tar -xf - -C /var/lib/docker/overlay2/$new_id/diff/ ; sudo bash -c "source $SCRIPT_DIR/basher ; new_id="$new_id"; i=0; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; SOURCE_DIR="container"; TARGET_DIR="/var/lib/docker" ; basher_layer") &
     pids+=($!)
 
 done
