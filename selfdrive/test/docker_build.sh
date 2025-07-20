@@ -109,7 +109,7 @@ do
   wait $pid
 done
 
-rsync -a --info=progress2 docker/ /var/lib/docker/
+sudo rsync -a --info=progress2 docker/ /var/lib/docker/
 
 date
 
