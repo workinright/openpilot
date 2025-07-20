@@ -127,7 +127,7 @@ sudo bash -c "source $SCRIPT_DIR/basher ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$
 
 #rm -rf container
 
-echo -n "{"Repositories":{"openpilot-base": {"openpilot-base:latest": "sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}, "ghcr.io/workinright/openpilot-base":{"ghcr.io/workinright/openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
+echo -n "{"Repositories":{"openpilot-base":{"openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}, "ghcr.io/workinright/openpilot-base":{"ghcr.io/workinright/openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
 
 wait $stop_docker_pid
 sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
