@@ -12,7 +12,7 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
-sudo systemctl stop docker
+( sudo systemctl stop docker ; rm -rf /var/lib/docker ; mkdir /var/lib/docker ; chmod 744 /var/lib/docker ; mount -t tmpfs tmpfs /var/lib/docker ; systemctl start docker ; systemctl stop docker)
 stop_docker_pid=$!
 
 echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
@@ -93,7 +93,7 @@ for DIGEST in $LAYER_DIGESTS; do
   HASH=$(echo "$DIGEST" | cut -d ':' -f2)
   echo "    ↳ sha256:$HASH"
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
-  ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; sudo bash -c "source $SCRIPT_DIR/basher ; new_id="$new_id"; i=$i; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; SOURCE_DIR="container"; TARGET_DIR="/var/lib/docker"; sha256="$HASH"; basher_layer" ; curl -L -s -H "Authorization: Bearer $TOKEN" \
+  ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; SOURCE_DIR="container"; TARGET_DIR="docker"; sha256="$HASH"; basher_layer ; curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
     | sudo tar -xf - -C /var/lib/docker/overlay2/$new_id/diff/) &
 
@@ -106,6 +106,8 @@ do
   echo waiting for
   wait $pid
 done
+
+rsync -a --info=progress2 docker/ /var/lib/docker/
 
 date
 
