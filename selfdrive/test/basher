@@ -96,7 +96,7 @@ basher_layers() {
 
     wait $pid1
 
-    docker images
+    #docker images
 }
 
 basher_layer() {
