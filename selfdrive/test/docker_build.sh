@@ -109,7 +109,7 @@ done
 
 wait $stop_docker_pid
 
-sudo rsync -a --info=progress2 docker/ /var/lib/docker/
+sudo rsync -a docker/ /var/lib/docker/
 mount
 sudo umount docker
 
