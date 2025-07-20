@@ -87,16 +87,18 @@ wait $stop_docker_pid
 
 sudo bash -c "source $SCRIPT_DIR/basher ; basher_glob "container" "/var/lib/docker""
 
+i=0
 declare -a pids
 for DIGEST in $LAYER_DIGESTS; do
   HASH=$(echo "$DIGEST" | cut -d ':' -f2)
   echo "    ↳ sha256:$HASH"
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
-  ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; sudo bash -c "source $SCRIPT_DIR/basher ; new_id="$new_id"; i=0; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; SOURCE_DIR="container"; TARGET_DIR="/var/lib/docker"; sha256="$HASH"; basher_layer" ; curl -L -s -H "Authorization: Bearer $TOKEN" \
+  ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; sudo bash -c "source $SCRIPT_DIR/basher ; new_id="$new_id"; i=$i; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; SOURCE_DIR="container"; TARGET_DIR="/var/lib/docker"; sha256="$HASH"; basher_layer" ; curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
     | sudo tar -xf - -C /var/lib/docker/overlay2/$new_id/diff/) &
-    pids+=($!)
 
+    pids+=($!)
+    (++i)
 done
 
 for pid in ${pids[@]}
@@ -168,8 +170,8 @@ docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
 #journalctl -xu docker.service
 
-DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
-DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+#DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+#DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
 #docker login -u workinright -p
 
