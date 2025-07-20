@@ -65,7 +65,6 @@ basher_layers() {
 
 basher_layer() {
 
-    prev_new_ids=
     if [ $i = 0 ]
     then
         prev_new_ids="$new_id"

@@ -95,9 +95,15 @@ for DIGEST in $LAYER_DIGESTS; do
   echo "    ↳ sha256:$HASH"
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
   # (
-   assign_id "$HASH"; echo HASH $HASH new_id $new_id; SOURCE_DIR="container"; TARGET_DIR="docker"; sha256="$HASH"; basher_layer ; curl -L -s -H "Authorization: Bearer $TOKEN" \
+   assign_id "$HASH";
+   echo HASH $HASH new_id $new_id; SOURCE_DIR="container";
+   TARGET_DIR="docker";
+   sha256="$HASH";
+   basher_layer ;
+   
+   curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    | sudo tar -xf - -C docker/overlay2/$new_id/diff/ # ) &
+    | tar -xf - -C docker/overlay2/$new_id/diff/ # ) &
 
     #pids+=($!)
     ((++i))
