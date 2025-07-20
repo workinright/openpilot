@@ -83,8 +83,6 @@ echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 
-wait $stop_docker_pid
-
 mkdir docker ; sudo mount -t tmpfs tmpfs docker
 
 source $SCRIPT_DIR/basher ; basher_glob "container" "docker"
@@ -108,6 +106,8 @@ do
   echo waiting for
   wait $pid
 done
+
+wait $stop_docker_pid
 
 sudo rsync -a --info=progress2 docker/ /var/lib/docker/
 
