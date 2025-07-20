@@ -101,7 +101,7 @@ date
 
 sudo systemctl stop docker
 
-sudo "$(dirname "$0")/basher" "$container" "/var/lib/docker"
+sudo "$(dirname "$0")/basher" container "/var/lib/docker"
 
 sudo systemctl start docker
 
