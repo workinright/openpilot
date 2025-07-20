@@ -16,7 +16,7 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
-( sudo systemctl stop docker ; sudo rm -rf /var/lib/docker ; sudo mkdir /var/lib/docker ; sudo chmod 744 /var/lib/docker ; sudo mount -t tmpfs tmpfs /var/lib/docker ; sudo systemctl start docker ; sudo systemctl stop docker)
+( sudo systemctl stop docker ; sudo rm -rf /var/lib/docker ; sudo mkdir /var/lib/docker ; sudo chmod 744 /var/lib/docker ; sudo mount -t tmpfs tmpfs /var/lib/docker ; sleep 2 ; sudo systemctl start docker ; sudo systemctl stop docker)
 stop_docker_pid=$!
 
 echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
@@ -90,9 +90,7 @@ LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 wait $stop_docker_pid
 
- sudo bash -c "source $SCRIPT_DIR/basher ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "container" "/var/lib/docker""
-
- sudo bash -c "source $SCRIPT_DIR/basher ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "container" "/var/lib/docker""
+sudo bash -c "source $SCRIPT_DIR/basher ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "container" "/var/lib/docker" ; basher_layers "container" "/var/lib/docker""
 
 #i=0
 #declare -a pids
