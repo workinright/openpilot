@@ -77,7 +77,7 @@ basher_layers() {
         | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$$) | sha256sum - | cut -d' ' -f1 )" #) #&
         echo postsha "$sha256"
 
-        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id1/diff/"
+        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id1/diff/$sha256"
 
        # pids+=($!)
 
