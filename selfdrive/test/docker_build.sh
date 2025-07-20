@@ -194,7 +194,7 @@ func
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
-echo -n "{"Repositories":{"ghcr.io/workinright/openpilot-base":{"ghcr.io/workinright/openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a","ghcr.io/workinright/openpilot-base@sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}" > /var/lib/docker/image/overlay2/repositories.json
+echo -n "{"Repositories":{"ghcr.io/workinright/openpilot-base":{"ghcr.io/workinright/openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a","ghcr.io/workinright/openpilot-base@sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}" | sudo tee /var/lib/docker/image/overlay2/repositories.json &>/dev/null
 
 #docker tag 7eb1b2d52293 ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
