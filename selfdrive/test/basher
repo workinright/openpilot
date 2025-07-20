@@ -66,8 +66,6 @@ basher_layers() {
         #echo SOURCE_DIR $SOURCE_DIR
         #echo TARGET_DIR $TARGET_DIR
 
-        basher_layer
-
         #echo start
 
         echo presha "$sha256"
@@ -78,6 +76,8 @@ basher_layers() {
         echo postsha "$sha256"
 
         mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id1/diff/$sha256"
+
+        basher_layer
 
        # pids+=($!)
 
