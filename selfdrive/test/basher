@@ -53,6 +53,7 @@ basher_layers() {
     prev_chain_id=
     prev_new_ids=
     prev_new_ids2=
+    declare -a pids
     jq -r '.[0].Layers[]' "$SOURCE_DIR/manifest.json" | while read layer
     do
         sha256="$(echo -n "$layer" | rev | cut -d'/' -f1 | rev)"
@@ -62,9 +63,16 @@ basher_layers() {
 
          curl -L -s -H "Authorization: Bearer $TOKEN" \
         "https://ghcr.io/v2/$REPO/blobs/sha256:$sha256" \
-        | tar -xf - -C docker/overlay2/$new_id/diff/
+        | tar -xf - -C docker/overlay2/$new_id/diff/ &
 
+        pids+=($!)
         ((++i))
+    done
+
+    for pid in ${pids[@]}
+    do
+        echo waiting for
+        wait $pid
     done
 }
 
