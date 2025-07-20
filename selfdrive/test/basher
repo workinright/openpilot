@@ -61,7 +61,7 @@ basher_layers() {
     while read layer
     do
         sha256="$(echo -n "$layer" | cut -d':' -f2 )"
-        assign_id "$sha256"
+        
 
         #echo SOURCE_DIR $SOURCE_DIR
         #echo TARGET_DIR $TARGET_DIR
@@ -75,8 +75,10 @@ basher_layers() {
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
         | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$$) | sha256sum - | cut -d' ' -f1 )" #) #&
         echo postsha "$sha256"
+        assign_id "$sha256"
 
-        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id1/diff/$sha256"
+        rmdir "$TARGET_DIR/overlay2/$new_id1/diff"
+        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id1/diff"
 
         basher_layer
 
