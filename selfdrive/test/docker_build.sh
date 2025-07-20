@@ -90,9 +90,9 @@ LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 wait $stop_docker_pid
 
- sudo bash -c "source $SCRIPT_DIR/basher ; basher_glob "container" "/var/lib/docker""
+ sudo bash -c "source $SCRIPT_DIR/basher ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "container" "/var/lib/docker""
 
- sudo bash -c "source $SCRIPT_DIR/basher ; basher_layers "container" "/var/lib/docker""
+ sudo bash -c "source $SCRIPT_DIR/basher ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "container" "/var/lib/docker""
 
 #i=0
 #declare -a pids
