@@ -139,6 +139,8 @@ pid2=$!
 wait $pid2
 wait $pid1
 
+systemctl status docker
+
 
 #sudo dockerd -D -l debug --log-driver none &
 
