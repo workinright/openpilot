@@ -81,10 +81,6 @@ basher_layers() {
     done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
 
     wait $stop_docker_pid
-    echo -n '{"Repositories":{"openpilot-base":{"openpilot-base:latest":"sha256:dffe4116b62191e5a0f8dd10375cf8f76d94903b85c30cdcc2f3f5f9cf4929d4"}}}' | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
-    sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
-    sudo systemctl start docker &
-    pid1=$!
 
     #echo pids ${pids[@]}
 
@@ -94,7 +90,12 @@ basher_layers() {
         wait $pid
     done
 
-    wait $pid1
+    echo -n '{"Repositories":{"openpilot-base":{"openpilot-base:latest":"sha256:dffe4116b62191e5a0f8dd10375cf8f76d94903b85c30cdcc2f3f5f9cf4929d4"}}}' | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
+    sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
+    sudo systemctl start docker #&
+    #pid1=$!
+
+    #wait $pid1
 
     #docker images
 }

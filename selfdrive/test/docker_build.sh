@@ -16,7 +16,7 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 #OUTPUT_DIR="container"
 
-sudo bash -c "mkdir /var/lib/docker2 ; chmod 744 /var/lib/docker2 && mount -t tmpfs tmpfs /var/lib/docker2"
+sudo bash -c "mkdir /var/lib/docker2 ; chmod 744 /var/lib/docker2 && mount -t tmpfs -o size=8G tmpfs /var/lib/docker2"
 
 echo "[*] Requesting Bearer token from GHCR..."
 TOKEN=$(curl -L -s "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)
