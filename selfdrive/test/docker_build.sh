@@ -194,9 +194,11 @@ func
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
-docker tag 7eb1b2d52293 ghcr.io/workinright/openpilot-base:latest
-docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
-docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
+echo -n "{"Repositories":{"ghcr.io/workinright/openpilot-base":{"ghcr.io/workinright/openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a","ghcr.io/workinright/openpilot-base@sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}" > /var/lib/docker/image/overlay2/repositories.json
+
+#docker tag 7eb1b2d52293 ghcr.io/workinright/openpilot-base:latest
+#docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
+#docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
 #docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
 
