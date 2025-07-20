@@ -16,7 +16,7 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
-sudo bash -c "systemctl mask docker.socker ; systemctl stop docker ; rm -rf /var/lib/docker ; mkdir /var/lib/docker ; chmod 744 /var/lib/docker" &
+sudo bash -c "systemctl mask docker.socket ; systemctl stop docker ; rm -rf /var/lib/docker ; mkdir /var/lib/docker ; chmod 744 /var/lib/docker" &
 stop_docker_pid=$!
 
 sudo bash -c "mkdir container ; mkdir /var/lib/docker2 ; chmod 744 /var/lib/docker2 && mount -t tmpfs tmpfs /var/lib/docker2 && mount -t tmpfs tmpfs container"
@@ -129,7 +129,7 @@ sudo bash -c "source $SCRIPT_DIR/basher ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$
 
 wait $stop_docker_pid
 sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
-sudo systemctl unmask docker.socker &
+sudo systemctl unmask docker.socket &
 pid1=$!
 sudo umount container &
 pid2=$!
