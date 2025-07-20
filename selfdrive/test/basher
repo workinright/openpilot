@@ -94,6 +94,8 @@ basher_layers() {
     done
 
     wait $pid1
+
+    docker iamges
 }
 
 basher_layer() {
