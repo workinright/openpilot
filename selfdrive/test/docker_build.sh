@@ -12,6 +12,9 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
+sudo systemctl stop docker
+stop_docker_pid=$!
+
 echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR/blobs/sha256"
 
@@ -80,6 +83,7 @@ echo "[*] Downloading layer blobs..."
 LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 
+wait $stop_docker_pid
 
 sudo bash -c "source $SCRIPT_DIR/basher ; basher_glob "container" "/var/lib/docker""
 
@@ -102,8 +106,6 @@ do
 done
 
 date
-
-sudo systemctl stop docker
 
 sudo "$(dirname "$0")/basher" container "/var/lib/docker"
 rm -rf container
