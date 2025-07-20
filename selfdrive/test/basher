@@ -47,7 +47,6 @@ basher_layers() {
 
     SOURCE_DIR="$1"
     TARGET_DIR="$2"
-    assigned_id="$3"
 
     i=0
     prev_sha256=
@@ -60,6 +59,10 @@ basher_layers() {
         assign_id "$sha256"
 
         basher_layer
+
+         curl -L -s -H "Authorization: Bearer $TOKEN" \
+        "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
+        | tar -xf - -C docker/overlay2/$new_id/diff/
     done
 }
 
