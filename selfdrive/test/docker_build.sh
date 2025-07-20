@@ -135,7 +135,7 @@ sudo umount container &
 pid2=$!
 
 wait $pid2
-#wait $pid1
+wait $pid1
 
 
 #sudo dockerd -D -l debug --log-driver none &
