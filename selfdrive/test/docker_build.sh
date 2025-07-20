@@ -16,7 +16,7 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
-( sudo systemctl stop docker ; sleep 2 ; sudo rm -rf /var/lib/docker ; sudo mkdir /var/lib/docker ; sudo chmod 744 /var/lib/docker ; sudo mount -t tmpfs tmpfs /var/lib/docker ; sleep 5 ; sudo systemctl start docker ; sudo systemctl stop docker)
+( sudo systemctl stop docker ; sleep 1 ; sudo rm -rf /var/lib/docker ; sudo mkdir /var/lib/docker ; sudo chmod 744 /var/lib/docker ; sudo mount -t tmpfs tmpfs /var/lib/docker ; sleep 1 ; sudo systemctl start docker ; sudo systemctl stop docker)
 stop_docker_pid=$!
 
 echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
