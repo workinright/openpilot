@@ -106,6 +106,8 @@ basher_layers() {
 
     sleep 10
 
+    docker images
+
     docker run openpilot-base:latest bash
 
     #wait $pid1
