@@ -72,7 +72,7 @@ basher_layers() {
 
         ( TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
-        | tar -xf - -C $TARGET_DIR/overlay2/$new_id1/diff/ ) &
+        | pigz -d | tar -xf - -C $TARGET_DIR/overlay2/$new_id1/diff/ ) &
 
         pids+=($!)
 
