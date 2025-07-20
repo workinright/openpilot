@@ -48,6 +48,9 @@ basher_layers() {
     MANIFEST="$(echo -n "$1" | base64 -d)"
     TARGET_DIR="$2"
 
+    sudo bash -c "systemctl stop docker ; rm -rf /var/lib/docker ; mkdir /var/lib/docker ; chmod 744 /var/lib/docker" &
+    stop_docker_pid=$!
+
     i=0
     prev_sha256=
     prev_chain_id=

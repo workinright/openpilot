@@ -16,9 +16,6 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 #OUTPUT_DIR="container"
 
-sudo bash -c "systemctl stop docker ; rm -rf /var/lib/docker ; mkdir /var/lib/docker ; chmod 744 /var/lib/docker" &
-stop_docker_pid=$!
-
 sudo bash -c "mkdir /var/lib/docker2 ; chmod 744 /var/lib/docker2 && mount -t tmpfs tmpfs /var/lib/docker2"
 
 echo "[*] Requesting Bearer token from GHCR..."
