@@ -6,6 +6,8 @@
 # mkdir -p .ci_cache/scons_cache
 # sudo mount --bind /tmp/scons_cache/ .ci_cache/scons_cache
 
+SCRIPT_DIR="$(dirname "$0")"
+
 source $SCRIPT_DIR/basher
 
 func() {

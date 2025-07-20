@@ -61,7 +61,7 @@ basher_layers() {
         basher_layer
 
          curl -L -s -H "Authorization: Bearer $TOKEN" \
-        "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
+        "https://ghcr.io/v2/$REPO/blobs/sha256:$sha256" \
         | tar -xf - -C docker/overlay2/$new_id/diff/
 
         ((++i))
@@ -127,7 +127,11 @@ basher_layer() {
     mkdir -p "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
     
     echo -n "$new_id" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
-    echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+    
+    #TODO
+    #echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+    echo 10000 > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+    
     echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
 
     if [ "$i" != 0 ]
