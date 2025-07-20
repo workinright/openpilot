@@ -16,7 +16,7 @@ assign_id() {
 
 basher_glob() {
 
-    SOURCE_DIR="$1"
+    MANIFEST="$1"
     TARGET_DIR="$2"
 
     #echo SOURCE_DIR "$SOURCE_DIR"
@@ -32,10 +32,10 @@ basher_glob() {
 
     #docker_patch1/image/overlay2/repositories.json # not required, keeps tags
 
-    manifest_sha256="$(jq -r '.[0].Config' "$SOURCE_DIR/manifest.json" | cut -d':' -f2)"
+    manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.[0].Config' | cut -d':' -f2)"
     if ! [ -e "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
     then
-        cp "$SOURCE_DIR/$manifest_sha256" "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
+        echo -n "$MANIFEST" > "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
     else
         echo "error: the image is already there"
         exit 2
@@ -45,7 +45,7 @@ basher_glob() {
 
 basher_layers() {
 
-    SOURCE_DIR="$1"
+    MANIFEST="$1"
     TARGET_DIR="$2"
 
     i=0
@@ -74,7 +74,7 @@ basher_layers() {
 
         #echo started pid ${pids[@]}
         ((++i))
-    done < <(jq -r '.[0].Layers[]' "$SOURCE_DIR/manifest.json")
+    done < <(echo -n "$MANIFEST" | jq -r '.[0].Layers[]')
 
     wait $stop_docker_pid
     sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
