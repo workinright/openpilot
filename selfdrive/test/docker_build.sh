@@ -85,7 +85,7 @@ LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 wait $stop_docker_pid
 
-sudo bash -c "source $SCRIPT_DIR/basher ; basher_glob "container" "/var/lib/docker""
+source $SCRIPT_DIR/basher ; basher_glob "container" "docker"
 
 i=0
 declare -a pids
