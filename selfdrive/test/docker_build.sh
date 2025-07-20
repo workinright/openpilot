@@ -129,7 +129,7 @@ sudo bash -c "source $SCRIPT_DIR/basher ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$
 
 wait $stop_docker_pid
 sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
-sudo systemctl unmask docker.socket &
+sudo bash -c "systemctl unmask docker.socket ; systemctl start docker" &
 pid1=$!
 sudo umount container &
 pid2=$!
