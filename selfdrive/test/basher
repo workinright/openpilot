@@ -16,7 +16,7 @@ assign_id() {
 
 basher_glob() {
 
-    MANIFEST="$1"
+    MANIFEST="$(echo -n "$1" | base64 -d)"
     TARGET_DIR="$2"
 
     #echo SOURCE_DIR "$SOURCE_DIR"
@@ -31,8 +31,8 @@ basher_glob() {
     mkdir -p "$TARGET_DIR/overlay2/l"
 
     #docker_patch1/image/overlay2/repositories.json # not required, keeps tags
-
-    manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.[0].Config' | cut -d':' -f2)"
+    #echo -n "$MANIFEST"
+    manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
     if ! [ -e "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
     then
         echo -n "$MANIFEST" > "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
@@ -45,7 +45,7 @@ basher_glob() {
 
 basher_layers() {
 
-    MANIFEST="$1"
+    MANIFEST="$(echo -n "$1" | base64 -d)"
     TARGET_DIR="$2"
 
     i=0
@@ -56,7 +56,7 @@ basher_layers() {
     declare -a pids
     while read layer
     do
-        sha256="$(echo -n "$layer" | rev | cut -d'/' -f1 | rev)"
+        sha256="$(echo -n "$layer" | cut -d':' -f2 )"
         assign_id "$sha256"
 
         #echo SOURCE_DIR $SOURCE_DIR
@@ -74,7 +74,7 @@ basher_layers() {
 
         #echo started pid ${pids[@]}
         ((++i))
-    done < <(echo -n "$MANIFEST" | jq -r '.[0].Layers[]')
+    done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
 
     wait $stop_docker_pid
     sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"

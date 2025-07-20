@@ -42,20 +42,19 @@ MANIFEST_DIGEST=$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)
 echo "[*] Manifest digest: sha256:$MANIFEST_DIGEST"
 
 # Download config blob
-CONFIG_DIGEST=$(echo "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)
+CONFIG_DIGEST=$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)
 echo "[*] Downloading config blob: sha256:$CONFIG_DIGEST"
 
 CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
-  "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST" \
-  -o "$OUTPUT_DIR/blobs/sha256/$CONFIG_DIGEST")"
+  "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST")"
 
 # Write oci-layout file
 #echo '[*] Writing oci-layout'
 #echo '{"imageLayoutVersion": "1.0.0"}' > "$OUTPUT_DIR/oci-layout"
 
 # Create index.json
-MEDIA_TYPE=$(echo "$MANIFEST" | jq -r .mediaType)
-MANIFEST_SIZE=$(wc -c < "$MANIFEST_FILE")
+MEDIA_TYPE=$(echo -n "$MANIFEST" | jq -r .mediaType)
+MANIFEST_SIZE=$(echo -n "$MANIFEST" | wc -c)
 
 #echo '[*] Writing index.json'
 INDEX_JSON="$(cat <<EOF
@@ -89,7 +88,8 @@ echo "[*] Downloading layer blobs..."
 
 #mkdir -p docker ; sudo mount -t tmpfs tmpfs docker ; sleep 2
 
-sudo bash -c "source $SCRIPT_DIR/basher ; MANIFEST="$MANIFEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "$MANIFEST" "/var/lib/docker2" ; basher_layers "$MANIFEST" "/var/lib/docker2""
+MANIFEST_b64="$(echo -n "$MANIFEST" | base64 -w0)"
+sudo bash -c "source $SCRIPT_DIR/basher ; MANIFEST_b64="$MANIFEST_b64" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "$MANIFEST_b64" "/var/lib/docker2" ; basher_layers "$MANIFEST_b64" "/var/lib/docker2""
 
 #i=0
 #declare -a pids
@@ -139,7 +139,7 @@ sudo bash -c "source $SCRIPT_DIR/basher ; MANIFEST="$MANIFEST" ; TOKEN="$TOKEN" 
 
 
 
-echo "OCI image layout saved to '$OUTPUT_DIR'"
+#echo "OCI image layout saved to '$OUTPUT_DIR'"
 }
 
 #echo ARGS $@
