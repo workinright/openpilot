@@ -85,6 +85,8 @@ LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 wait $stop_docker_pid
 
+mkdir docker ; sudo mount -t tmpfs tmpfs docker
+
 source $SCRIPT_DIR/basher ; basher_glob "container" "docker"
 
 i=0
@@ -95,7 +97,7 @@ for DIGEST in $LAYER_DIGESTS; do
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
   ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; SOURCE_DIR="container"; TARGET_DIR="docker"; sha256="$HASH"; basher_layer ; curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    | sudo tar -xf - -C /var/lib/docker/overlay2/$new_id/diff/) &
+    | sudo tar -xf - -C docker/overlay2/$new_id/diff/) &
 
     pids+=($!)
     ((++i))
