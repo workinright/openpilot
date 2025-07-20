@@ -48,6 +48,9 @@ basher_layers() {
     SOURCE_DIR="$1"
     TARGET_DIR="$2"
 
+    sudo bash -c "systemctl stop docker ; rm -rf /var/lib/docker ; mkdir /var/lib/docker ; chmod 744 /var/lib/docker" &
+    stop_docker_pid=$!
+
     i=0
     prev_sha256=
     prev_chain_id=
@@ -76,6 +79,9 @@ basher_layers() {
         ((++i))
     done < <(jq -r '.[0].Layers[]' "$SOURCE_DIR/manifest.json")
 
+    wait $stop_docker_pid
+    sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
+    echo -n '{"Repositories":{"openpilot-base":{"openpilot-base:latest":"sha256:7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a"}}}' | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
     sudo systemctl start docker &
     pid1=$!
 
