@@ -19,8 +19,8 @@ basher_glob() {
     SOURCE_DIR="$1"
     TARGET_DIR="$2"
 
-    echo SOURCE_DIR "$SOURCE_DIR"
-    echo TARGET_DIR "$TARGET_DIR"
+    #echo SOURCE_DIR "$SOURCE_DIR"
+    #echo TARGET_DIR "$TARGET_DIR"
 
     mkdir -p "$TARGET_DIR/image/overlay2/l"
     mkdir -p "$TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"
@@ -59,12 +59,12 @@ basher_layers() {
         sha256="$(echo -n "$layer" | rev | cut -d'/' -f1 | rev)"
         assign_id "$sha256"
 
-        echo SOURCE_DIR $SOURCE_DIR
-        echo TARGET_DIR $TARGET_DIR
+        #echo SOURCE_DIR $SOURCE_DIR
+        #echo TARGET_DIR $TARGET_DIR
 
         basher_layer
 
-        echo start
+        #echo start
 
         ( TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
@@ -72,15 +72,15 @@ basher_layers() {
 
         pids+=($!)
 
-        echo started pid ${pids[@]}
+        #echo started pid ${pids[@]}
         ((++i))
     done < <(jq -r '.[0].Layers[]' "$SOURCE_DIR/manifest.json")
 
-    echo pids ${pids[@]}
+    #echo pids ${pids[@]}
 
     for pid in ${pids[@]}
     do
-        echo waiting for
+        #echo waiting for
         wait $pid
     done
 }

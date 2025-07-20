@@ -16,8 +16,10 @@ TAG="latest"
 IMAGE="ghcr.io/$REPO"
 OUTPUT_DIR="container"
 
-( sudo systemctl stop docker ; sleep 1 ; sudo rm -rf /var/lib/docker ; sudo mkdir /var/lib/docker ; sudo chmod 744 /var/lib/docker ; sudo mount -t tmpfs tmpfs /var/lib/docker ; sleep 1 ; sudo systemctl start docker ; sudo systemctl stop docker)
+sudo bash -c "systemctl stop docker ; rm -rf /var/lib/docker ; mkdir /var/lib/docker ; chmod 744 /var/lib/docker" &
 stop_docker_pid=$!
+
+sudo bash -c "mkdir container ; mkdir /var/lib/docker2 ; chmod 744 /var/lib/docker2 && mount -t tmpfs tmpfs /var/lib/docker2 && mount -t tmpfs tmpfs container"
 
 echo "[*] Creating OCI layout directory: $OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR/blobs/sha256"
@@ -80,17 +82,15 @@ EOF
 #touch tar.tar.lock
 #cd ..
 
-date
+#date
 
 # Download each layer
 echo "[*] Downloading layer blobs..."
-LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
+#LAYER_DIGESTS=$(echo "$MANIFEST" | jq -r '.layers[].digest')
 
 #mkdir -p docker ; sudo mount -t tmpfs tmpfs docker ; sleep 2
 
-wait $stop_docker_pid
-
-sudo bash -c "source $SCRIPT_DIR/basher ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "container" "/var/lib/docker" ; basher_layers "container" "/var/lib/docker""
+sudo bash -c "source $SCRIPT_DIR/basher ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "container" "/var/lib/docker2" ; basher_layers "container" "/var/lib/docker2""
 
 #i=0
 #declare -a pids
@@ -123,11 +123,21 @@ sudo bash -c "source $SCRIPT_DIR/basher ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$
 #mount
 #sudo umount docker
 
-date
+#date
 
-rm -rf container
+#rm -rf container
 
-sudo systemctl start docker
+wait $stop_docker_pid
+sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
+sudo systemctl start docker &
+pid1=$!
+sudo umount container &
+pid2=$!
+
+wait $pid2
+wait $pid1
+
+
 #sudo dockerd -D -l debug --log-driver none &
 
 
