@@ -107,7 +107,6 @@ done
 
 date
 
-sudo "$(dirname "$0")/basher" container "/var/lib/docker"
 rm -rf container
 
 sudo systemctl start docker
