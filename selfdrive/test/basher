@@ -63,6 +63,8 @@ basher_layers() {
          curl -L -s -H "Authorization: Bearer $TOKEN" \
         "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
         | tar -xf - -C docker/overlay2/$new_id/diff/
+
+        ((++i))
     done
 }
 
@@ -143,7 +145,6 @@ basher_layer() {
     
     prev_sha256="$sha256"
     prev_chain_id="$chain_id"
-    ((++i))
 
 }
 
