@@ -89,23 +89,24 @@ source $SCRIPT_DIR/basher ; basher_glob "container" "docker"
 
 i=0
 declare -a pids
+prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=;
 for DIGEST in $LAYER_DIGESTS; do
   HASH=$(echo "$DIGEST" | cut -d ':' -f2)
   echo "    ↳ sha256:$HASH"
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
-  ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; prev_sha256=;prev_chain_id=;prev_new_ids=;prev_new_ids2=; SOURCE_DIR="container"; TARGET_DIR="docker"; sha256="$HASH"; basher_layer ; curl -L -s -H "Authorization: Bearer $TOKEN" \
+  ( source $SCRIPT_DIR/basher ; assign_id "$HASH"; echo HASH $HASH new_id $new_id; SOURCE_DIR="container"; TARGET_DIR="docker"; sha256="$HASH"; basher_layer ; curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    | sudo tar -xf - -C docker/overlay2/$new_id/diff/) &
+    | sudo tar -xf - -C docker/overlay2/$new_id/diff/) # &
 
-    pids+=($!)
+    #pids+=($!)
     ((++i))
 done
 
-for pid in ${pids[@]}
-do
-  echo waiting for
-  wait $pid
-done
+#for pid in ${pids[@]}
+#do
+#  echo waiting for
+#  wait $pid
+#done
 
 wait $stop_docker_pid
 
