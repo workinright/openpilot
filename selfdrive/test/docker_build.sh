@@ -98,7 +98,7 @@ for DIGEST in $LAYER_DIGESTS; do
     | sudo tar -xf - -C /var/lib/docker/overlay2/$new_id/diff/) &
 
     pids+=($!)
-    (++i)
+    ((++i))
 done
 
 for pid in ${pids[@]}
