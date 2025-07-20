@@ -163,8 +163,8 @@ docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
 #journalctl -xu docker.service
 
-#DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
-#DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
 #docker login -u workinright -p
 
