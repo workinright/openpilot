@@ -1,0 +1,139 @@
+#!/bin/bash
+set -e
+
+#if [ $# -lt 2 ]
+#then
+#    echo "usage: $0 SOURCE_DIR TARGET_DIR"
+#    exit 1
+#fi
+
+basher() {
+
+    SOURCE_DIR=$1
+    TARGET_DIR=$2
+
+    mkdir -p "$TARGET_DIR/image/overlay2/l"
+    mkdir -p "$TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"
+    mkdir -p "$TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256"
+    mkdir -p "$TARGET_DIR/image/overlay2/layerdb/sha256"
+    mkdir -p "$TARGET_DIR/image/overlay2/imagedb/content/sha256"
+    mkdir -p "$TARGET_DIR/image/overlay2/layerdb/tmp"
+    mkdir -p "$TARGET_DIR/overlay2/l"
+
+    #docker_patch1/image/overlay2/repositories.json # not required, keeps tags
+
+    manifest_sha256="$(jq -r '.[0].Config' "$SOURCE_DIR/manifest.json" | cut -d':' -f2)"
+    if ! [ -e "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
+    then
+        cp "$SOURCE_DIR/$manifest_sha256" "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
+    else
+        echo "error: the image is already there"
+        exit 2
+    fi
+
+    #var="$(cat "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256")"
+    #echo -n "$var" | jq '. + {rootfs: {type: "layers", diff_ids: []}}' > "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256"
+
+    i=0
+    prev_sha256=
+    prev_chain_id=
+    prev_new_ids=
+    prev_new_ids2=
+    jq -r '.[0].Layers[]' "$SOURCE_DIR/manifest.json" | while read layer
+    do
+        sha256="$(echo -n "$layer" | rev | cut -d'/' -f1 | rev)"
+        new_id="$(echo -n "$sha256" | dd bs=64 count=1 2>/dev/null | sha256sum - | cut -d' ' -f1)"
+
+
+        #new_id2="$(echo -n "$sha256" | dd bs=63 count=1 2>/dev/null | sha256sum - | cut -d' ' -f1 | tr -dc 'A-Z0-9' < /dev/urandom | head -c26)"
+
+        prev_new_ids="$prev_new_ids:$new_id"
+        if [ $i = 0 ]
+        then
+            prev_new_ids="$new_id"
+        else
+            prev_new_ids="$prev_new_ids:$new_id"
+        fi
+
+        #var="$(cat "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256")"
+        #echo -n "$var" | jq ".rootfs.diff_ids += [\"sha256:$new_id\"]" > "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256"
+
+        new_id2="$(echo -n "$prev_new_ids" | sha256sum | cut -d' ' -f1 | base64 -w 0 | tr +/ -_ | cut -c1-26)"
+        #new_id2="$(echo -n "$new_id2")"
+        #echo $new_id2
+
+
+        #cache_id="$(echo -n "$sha256" | dd bs=62 count=1 2>/dev/null | sha256sum - | cut -d' ' -f1)"
+
+        if [ $i = 0 ]
+        then
+            chain_id="$sha256"
+        else
+            chain_id="$(echo -n "sha256:$chain_id sha256:$sha256" | sha256sum - | cut -d' ' -f1)"
+        fi
+        #echo "final $chain_id"
+
+        # update here
+        if [ -e "$TARGET_DIR/overlay2/$new_id" ] || [ -e "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id" ]
+        then
+            echo "error: the file or directory is already there"
+            exit 3
+        fi
+        
+        mkdir -p "$TARGET_DIR/overlay2/$new_id/diff"
+        mkdir -p "$TARGET_DIR/overlay2/$new_id/work"
+
+        echo -n "$new_id2" > "$TARGET_DIR/overlay2/$new_id/link"
+        ln -s "../$new_id/diff" "$TARGET_DIR/overlay2/l/$new_id2"
+
+        if [ $i = 0 ]
+        then
+            prev_new_ids2="l/$new_id2"
+        else
+            echo -n "$prev_new_ids2" > "$TARGET_DIR/overlay2/$new_id/lower"
+        
+            prev_new_ids2="$prev_new_ids2:l/$new_id2"
+        fi
+
+        tar -xf "$SOURCE_DIR/$layer" -C "$TARGET_DIR/overlay2/$new_id/diff/"
+
+        if [ "$i" = 1 ]
+        then
+            touch "$TARGET_DIR/overlay2/$new_id/committed"
+        fi
+
+        #chain_id=
+        #if [ "$i" = 0 ]
+        #then
+        #    chain_id="$sha256"
+        #else
+        #    chain_id="$new_id"
+        #fi
+
+        mkdir -p "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
+        
+        echo -n "$new_id" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
+        echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+        echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
+
+        if [ "$i" != 0 ]
+        then
+            echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
+            echo -n "sha256:$prev_chain_id" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/parent"
+        fi
+
+        #echo "tarsplit" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/tar-split.json.gz"
+
+        echo -n "[{\"Digest\":\"sha256:$sha256\",\"SourceRepository\":\"ghcr.io/workinright/openpilot-base\",\"HMAC\":\"\"}]" \
+            > "$TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256/$sha256"
+        
+        echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256/$sha256"
+        
+        prev_sha256="$sha256"
+        prev_chain_id="$chain_id"
+        ((++i))
+    done
+
+}
+
+basher "$1" "$2"

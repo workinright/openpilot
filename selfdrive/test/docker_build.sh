@@ -68,10 +68,10 @@ cat > "$OUTPUT_DIR/index.json" <<EOF
 EOF
 #{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.docker.distribution.manifest.v2+json","digest":"sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374","size":1654,"annotations":{"io.containerd.image.name":"ghcr.io/workinright/openpilot-base:latest","org.opencontainers.image.created":"2025-07-18T04:48:02Z","org.opencontainers.image.ref.name":"latest"},"platform":{"architecture":"amd64","os":"linux"}}]}
 
-cd container
-tar cf ../tar.tar *
-touch tar.tar.lock
-cd ..
+#cd container
+#tar cf ../tar.tar *
+#touch tar.tar.lock
+#cd ..
 
 date
 
@@ -86,7 +86,7 @@ for DIGEST in $LAYER_DIGESTS; do
   #mkfifo "$OUTPUT_DIR/blobs/sha256/$HASH"
   ( curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$HASH" \
-    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ; cd container ; exec 200>tar.tar.lock ; while ! flock -n 200; do sleep 0.1; echo attempt lock; done; tar rf ../tar.tar blobs/sha256/$HASH ; exec 200>&- ; rm blobs/sha256/$HASH ) &
+    -o "$OUTPUT_DIR/blobs/sha256/$HASH" ) &
     pids+=($!)
 
 done
@@ -99,8 +99,15 @@ done
 
 date
 
-time bash -c "docker load < tar.tar"
-cd ..
+sudo systemctl stop docker
+
+sudo "$(dirname "$0")/basher" "$container" "/var/lib/docker"
+
+sudo systemctl start docker
+
+
+#time bash -c "docker load < tar.tar"
+#cd ..
 
 
 
@@ -147,6 +154,7 @@ func
 
 #docker pull ghcr.io/workinright/openpilot-base:latest
 #docker tag ghcr.io/workinright/openpilot-base121:latest ghcr.io/workinright/openpilot-base:latest
+docker tag 7eb1b2d52293 ghcr.io/workinright/openpilot-base:latest
 docker tag ghcr.io/workinright/openpilot-base:latest $REMOTE_SHA_TAG
 docker tag ghcr.io/workinright/openpilot-base:latest $LOCAL_TAG
 
