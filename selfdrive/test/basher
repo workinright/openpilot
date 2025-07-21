@@ -90,7 +90,7 @@ basher_layers() {
 
         
         tmp_dirs+=($var)
-        pids+=($sha256)
+        sha256s+=($sha256)
 
         ((++i))
     done <<< "$layers"
