@@ -77,8 +77,8 @@ basher_layers() {
         echo postsha "$sha256"
         assign_id "$sha256"
 
-        rmdir "$TARGET_DIR/overlay2/$new_id1/diff"
-        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id1/diff"
+        rmdir "$TARGET_DIR/overlay2/$new_id/diff"
+        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer
 
