@@ -77,9 +77,11 @@ basher_layers() {
         ( var="$var" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
         | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$var) | sha256sum - | cut -d' ' -f1 )" ; mv "$TARGET_DIR/$var" "$TARGET_DIR/${sha2561}_$sha256" ) &
+        pids+=($!)
+        
         echo postsha "$sha256"
 
-        pids+=($!)
+        
         sth1+=($var)
         sth2+=($sha256)
 
