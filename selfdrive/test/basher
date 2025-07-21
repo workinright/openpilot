@@ -14,7 +14,8 @@ basher_layers() {
     TAG="latest"
     IMAGE="ghcr.io/$REPO"
 
-    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p $ATOMIC_TARGET_DIR ; chmod 744 $ATOMIC_TARGET_DIR && mount -t tmpfs -o size=8G tmpfs $ATOMIC_TARGET_DIR ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
+    # mount -t tmpfs -o size=8G tmpfs $ATOMIC_TARGET_DIR
+    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p $ATOMIC_TARGET_DIR ; chmod 744 $ATOMIC_TARGET_DIR ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256" \
@@ -26,10 +27,10 @@ basher_layers() {
     sudo bash -c "TARGET_DIR="$TARGET_DIR" ; systemctl stop docker >/dev/null 2>&1; rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR"" &
     stop_docker_pid=$!
 
-    echo "[*] Requesting Bearer token from GHCR..."
+    echo "Requesting Bearer token from the registry..."
     TOKEN="$(curl -L -s "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)"
 
-    echo "[*] Fetching manifest for $IMAGE:$TAG"
+    echo "Fetching manifest for $IMAGE:$TAG"
     MANIFEST="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
     -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
     "https://ghcr.io/v2/$REPO/manifests/$TAG")"
@@ -37,11 +38,11 @@ basher_layers() {
     # Calculate SHA256 of the manifest
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
 
-    echo "[*] Manifest digest: sha256:$MANIFEST_DIGEST"
+    echo "Manifest digest: sha256:$MANIFEST_DIGEST"
 
     # Download config blob
     CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
-    echo "[*] Downloading config blob: sha256:$CONFIG_DIGEST"
+    echo "Downloading config blob: sha256:$CONFIG_DIGEST"
 
     CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST")"
@@ -51,7 +52,7 @@ basher_layers() {
     MANIFEST_SIZE="$(echo -n "$MANIFEST" | wc -c)"
 
     # Download each layer
-    echo "[*] Downloading layer blobs..."    
+    echo "Downloading layer blobs..."    
 
     wait $pid0
 
@@ -69,16 +70,16 @@ basher_layers() {
     prev_chain_id=
     prev_new_ids=
     prev_new_ids2=
-    declare -a sth1
-    declare -a sth2
+    declare -a tmp_dirs
+    declare -a sha256s
     declare -a pids
     while read layer
     do
         sha256="$(echo -n "$layer" | cut -d':' -f2 )"
 
-        var=$(($$+i))
+        tmp_dirs=$(($$+i))
 
-        #echo presha "$sha256"
+        # TODO detect zstd/pigz/pixz
         mkdir -p $ATOMIC_TARGET_DIR/$var
         ( var="$var" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
@@ -86,8 +87,8 @@ basher_layers() {
         pids+=($!)
 
         
-        sth1+=($var)
-        sth2+=($sha256)
+        tmp_dirs+=($var)
+        pids+=($sha256)
 
         ((++i))
     done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
@@ -101,23 +102,18 @@ basher_layers() {
     i=0
     while read layer
     do
-        orgsha256=${sth2[$i]}
-        var=${sth1[$i]}
+        orgsha256=${pids[$i]}
+        var=${tmp_dirs[$i]}
 
-        #echo orgsha $orgsha256
         _src=$ATOMIC_TARGET_DIR/${orgsha256}_*
         newsha256="$(echo -n $_src | cut -d' ' -f1 | cut -d'_' -f2)"
-        #echo oldsha $orgsha256 newsha $newsha256
 
         assign_id "$newsha256"
 
-        #rmdir "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
         mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id"
         mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}" "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer
-
-        #echo started pid ${pids[@]}
         ((++i))
     done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
 
@@ -138,7 +134,6 @@ basher_layer() {
     fi
 
     new_id2="$(echo -n "$prev_new_ids" | sha256sum | cut -d' ' -f1 | base64 -w 0 | tr +/ -_ | cut -c1-26)"
-    #echo $new_id2
 
     if [ $i = 0 ]
     then
@@ -146,8 +141,8 @@ basher_layer() {
     else
         chain_id="$(echo -n "sha256:$chain_id sha256:$sha256" | sha256sum - | cut -d' ' -f1)"
     fi
-    #echo "final $chain_id"
 
+    # TODO
     #if [ -e "$ATOMIC_TARGET_DIR/overlay2/$new_id" ] ||
     if [ -e "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id" ]
     then
@@ -170,26 +165,16 @@ basher_layer() {
         prev_new_ids2="$prev_new_ids2:l/$new_id2"
     fi
 
-    #tar -xf "$SOURCE_DIR/$layer" -C "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/"
-
     if [ "$i" = 1 ]
     then
         touch "$ATOMIC_TARGET_DIR/overlay2/$new_id/committed"
     fi
 
-    #chain_id=
-    #if [ "$i" = 0 ]
-    #then
-    #    chain_id="$sha256"
-    #else
-    #    chain_id="$new_id"
-    #fi
-
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
     
     echo -n "$new_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
     
-    #TODO
+    # TODO
     #echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
     echo -n 10000 > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
 
@@ -201,8 +186,6 @@ basher_layer() {
         echo -n "sha256:$prev_chain_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/parent"
     fi
 
-    #echo "tarsplit" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/tar-split.json.gz"
-
     echo -n "[{\"Digest\":\"sha256:$sha256\",\"SourceRepository\":\"ghcr.io/workinright/openpilot-base\",\"HMAC\":\"\"}]" \
         > "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256/$sha256"
     
@@ -210,8 +193,4 @@ basher_layer() {
     
     prev_sha256="$sha256"
     prev_chain_id="$chain_id"
-
 }
-
-#basher_glob "$1" "$2"
-#basher_layers "$1" "$2"
