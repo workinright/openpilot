@@ -68,6 +68,8 @@ basher_layers() {
 
         #echo start
 
+        (
+
         echo presha "$sha256"
         mkdir -p $TARGET_DIR/$$
         #(
@@ -81,9 +83,9 @@ basher_layers() {
         mkdir -p "$TARGET_DIR/overlay2/$new_id"
         mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id/diff"
 
-        basher_layer
+        basher_layer ) &
 
-       # pids+=($!)
+        pids+=($!)
 
         #echo started pid ${pids[@]}
         ((++i))
@@ -91,13 +93,13 @@ basher_layers() {
 
     wait $stop_docker_pid
 
-    #echo pids ${pids[@]}
+    echo pids ${pids[@]}
 
-    #for pid in ${pids[@]}
-    #do
+    for pid in ${pids[@]}
+    do
         #echo waiting for
-        #wait $pid
-    #done
+        wait $pid
+    done
 
     echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
     sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
