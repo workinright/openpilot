@@ -131,14 +131,14 @@ EOF
 
         var=$(($$+i))
 
-        echo presha "$sha256"
+        #echo presha "$sha256"
         mkdir -p $TARGET_DIR/$var
         ( var="$var" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
         | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$var) | sha256sum - | cut -d' ' -f1 )" ; mv "$TARGET_DIR/$var" "$TARGET_DIR/${sha2561}_$sha256" ) &
         pids+=($!)
 
-        echo postsha "$sha256"
+        #echo postsha "$sha256"
 
         
         sth1+=($var)
@@ -159,10 +159,10 @@ EOF
         orgsha256=${sth2[$i]}
         var=${sth1[$i]}
 
-        echo orgsha $orgsha256
+        #echo orgsha $orgsha256
         _src=$TARGET_DIR/${orgsha256}_*
         newsha256="$(echo -n $_src | cut -d' ' -f1 | cut -d'_' -f2)"
-        echo oldsha $orgsha256 newsha $newsha256
+        #echo oldsha $orgsha256 newsha $newsha256
 
         assign_id "$newsha256"
 
