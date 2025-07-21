@@ -103,10 +103,8 @@ basher_layers() {
         echo orgsha $sha256
         newsha256="$(echo -n $TARGET_DIR/$sha256* | cut -d'_' -f2)"
         echo oldsha $sha256 newsha $newsha256
-        sha256="$newsha256"
-        echo latestsha256 "$sha256"
 
-        assign_id "$sha256"
+        assign_id "$newsha256"
 
         rmdir "$TARGET_DIR/overlay2/$new_id/diff"
         mkdir -p "$TARGET_DIR/overlay2/$new_id"
