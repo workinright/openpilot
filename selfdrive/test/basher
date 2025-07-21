@@ -78,7 +78,7 @@ basher_layers() {
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
         | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$var) | sha256sum - | cut -d' ' -f1 )" ; mv "$TARGET_DIR/$var" "$TARGET_DIR/${sha2561}_$sha256" ) &
         pids+=($!)
-        
+
         echo postsha "$sha256"
 
         
@@ -101,6 +101,7 @@ basher_layers() {
         var=${sth1[$i]}
 
         _newsha256="$TARGET_DIR/$sha256*"
+        echo _newsha256 $_newsha256
         newsha256="$("echo $_newsha256" | cut -d'_' -f2)"
         echo oldsha $sha256 newsha $newsha256
 
