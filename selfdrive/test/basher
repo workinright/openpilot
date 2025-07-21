@@ -1,38 +1,29 @@
-#!/usr/bin/env bash
-#set -e
-
-#if [ $# -lt 2 ]
-#then
-#    echo "usage: $0 SOURCE_DIR TARGET_DIR"
-#    exit 1
-#fi
-
-assign_id() {
+assign_id(){
 
     sha256="$1"
-    new_id="$(echo -n "$sha256" | dd bs=64 count=1 2>/dev/null | sha256sum - | cut -d' ' -f1)"
 
+    new_id="$(echo -n "$sha256" | dd bs=64 count=1 2>/dev/null | sha256sum - | cut -d' ' -f1)"
 }
 
 basher_layers() {
 
-    TARGET_DIR="$1"
+    ATOMIC_TARGET_DIR="$1"
+    TARGET_DIR="$2"
 
     REPO="workinright/openpilot-base"
     TAG="latest"
     IMAGE="ghcr.io/$REPO"
-    #OUTPUT_DIR="container"
 
-    sudo bash -c "TARGET_DIR="$TARGET_DIR" ; mkdir -p /var/lib/docker2 ; chmod 744 /var/lib/docker2 && mount -t tmpfs -o size=8G tmpfs /var/lib/docker2 ; mkdir -p "$TARGET_DIR/image/overlay2/l" \
-    mkdir -p "$TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
-    mkdir -p "$TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" \
-    mkdir -p "$TARGET_DIR/image/overlay2/layerdb/sha256" \
-    mkdir -p "$TARGET_DIR/image/overlay2/imagedb/content/sha256" \
-    mkdir -p "$TARGET_DIR/image/overlay2/layerdb/tmp" \
-    mkdir -p "$TARGET_DIR/overlay2/l"" &
+    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p $ATOMIC_TARGET_DIR ; chmod 744 $ATOMIC_TARGET_DIR && mount -t tmpfs -o size=8G tmpfs $ATOMIC_TARGET_DIR ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256" \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256" \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/tmp" \
+    mkdir -p "$ATOMIC_TARGET_DIR/overlay2/l"" &
     pid0=$!
 
-    sudo bash -c "systemctl stop docker >/dev/null 2>&1; rm -rf /var/lib/docker ; mkdir -p /var/lib/docker ; chmod 744 /var/lib/docker" &
+    sudo bash -c "TARGET_DIR="$TARGET_DIR" ; systemctl stop docker >/dev/null 2>&1; rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR"" &
     stop_docker_pid=$!
 
     echo "[*] Requesting Bearer token from GHCR..."
@@ -43,14 +34,8 @@ basher_layers() {
     -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
     "https://ghcr.io/v2/$REPO/manifests/$TAG")"
 
-    # Save manifest
-    #echo "$MANIFEST" > "$MANIFEST_FILE"
-    #echo '[{"Config":"blobs/sha256/7eb1b2d522931ebf0b08ab1eb9877dd8a18d7c074e63377f5aa7d8deaeb8804a","RepoTags":["ghcr.io/workinright/openpilot-base:latest"],"Layers":["blobs/sha256/107cbdaeec042e6154640c94972c638f4e2fee795902b149e8ce9acbd03d59d7","blobs/sha256/217fab191c7c42284a939d32f1bab746921065cfd7f3fa1674e684a227974d8d","blobs/sha256/c03653e5cf5402c8ee1dd925ea7a5972ec57ca22ff5a4a5f4ba394b00e164c42","blobs/sha256/a59bbb8a8d17760fa86eb0784b64715e95c659e0f4475d9ecbd5def390766c4a","blobs/sha256/c816f3bba8b8f27500566fda3ab26401efb9e78301741df45a589eea1a28d328","blobs/sha256/22ed7fbdb74871ed4101fc509dd5523bd3f57f8b307e71964d8ed95e48ed8e5f","blobs/sha256/53d8ca3de39bc19aa653c7e56319e3b92980ba5e066288e11e33ef7dd9e709e3"]}]' > "$MANIFEST_FILE"
-
     # Calculate SHA256 of the manifest
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
-    #cp "$MANIFEST_FILE" "$OUTPUT_DIR/blobs/sha256/$MANIFEST_DIGEST"
-    #####echo -n "$MANIFEST" > 
 
     echo "[*] Manifest digest: sha256:$MANIFEST_DIGEST"
 
@@ -61,51 +46,19 @@ basher_layers() {
     CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST")"
 
-    # Write oci-layout file
-    #echo '[*] Writing oci-layout'
-    #echo '{"imageLayoutVersion": "1.0.0"}' > "$OUTPUT_DIR/oci-layout"
-
     # Create index.json
     MEDIA_TYPE="$(echo -n "$MANIFEST" | jq -r .mediaType)"
     MANIFEST_SIZE="$(echo -n "$MANIFEST" | wc -c)"
-
-    #echo '[*] Writing index.json'
-    INDEX_JSON="$(cat <<EOF
-{
-"schemaVersion": 2,
-"manifests": [
-    {
-    "mediaType": "$MEDIA_TYPE",
-    "digest": "sha256:$MANIFEST_DIGEST",
-    "size": $MANIFEST_SIZE,
-    "annotations": {
-        "org.opencontainers.image.ref.name": "$TAG"
-    }
-    }
-]
-}
-EOF
-)"
-    #{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.docker.distribution.manifest.v2+json","digest":"sha256:1b9c39f2dae6a40313c408e70160efb611f8cd5ec0e3b95c15f8b6cf79031374","size":1654,"annotations":{"io.containerd.image.name":"ghcr.io/workinright/openpilot-base:latest","org.opencontainers.image.created":"2025-07-18T04:48:02Z","org.opencontainers.image.ref.name":"latest"},"platform":{"architecture":"amd64","os":"linux"}}]}
-
-    #cd container
-    #tar cf ../tar.tar *
-    #touch tar.tar.lock
-    #cd ..
-
-    #date
 
     # Download each layer
     echo "[*] Downloading layer blobs..."    
 
     wait $pid0
 
-    #docker_patch1/image/overlay2/repositories.json # not required, keeps tags
-    #echo -n "$MANIFEST"
     manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
-    if ! [ -e "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
+    if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
     then
-        echo -n "$CONFIG" > "$TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
+        echo -n "$CONFIG" > "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
     else
         echo "error: the image is already there"
         exit 2
@@ -122,23 +75,15 @@ EOF
     while read layer
     do
         sha256="$(echo -n "$layer" | cut -d':' -f2 )"
-        
-
-        #echo SOURCE_DIR $SOURCE_DIR
-        #echo TARGET_DIR $TARGET_DIR
-
-        #echo start
 
         var=$(($$+i))
 
         #echo presha "$sha256"
-        mkdir -p $TARGET_DIR/$var
+        mkdir -p $ATOMIC_TARGET_DIR/$var
         ( var="$var" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
-        | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$var) | sha256sum - | cut -d' ' -f1 )" ; mv "$TARGET_DIR/$var" "$TARGET_DIR/${sha2561}_$sha256" ) &
+        | pigz -d | tee >(tar -xf - -C $ATOMIC_TARGET_DIR/$var) | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$var" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256" ) &
         pids+=($!)
-
-        #echo postsha "$sha256"
 
         
         sth1+=($var)
@@ -160,19 +105,17 @@ EOF
         var=${sth1[$i]}
 
         #echo orgsha $orgsha256
-        _src=$TARGET_DIR/${orgsha256}_*
+        _src=$ATOMIC_TARGET_DIR/${orgsha256}_*
         newsha256="$(echo -n $_src | cut -d' ' -f1 | cut -d'_' -f2)"
         #echo oldsha $orgsha256 newsha $newsha256
 
         assign_id "$newsha256"
 
-        #rmdir "$TARGET_DIR/overlay2/$new_id/diff"
-        mkdir -p "$TARGET_DIR/overlay2/$new_id"
-        mv "$TARGET_DIR/${orgsha256}_${newsha256}" "$TARGET_DIR/overlay2/$new_id/diff"
+        #rmdir "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
+        mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id"
+        mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}" "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer
-
-       # 
 
         #echo started pid ${pids[@]}
         ((++i))
@@ -180,25 +123,9 @@ EOF
 
     wait $stop_docker_pid
 
-    #echo pids ${pids[@]}
-
-    #
-
-    echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
-    sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
+    echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json &>/dev/null
+    sudo bash -c "mount --bind $ATOMIC_TARGET_DIR "$TARGET_DIR""
     sudo systemctl start docker #&
-    #sudo dockerd -D -l debug --log-driver none &
-    #pid1=$!
-
-    #sleep 10
-
-    #docker images
-
-    #docker run openpilot-base:latest bash
-
-    #wait $pid1
-
-    #docker images
 }
 
 basher_layer() {
@@ -221,33 +148,33 @@ basher_layer() {
     fi
     #echo "final $chain_id"
 
-    #if [ -e "$TARGET_DIR/overlay2/$new_id" ] ||
-    if [ -e "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id" ]
+    #if [ -e "$ATOMIC_TARGET_DIR/overlay2/$new_id" ] ||
+    if [ -e "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id" ]
     then
         echo "error: the file or directory is already there"
         exit 3
     fi
     
-    mkdir -p "$TARGET_DIR/overlay2/$new_id/diff"
-    mkdir -p "$TARGET_DIR/overlay2/$new_id/work"
+    mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
+    mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/work"
 
-    echo -n "$new_id2" > "$TARGET_DIR/overlay2/$new_id/link"
-    ln -s "../$new_id/diff" "$TARGET_DIR/overlay2/l/$new_id2"
+    echo -n "$new_id2" > "$ATOMIC_TARGET_DIR/overlay2/$new_id/link"
+    ln -s "../$new_id/diff" "$ATOMIC_TARGET_DIR/overlay2/l/$new_id2"
 
     if [ $i = 0 ]
     then
         prev_new_ids2="l/$new_id2"
     else
-        echo -n "$prev_new_ids2" > "$TARGET_DIR/overlay2/$new_id/lower"
+        echo -n "$prev_new_ids2" > "$ATOMIC_TARGET_DIR/overlay2/$new_id/lower"
     
         prev_new_ids2="$prev_new_ids2:l/$new_id2"
     fi
 
-    #tar -xf "$SOURCE_DIR/$layer" -C "$TARGET_DIR/overlay2/$new_id/diff/"
+    #tar -xf "$SOURCE_DIR/$layer" -C "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/"
 
     if [ "$i" = 1 ]
     then
-        touch "$TARGET_DIR/overlay2/$new_id/committed"
+        touch "$ATOMIC_TARGET_DIR/overlay2/$new_id/committed"
     fi
 
     #chain_id=
@@ -258,28 +185,28 @@ basher_layer() {
     #    chain_id="$new_id"
     #fi
 
-    mkdir -p "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
     
-    echo -n "$new_id" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
+    echo -n "$new_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
     
     #TODO
-    #echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
-    echo -n 10000 > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+    #echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+    echo -n 10000 > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
 
-    echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
+    echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
 
     if [ "$i" != 0 ]
     then
-        echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
-        echo -n "sha256:$prev_chain_id" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/parent"
+        echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
+        echo -n "sha256:$prev_chain_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/parent"
     fi
 
-    #echo "tarsplit" > "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/tar-split.json.gz"
+    #echo "tarsplit" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/tar-split.json.gz"
 
     echo -n "[{\"Digest\":\"sha256:$sha256\",\"SourceRepository\":\"ghcr.io/workinright/openpilot-base\",\"HMAC\":\"\"}]" \
-        > "$TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256/$sha256"
+        > "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256/$sha256"
     
-    echo -n "sha256:$sha256" > "$TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256/$sha256"
+    echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256/$sha256"
     
     prev_sha256="$sha256"
     prev_chain_id="$chain_id"
