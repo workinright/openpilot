@@ -87,7 +87,7 @@ echo "[*] Downloading layer blobs..."
 
 MANIFEST_b64="$(echo -n "$MANIFEST" | base64 -w0)"
 CONFIG_b64="$(echo -n "$CONFIG" | base64 -w0)"
-sudo bash -c "source $SCRIPT_DIR/basher ; MANIFEST_b64="$MANIFEST_b64" ; CONFIG_b64="$CONFIG_b64" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "$MANIFEST_b64" "$CONFIG_b64" "/var/lib/docker2" ; basher_layers "$MANIFEST_b64" "/var/lib/docker2""
+sudo bash -c "source $SCRIPT_DIR/basher ; MANIFEST_b64="$MANIFEST_b64" ; CONFIG_DIGEST="$CONFIG_DIGEST" ; CONFIG_b64="$CONFIG_b64" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_glob "$MANIFEST_b64" "$CONFIG_b64" "/var/lib/docker2" ; basher_layers "$MANIFEST_b64" "/var/lib/docker2""
 
 #i=0
 #declare -a pids
