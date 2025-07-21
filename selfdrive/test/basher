@@ -32,7 +32,7 @@ basher_layers() {
     mkdir -p "$TARGET_DIR/overlay2/l"" &
     pid0=$!
 
-    sudo bash -c "systemctl stop docker ; rm -rf /var/lib/docker ; mkdir -p /var/lib/docker ; chmod 744 /var/lib/docker" &
+    sudo bash -c "systemctl stop docker >/dev/null 2>&1; rm -rf /var/lib/docker ; mkdir -p /var/lib/docker ; chmod 744 /var/lib/docker" &
     stop_docker_pid=$!
 
     echo "[*] Requesting Bearer token from GHCR..."
