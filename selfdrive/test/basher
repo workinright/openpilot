@@ -101,7 +101,7 @@ basher_layers() {
         var=${sth1[$i]}
 
         echo orgsha $sha256
-        _src=$TARGET_DIR/$sha256_*
+        _src=$TARGET_DIR/${sha256}_*
         newsha256="$(echo -n $_src | cut -d' ' -f1 | cut -d'_' -f2)"
         echo oldsha $sha256 newsha $newsha256
 
