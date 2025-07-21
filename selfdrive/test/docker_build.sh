@@ -19,8 +19,11 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
 sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker""
 
-if [ -n "$PUSH_IMAGE" ]; then
-  output_arg="--output type=image,name=$DOCKER_REGISTRY/$DOCKER_IMAGE,push=true"
-fi
+#if [ -n "$PUSH_IMAGE" ]; then
+  output_arg="--output type=image,name=$DOCKER_REGISTRY/$DOCKER_IMAGE,compression=gzip,push=true"
+#fi
 
-DOCKER_BUILDKIT=1 docker buildx build --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG $output_arg -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+
+DOCKER_BUILDKIT=1 docker buildx build --provenance false --pull --builder mybuilder --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG $output_arg -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
