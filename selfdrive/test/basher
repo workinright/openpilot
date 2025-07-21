@@ -100,7 +100,7 @@ basher_layers() {
 
         newsha256="$TARGET_DIR/$sha256*"
         newsha256="$("echo $newsha256" | cut -d'_' -f2)"
-        echo $sha256 $newsha256
+        echo oldsha $sha256 newsha $newsha256
 
         assign_id "$sha256"
 
