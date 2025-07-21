@@ -101,15 +101,15 @@ basher_layers() {
 
     echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
     sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
-    #sudo systemctl start docker #&
-    sudo dockerd -D -l debug --log-driver none &
+    sudo systemctl start docker #&
+    #sudo dockerd -D -l debug --log-driver none &
     #pid1=$!
 
-    sleep 10
+    #sleep 10
 
-    docker images
+    #docker images
 
-    docker run openpilot-base:latest bash
+    #docker run openpilot-base:latest bash
 
     #wait $pid1
 
