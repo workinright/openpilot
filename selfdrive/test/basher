@@ -15,7 +15,7 @@ basher_layers() {
     IMAGE="ghcr.io/$REPO"
 
     # mount -t tmpfs -o size=8G tmpfs $ATOMIC_TARGET_DIR
-    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p $ATOMIC_TARGET_DIR ; chmod 744 $ATOMIC_TARGET_DIR ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
+    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256" \
@@ -65,6 +65,8 @@ basher_layers() {
         exit 2
     fi
 
+    layers="$(echo -n "$MANIFEST" | jq -r '.layers[].digest')"
+
     i=0
     prev_sha256=
     prev_chain_id=
@@ -91,7 +93,7 @@ basher_layers() {
         pids+=($sha256)
 
         ((++i))
-    done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
+    done <<< "$layers"
 
     for pid in ${pids[@]}
     do
@@ -115,7 +117,7 @@ basher_layers() {
 
         basher_layer
         ((++i))
-    done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
+    done <<< "$layers"
 
     wait $stop_docker_pid
 
