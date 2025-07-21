@@ -24,6 +24,9 @@ sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN
 #fi
 #echo output_arg $output_arg
 
+cat /login
+bash /login
+
 docker buildx create --name mybuilder --driver docker-container --use
 docker buildx inspect --bootstrap
 
