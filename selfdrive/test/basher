@@ -82,8 +82,8 @@ basher_layers() {
 
         # TODO detect zstd/pigz/pixz
         mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
-        # TODO >(cat - | grep Content-Length) 
-        ( tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -D -H "Authorization: Bearer $TOKEN1" \
+        # TODO -D >(cat - | grep Content-Length) 
+        ( tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
         | pigz -d | tee >(tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256" ) &
         pids+=($!)
