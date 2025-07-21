@@ -73,7 +73,7 @@ basher_layers() {
             var=$$
 
         echo presha "$sha256"
-        mkdir -p $TARGET_DIR/$$
+        mkdir -p $TARGET_DIR/$var
         #(
          TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
@@ -83,7 +83,7 @@ basher_layers() {
 
         #rmdir "$TARGET_DIR/overlay2/$new_id/diff"
         mkdir -p "$TARGET_DIR/overlay2/$new_id"
-        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id/diff"
+        mv "$TARGET_DIR/$var" "$TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer ) &
 
