@@ -22,6 +22,7 @@ sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN
 #if [ -n "$PUSH_IMAGE" ]; then
   output_arg="--output type=image,name=$DOCKER_REGISTRY/$DOCKER_IMAGE,compression=gzip,push=true"
 #fi
+echo output_arg $output_arg
 
 DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
