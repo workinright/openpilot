@@ -27,7 +27,8 @@ sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN
 cat $HOME/login
 cat $HOME/login
 
-echo "$GITHUB_ENV" a "$AAA"
+#echo "$GITHUB_ENV" a "$AAA"
+docker login ghcr.io "$AAA"
 
 docker buildx create --name mybuilder --driver docker-container --use
 docker buildx inspect --bootstrap
