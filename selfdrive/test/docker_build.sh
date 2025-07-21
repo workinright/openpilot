@@ -27,4 +27,4 @@ sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN
 docker buildx create --name mybuilder --driver docker-container --use
 docker buildx inspect --bootstrap
 
-DOCKER_BUILDKIT=1 docker buildx build --pull --load --push --builder mybuilder --output type=image,name=$DOCKER_REGISTRY/$DOCKER_IMAGE,compression=gzip,push=true --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+DOCKER_BUILDKIT=1 docker buildx build --pull --load --push --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,compression=gzip,push=true --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
