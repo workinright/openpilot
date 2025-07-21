@@ -108,7 +108,7 @@ basher_layers() {
 
         rmdir "$TARGET_DIR/overlay2/$new_id/diff"
         mkdir -p "$TARGET_DIR/overlay2/$new_id"
-        mv $TARGET_DIR/$sha256_* "$TARGET_DIR/overlay2/$new_id/diff"
+        mv "$TARGET_DIR/${sha256}_${orgsha256}" "$TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer
 
