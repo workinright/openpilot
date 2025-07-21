@@ -71,6 +71,7 @@ basher_layers() {
         (
 
             var=$$
+            echo pid $var
 
         echo presha "$sha256"
         mkdir -p $TARGET_DIR/$var
