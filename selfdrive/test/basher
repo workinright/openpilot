@@ -136,7 +136,8 @@ basher_layer() {
     fi
     #echo "final $chain_id"
 
-    if [ -e "$TARGET_DIR/overlay2/$new_id" ] || [ -e "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id" ]
+    #if [ -e "$TARGET_DIR/overlay2/$new_id" ] ||
+    if [ -e "$TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id" ]
     then
         echo "error: the file or directory is already there"
         exit 3
