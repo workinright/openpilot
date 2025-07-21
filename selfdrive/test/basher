@@ -68,27 +68,22 @@ basher_layers() {
 
         #echo start
 
-        (
-
-            var=$$
-            echo pid $var
-
         echo presha "$sha256"
-        mkdir -p $TARGET_DIR/$var
+        mkdir -p $TARGET_DIR/$$
         #(
          TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; sha256="$(curl -L -s -H "Authorization: Bearer $TOKEN1" \
         "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
-        | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$var) | sha256sum - | cut -d' ' -f1 )" #) #&
+        | pigz -d | tee >(tar -xf - -C $TARGET_DIR/$$) | sha256sum - | cut -d' ' -f1 )" #) #&
         echo postsha "$sha256"
         assign_id "$sha256"
 
-        #rmdir "$TARGET_DIR/overlay2/$new_id/diff"
+        rmdir "$TARGET_DIR/overlay2/$new_id/diff"
         mkdir -p "$TARGET_DIR/overlay2/$new_id"
-        mv "$TARGET_DIR/$var" "$TARGET_DIR/overlay2/$new_id/diff"
+        mv "$TARGET_DIR/$$" "$TARGET_DIR/overlay2/$new_id/diff"
 
-        basher_layer ) &
+        basher_layer
 
-        pids+=($!)
+       # pids+=($!)
 
         #echo started pid ${pids[@]}
         ((++i))
@@ -96,13 +91,13 @@ basher_layers() {
 
     wait $stop_docker_pid
 
-    echo pids ${pids[@]}
+    #echo pids ${pids[@]}
 
-    for pid in ${pids[@]}
-    do
+    #for pid in ${pids[@]}
+    #do
         #echo waiting for
-        wait $pid
-    done
+        #wait $pid
+    #done
 
     echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee /var/lib/docker2/image/overlay2/repositories.json &>/dev/null
     sudo bash -c "mount --bind /var/lib/docker2 /var/lib/docker"
