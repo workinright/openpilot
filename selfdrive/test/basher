@@ -97,19 +97,19 @@ basher_layers() {
     i=0
     while read layer
     do
-        sha256=${sth2[$i]}
+        orgsha256=${sth2[$i]}
         var=${sth1[$i]}
 
-        echo orgsha $sha256
-        _src=$TARGET_DIR/${sha256}_*
+        echo orgsha $orgsha256
+        _src=$TARGET_DIR/${orgsha256}_*
         newsha256="$(echo -n $_src | cut -d' ' -f1 | cut -d'_' -f2)"
-        echo oldsha $sha256 newsha $newsha256
+        echo oldsha $orgsha256 newsha $newsha256
 
         assign_id "$newsha256"
 
         rmdir "$TARGET_DIR/overlay2/$new_id/diff"
         mkdir -p "$TARGET_DIR/overlay2/$new_id"
-        mv "$TARGET_DIR/${sha256}_${newsha256}" "$TARGET_DIR/overlay2/$new_id/diff"
+        mv "$TARGET_DIR/${orgsha256}_${newsha256}" "$TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer
 
