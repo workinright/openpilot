@@ -31,10 +31,7 @@ cat $HOME/login
 DOCKER_BUILDKIT=1 docker login ghcr.io $AAA
 
 #DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
-DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container \
-  --driver-opt network=host \
-  --driver-opt "docker-config=$HOME/.docker" \
-  --use
+DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
-DOCKER_BUILDKIT=1 docker buildx build --pull --load --push --builder mybuilder --output type=image,name=ghcr.io/workinright/openpilot-base,compression=gzip,push=true --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+DOCKER_BUILDKIT=1 docker buildx build --pull --load --push --builder mybuilder --config ~/.docker/config.json --output type=image,name=ghcr.io/workinright/openpilot-base,compression=gzip,push=true --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
