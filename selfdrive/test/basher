@@ -34,7 +34,7 @@ basher_layers() {
     -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
     "https://ghcr.io/v2/$REPO/manifests/$TAG")"
 
-    echo "$MANIFEST"
+    #echo "$MANIFEST"
 
     # Calculate SHA256 of the manifest
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
@@ -98,7 +98,7 @@ basher_layers() {
                     echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size" ) &
 
                     # TODO check thread flow here
-                    if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                    if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                     then
                         f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
                     else
