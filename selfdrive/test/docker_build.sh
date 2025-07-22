@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#set -e
+set -e
 #set -x
 
 # To build sim and docs, you can run the following to mount the scons cache to the same place as in CI:
@@ -18,7 +18,7 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker""
+sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker"" || true
 
 #if [ -n "$PUSH_IMAGE" ]; then
   #output_arg="--output type=image,name=$DOCKER_REGISTRY/$DOCKER_IMAGE,compression=gzip,push=true"
