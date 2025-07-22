@@ -60,7 +60,7 @@ basher_layers() {
         exit 2
     fi
 
-    layers="$(echo -n "$MANIFEST" | jq -r '.layers[].digest')"
+    layers="$(echo -n "$MANIFEST" | jq -r '.layers[]')"
 
     i=0
     prev_sha256=
@@ -72,7 +72,8 @@ basher_layers() {
     declare -a pids
     while read layer
     do
-        sha256="$(echo -n "$layer" | cut -d':' -f2 )"
+        sha256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2 )"
+        mediaType="$(echo -n "$layer" | jq -r '.mediaType' )"
 
         tmp_dir=$(($$+i))
 
@@ -103,7 +104,12 @@ basher_layers() {
 
                 # TODO check thread flow here
 
-                pigz -d
+                if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                then
+                    pigz -d
+                else
+                    cat
+                fi
                 
                 
                 } | tee >(tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256") &
