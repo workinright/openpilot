@@ -74,6 +74,7 @@ basher_layers() {
     do
         sha256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2)"
         mediaType="$(echo -n "$layer" | jq -r '.mediaType')"
+        echo mediaType "$mediaType"
 
         tmp_dir=$(($$+i))
 
