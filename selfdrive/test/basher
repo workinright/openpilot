@@ -87,7 +87,7 @@ basher_layers() {
             mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id"
 
             #mkfifo "$ATOMIC_TARGET_DIR/$sha2561" ;
-            sha256="$(mediaType2="$mediaType1" ; curl -L -D -H "Authorization: Bearer $TOKEN1" \
+            sha256="$(mediaType2="$mediaType1" ; curl -L -H "Authorization: Bearer $TOKEN1" \
                 "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" | \
                     #{ head -c 2 | grep -a -q -P '^1f8b' && echo pigz >/dev/stderr ; pigz -d || echo none > /dev/stderr ; cat -; } \
                     { \
@@ -98,12 +98,12 @@ basher_layers() {
                     #echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size" ) &
 \
                     # TODO check thread flow here
-                    #if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
-                    #then
+                    if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                    then
                         f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
-                    #else
-                    #    cat -
-                    #fi 
+                    else
+                        cat -
+                    fi 
                     } \
                     \
  \
