@@ -72,8 +72,8 @@ basher_layers() {
     declare -a pids
     while read layer
     do
-        sha256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2 )"
-        mediaType="$(echo -n "$layer" | jq -r '.mediaType' )"
+        sha256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2)"
+        mediaType="$(echo -n "$layer" | jq -r '.mediaType')"
 
         tmp_dir=$(($$+i))
 
