@@ -79,9 +79,29 @@ basher_layers() {
         # TODO detect zstd/pigz/pixz
         mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
         # TODO -D >(cat - | grep Content-Length) 
-        ( tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id" ; echo "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" ; sha256="$(curl -L -s -D "$ATOMIC_TARGET_DIR/$sha2561" -H "Authorization: Bearer $TOKEN1" \
-        "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
-        | pigz -d | tee >(tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256" ; cat "$ATOMIC_TARGET_DIR/$sha2561") &
+        (
+            tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id"
+
+            mkfifo "$ATOMIC_TARGET_DIR/$sha2561"
+            
+            sha256="$(curl -L -s -D "$ATOMIC_TARGET_DIR/$sha2561" -H "Authorization: Bearer $TOKEN1" \
+                "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
+                |
+                {
+                
+                
+
+                consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
+                rm -f "$ATOMIC_TARGET_DIR/$sha2561";
+                content_length="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
+                content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
+
+                echo "CT $content_type CL $content_length" > /dev/stderr;
+
+                pigz -d
+                
+                
+                } | tee >(tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256") &
         pids+=($!)
 
         
