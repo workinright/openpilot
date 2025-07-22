@@ -85,11 +85,11 @@ basher_layers() {
 
             mkfifo "$ATOMIC_TARGET_DIR/$sha2561"
             
-            sha256="$(curl -L -s -D "$ATOMIC_TARGET_DIR/$sha2561" -H "Authorization: Bearer $TOKEN1" \
+            sha256="$(mediaType2="$mediaType1" ; curl -L -s -D "$ATOMIC_TARGET_DIR/$sha2561" -H "Authorization: Bearer $TOKEN1" \
                 "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
                 |
                 {
-                
+                    mediaType3="$mediaType2" ;
                 
 
                 ( consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
@@ -99,12 +99,15 @@ basher_layers() {
                 content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
 
                 echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size"
+                echo "$content_type" > /dev/stderr
 
                  ) &
 
                 # TODO check thread flow here
 
-                if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                echo "$mediaType3" > /dev/stderr
+
+                if [ "$mediaType3" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                 then
                     pigz -d
                 #else
