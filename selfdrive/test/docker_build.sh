@@ -27,4 +27,4 @@ sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN
 
 DOCKER_BUILDKIT=1 docker login ghcr.io $AAA
 
-DOCKER_BUILDKIT=1 docker buildx build --pull --load --push --output type=image,name=ghcr.io/workinright/openpilot-base,compression=gzip,push=true,force-compression=true --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+DOCKER_BUILDKIT=1 docker buildx build --output type=image,name=ghcr.io/workinright/openpilot-base,compression=gzip,push=true,force-compression=true --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
