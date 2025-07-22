@@ -93,7 +93,8 @@ basher_layers() {
 
                 consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
                 rm -f "$ATOMIC_TARGET_DIR/$sha2561";
-                content_length="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
+                echo "$consume"
+                content_length="$(echo -n "$consume" | grep -i "content-length" | cut -d':' -f2)";
                 content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
 
                 echo "CT $content_type CL $content_length" > /dev/stderr;
