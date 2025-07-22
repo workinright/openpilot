@@ -93,16 +93,16 @@ basher_layers() {
                     mediaType3="$mediaType2" ;
                 
 
-                ( consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
-                rm -f "$ATOMIC_TARGET_DIR/$sha2561" >/dev/null 2>/dev/null;
+                ##( consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
+                ##rm -f "$ATOMIC_TARGET_DIR/$sha2561" >/dev/null 2>/dev/null;
                 #echo "$consume" > /dev/stderr
-                content_length="$(echo -n "$consume" | grep -i "content-length" | cut -d':' -f2)";
-                content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
+                ##content_length="$(echo -n "$consume" | grep -i "content-length" | cut -d':' -f2)";
+                ##content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
 
-                echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size"
+                ##echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size"
                 #echo "$content_type" > /dev/stderr
 
-                 ) &
+                 ##) &
 
                 # TODO check thread flow here
 
@@ -128,7 +128,7 @@ basher_layers() {
 
     for pid in ${pids[@]}
     do
-        #echo waiting for
+        echo waiting for $pid
         wait $pid
     done
 
@@ -207,7 +207,9 @@ basher_layer() {
     
     echo -n "$new_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
     
-    echo -n "$ATOMIC_TARGET_DIR/${orgsha256}_size" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" 2>/dev/null
+    #cat "$ATOMIC_TARGET_DIR/${orgsha256}_size" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" 2>/dev/null
+    # TODO
+    echo -n "0" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
     rm -f "$ATOMIC_TARGET_DIR/${orgsha256}_size"
 
     echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
