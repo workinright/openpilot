@@ -107,8 +107,8 @@ basher_layers() {
                 if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                 then
                     pigz -d
-                else
-                    cat
+                #else
+                    #cat -
                 fi
                 
                 
