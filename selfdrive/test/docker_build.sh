@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #set -e
+set -x
 
 # To build sim and docs, you can run the following to mount the scons cache to the same place as in CI:
 # mkdir -p .ci_cache/scons_cache
