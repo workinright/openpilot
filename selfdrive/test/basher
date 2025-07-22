@@ -91,7 +91,7 @@ basher_layers() {
                 "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" | \
                     #{ head -c 2 | grep -a -q -P '^1f8b' && echo pigz >/dev/stderr ; pigz -d || echo none > /dev/stderr ; cat -; } \
                     { \
-                    ( consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
+                    ( consume=$(awk 'BEGIN{RS="";ORS="\n\n"} {print; exit}' "$ATOMIC_TARGET_DIR/$sha2561");
                     rm -f "$ATOMIC_TARGET_DIR/$sha2561" >/dev/null 2>/dev/null;
                     content_length="$(echo -n "$consume" | grep -i "content-length" | cut -d':' -f2)";
                     #content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
