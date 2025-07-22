@@ -46,10 +46,6 @@ basher_layers() {
     CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
     "https://ghcr.io/v2/$REPO/blobs/sha256:$CONFIG_DIGEST")"
 
-    # Create index.json
-    MEDIA_TYPE="$(echo -n "$MANIFEST" | jq -r .mediaType)"
-    MANIFEST_SIZE="$(echo -n "$MANIFEST" | wc -c)"
-
     # Download each layer
     echo "Downloading layer blobs..."    
 
@@ -64,7 +60,7 @@ basher_layers() {
         exit 2
     fi
 
-    layers="$(echo -n "$MANIFEST" | jq -r '.layers[].digest')"
+    #layers="$(echo -n "$MANIFEST" | jq -r '.layers[].digest')"
 
     i=0
     prev_sha256=
@@ -93,7 +89,7 @@ basher_layers() {
         sha256s+=($sha256)
 
         ((++i))
-    done <<< "$layers"
+    done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
 
     for pid in ${pids[@]}
     do
@@ -117,7 +113,7 @@ basher_layers() {
 
         basher_layer
         ((++i))
-    done <<< "$layers"
+    done < <(echo -n "$MANIFEST" | jq -r '.layers[].digest')
 
     wait $stop_docker_pid
 
