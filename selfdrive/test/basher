@@ -97,7 +97,11 @@ basher_layers() {
                 content_length="$(echo -n "$consume" | grep -i "content-length" | cut -d':' -f2)";
                 content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
 
-                echo "CT $content_type CL $content_length" > /dev/stderr ) &
+                echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size"
+
+                 ) &
+
+                # TODO check thread flow here
 
                 pigz -d
                 
@@ -193,9 +197,8 @@ basher_layer() {
     
     echo -n "$new_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
     
-    # TODO
-    #echo -n "$(du -b "$SOURCE_DIR/$layer" | cut -f1)" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
-    echo -n 10000 > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
+    echo -n "$ATOMIC_TARGET_DIR/${orgsha256}_size" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" 2>/dev/null
+    rm -f "$ATOMIC_TARGET_DIR/${orgsha256}_size"
 
     echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
 
