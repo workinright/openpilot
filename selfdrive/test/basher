@@ -94,19 +94,19 @@ basher_layers() {
                 
 
                 ( consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
-                rm -f "$ATOMIC_TARGET_DIR/$sha2561";
+                rm -f "$ATOMIC_TARGET_DIR/$sha2561" >/dev/null 2>/dev/null;
                 #echo "$consume" > /dev/stderr
                 content_length="$(echo -n "$consume" | grep -i "content-length" | cut -d':' -f2)";
                 content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
 
                 echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size"
-                echo "$content_type" > /dev/stderr
+                #echo "$content_type" > /dev/stderr
 
                  ) &
 
                 # TODO check thread flow here
 
-                echo "$mediaType3" > /dev/stderr
+                #echo "$mediaType3" > /dev/stderr
 
                 if [ "$mediaType3" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                 then
