@@ -25,9 +25,6 @@ sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN
 #fi
 #echo output_arg $output_arg
 
-cat $HOME/login
-cat $HOME/login
-
 #echo "$GITHUB_ENV" a "$AAA"
 
 #DOCKER_BUILDKIT=1 docker login ghcr.io $AAA
