@@ -81,7 +81,7 @@ basher_layers() {
         mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
         # TODO -D >(cat - | grep Content-Length) 
         (
-            tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id"
+            mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id"
 
             mkfifo "$ATOMIC_TARGET_DIR/$sha2561"
             
@@ -104,7 +104,7 @@ basher_layers() {
 
                 # TODO check thread flow here
 
-                if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                 then
                     pigz -d
                 else
