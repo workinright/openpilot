@@ -60,7 +60,7 @@ basher_layers() {
         exit 2
     fi
 
-    layers="$(echo -n "$MANIFEST" | jq -r '.layers[]')"
+    layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
 
     i=0
     prev_sha256=
