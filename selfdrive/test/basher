@@ -34,7 +34,7 @@ basher_layers() {
     -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
     "https://ghcr.io/v2/$REPO/manifests/$TAG")"
 
-    echo $MANIFEST
+    #echo $MANIFEST
 
     # Calculate SHA256 of the manifest
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
