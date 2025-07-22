@@ -34,6 +34,8 @@ basher_layers() {
     -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
     "https://ghcr.io/v2/$REPO/manifests/$TAG")"
 
+    echo $MANIFEST
+
     # Calculate SHA256 of the manifest
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
 
@@ -87,36 +89,10 @@ basher_layers() {
             #mkfifo "$ATOMIC_TARGET_DIR/$sha2561" ;
             #-D "$ATOMIC_TARGET_DIR/$sha2561"
             sha256="$(mediaType2="$mediaType1" ; curl -L -s -H "Authorization: Bearer $TOKEN1" \
-                "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" \
-                |
-                {
-                    mediaType3="$mediaType2" ;
-                
-
-                ##( consume="$(cat "$ATOMIC_TARGET_DIR/$sha2561")";
-                ##rm -f "$ATOMIC_TARGET_DIR/$sha2561" >/dev/null 2>/dev/null;
-                #echo "$consume" > /dev/stderr
-                ##content_length="$(echo -n "$consume" | grep -i "content-length" | cut -d':' -f2)";
-                ##content_type="$(echo -n "$consume" | grep -i "content-type" | cut -d':' -f2)";
-
-                ##echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size"
-                #echo "$content_type" > /dev/stderr
-
-                 ##) &
-
-                # TODO check thread flow here
-
-                #echo "$mediaType3" > /dev/stderr
-
-                if [ "$mediaType3" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
-                then
-                    pigz -d
-                else
-                    cat -
-                fi
-                
-                
-                } | tee >(tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256") &
+                "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" | \
+                    { head -c 2 | grep -a -q -P '^1f8b' && echo pigz >/dev/stderr ; pigz -d || echo none > /dev/stderr ; cat -; } \
+ \
+                 | tee >(tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256") &
         pids+=($!)
 
         
