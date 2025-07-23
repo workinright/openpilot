@@ -14,7 +14,8 @@ basher_layers() {
     TAG="latest"
     IMAGE="ghcr.io/$REPO"
 
-    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
+    #sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
+    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256" \
@@ -56,7 +57,7 @@ basher_layers() {
     manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
     if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
     then
-        echo ls "$(ls "$ATOMIC_TARGET_DIR")" a "$(ls "$ATOMIC_TARGET_DIR/image")" b "$(ls "$ATOMIC_TARGET_DIR/image/overlay2")" c "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb")" d "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content")" e "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256")"
+        #echo ls "$(ls "$ATOMIC_TARGET_DIR")" a "$(ls "$ATOMIC_TARGET_DIR/image")" b "$(ls "$ATOMIC_TARGET_DIR/image/overlay2")" c "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb")" d "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content")" e "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256")"
         echo -n "$CONFIG" > "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
     else
         echo "error: the image is already there"
