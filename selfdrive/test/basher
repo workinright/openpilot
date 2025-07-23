@@ -56,6 +56,7 @@ basher_layers() {
     manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
     if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
     then
+        echo ls "$(ls "$ATOMIC_TARGET_DIR")" a "$(ls "$ATOMIC_TARGET_DIR/image")" b "$(ls "$ATOMIC_TARGET_DIR/image/overlay2")" c "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb")" d "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content")" e "$(ls "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256")"
         echo -n "$CONFIG" > "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
     else
         echo "error: the image is already there"
