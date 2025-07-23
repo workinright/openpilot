@@ -20,6 +20,7 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
 sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker"" || true
 
+echo AAA $AAA
 DOCKER_BUILDKIT=1 docker login ghcr.io $AAA
 
 DOCKER_BUILDKIT=1 docker buildx build --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
