@@ -33,7 +33,7 @@ jobs:
   sometest:
     name: sometest1
     runs-on: ubuntu-24.04
-    - uses: ./.github/workflows/sometest
+    uses: ./.github/workflows/sometest
 
   build_release:
     name: build release
