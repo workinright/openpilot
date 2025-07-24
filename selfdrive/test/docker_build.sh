@@ -35,7 +35,7 @@ flags=
 ##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
 ##then
   mkdir ./myimage
-  flags="--output type=docker,dest=./myimage,tar=false"
+  flags="--output type=oci,dest=./myimage,tar=false"
 ##fi
 
 date
