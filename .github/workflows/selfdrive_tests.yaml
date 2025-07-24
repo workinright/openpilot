@@ -135,15 +135,11 @@ jobs:
       || fromJSON('["ubuntu-24.04"]') }}
     env:
       PYTHONWARNINGS: default
+    needs: [sometest]
     steps:
-    #- uses: actions/checkout@v4
-    #  with:
-    #    submodules: true
-    - name: Build devel
-      timeout-minutes: 1
-      run: |
-        echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
-        TARGET_DIR=$STRIPPED_DIR release/build_devel.sh
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
     - uses: ./.github/workflows/setup-with-retry
     - name: Static analysis
       timeout-minutes: 1
