@@ -247,6 +247,8 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
+    - name: aaaa
+      run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Cache test routes
@@ -277,6 +279,8 @@ jobs:
           submodules: true
           ref: ${{ github.event.pull_request.base.ref }}
       - run: git lfs pull
+      - name: aaaa
+        run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
       - uses: ./.github/workflows/setup-with-retry
       - name: Get base car info
         run: |
