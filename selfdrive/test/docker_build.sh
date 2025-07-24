@@ -35,7 +35,7 @@ flags=
 ##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
 ##then
   #mkdir ./myimage
-  flags="--output type=image,dest=./myimage.tar,compression=uncompressed,force-recompress=true"
+  flags="--output type=image,dest=$HOME/myimage.tar,compression=uncompressed,force-recompress=true"
 ##fi
 
 date
@@ -61,13 +61,13 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
   DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
     
     #output2="$(
-    DOCKER_BUILDKIT=1 docker buildx build $flags --progress=plain --load --builder mybuilder --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+    DOCKER_BUILDKIT=1 docker buildx build $flags --progress=plain --builder mybuilder --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
     #2>&1)"
     #echo output2 $output2
 
     ls
     mkdir myimage
-    tar -xf myimage.tar -C myimage/
+    tar -xf $HOME/myimage.tar -C myimage/
     rm myimage.tar
 
     stat myimage || true
