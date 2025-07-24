@@ -29,6 +29,9 @@ then
 fi
 #echo AAB $AAA "$(cat "$HOME/github_credentials")"
 
+DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+
 flags=
 ##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
 ##then
@@ -36,7 +39,7 @@ flags=
 ##fi
 
 date
-output="$(DOCKER_BUILDKIT=1 docker buildx build $flags --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
+output="$(DOCKER_BUILDKIT=1 docker buildx build $flags --progress=plain --load --builder mybuilder --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
 date
 echo output $output
 stat myimage.tar || true
