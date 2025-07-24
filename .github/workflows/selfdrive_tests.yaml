@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       STRIPPED_DIR: /tmp/releasepilot
-    needs: [sometest1]
+    needs: [sometest]
     steps:
     - uses: actions/checkout@v4
       with:
