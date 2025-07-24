@@ -65,7 +65,7 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
 
     stat myimage || true
     ls myimage
-    file -bi myimage/blobs/*
+    file -bi myimage/blobs/sha256/*
 
   #fi
 
