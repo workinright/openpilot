@@ -109,7 +109,7 @@ basher_layers() {
                     } \
                     \
  \
-                 | tee >(dd bs=32M 2>/dev/null | tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256") &
+                 | dd bs=32M 2>/dev/null | tee >(dd bs=32M 2>/dev/null | tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | dd bs=32M 2>/dev/null | sha256sum - | cut -d' ' -f1 )" ; mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256") &
         pids+=($!)
 
         
