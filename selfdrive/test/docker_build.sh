@@ -30,10 +30,10 @@ fi
 #echo AAB $AAA "$(cat "$HOME/github_credentials")"
 
 flags=
-if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
-then
+##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
+##then
   flags="--output type=docker,dest=./myimage.tar"
-fi
+##fi
 
 date
 output="$(DOCKER_BUILDKIT=1 docker buildx build $flags --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
