@@ -186,12 +186,14 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
+    needs: [sometest]
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
     - name: aaaa
       run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
+    - run: git lfs pull
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Cache test routes
