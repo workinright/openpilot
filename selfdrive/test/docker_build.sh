@@ -29,7 +29,7 @@ then
 fi
 #echo AAB $AAA "$(cat "$HOME/github_credentials")"
 
-DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --buildkitd-flags --use
+DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
 DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
 
 flags=
