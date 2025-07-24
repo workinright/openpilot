@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-###set -e
+set -e
 #set -x
 
 # To build sim and docs, you can run the following to mount the scons cache to the same place as in CI:
@@ -31,10 +31,12 @@ echo AAB $AAA "$(cat "$HOME/github_credentials")"
 DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
 
 output="$(DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
-sha256_11="$(echo "$output" | tail -n1 | grep sha256)"
+echo output
+sha256_11="$(echo "$output" | tail -n1 | grep sha256)" || true
 
-echo sha
+echo sha1
 echo "$sha256_10"
+echo sha12
 echo "$sha256_11"
 echo shaend
 
