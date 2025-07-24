@@ -32,7 +32,7 @@ fi
 flags=
 ##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
 ##then
-  flags="--output type=docker,dest=./myimage.tar"
+  flags="--save --output type=docker,dest=./myimage.tar"
 ##fi
 
 date
