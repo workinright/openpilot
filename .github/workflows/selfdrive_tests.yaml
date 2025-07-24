@@ -136,9 +136,9 @@ jobs:
     env:
       PYTHONWARNINGS: default
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+    #- uses: actions/checkout@v4
+    #  with:
+    #    submodules: true
     - name: Build devel
       timeout-minutes: 1
       run: |
