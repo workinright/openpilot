@@ -343,7 +343,7 @@ jobs:
       with:
         submodules: true
     - name: aaaa
-        run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
+      run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Build openpilot
