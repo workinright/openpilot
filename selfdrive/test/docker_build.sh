@@ -18,6 +18,12 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
+(
+  DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
+  DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+) &
+pid9=$!
+
 sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker"" || true
 
 sha256_10="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
@@ -29,8 +35,7 @@ then
 fi
 #echo AAB $AAA "$(cat "$HOME/github_credentials")"
 
-DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
-DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+
 
 flags=
 ##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
@@ -38,8 +43,9 @@ flags=
   flags="--output type=docker,dest=./myimage.tar"
 ##fi
 
+wait $pid9
 date
-output="$(DOCKER_BUILDKIT=1 docker buildx build $flags --progress=plain --load --builder mybuilder --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
+output="$(DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --builder mybuilder --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
 date
 echo output $output
 stat myimage.tar || true
@@ -57,8 +63,9 @@ then
   if [ "$use_zstd" = 1 ]
   then
     # Zstandard uploading is broken in docker buildx!
-    :
-
+    
+    output2="$(DOCKER_BUILDKIT=1 docker buildx build $flags--progress=plain --load --builder mybuilder --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
+    echo output2 $output2
 
   fi
 
