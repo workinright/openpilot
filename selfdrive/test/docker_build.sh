@@ -53,7 +53,7 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
 ##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ]
 ##then
   ##if [ "$use_zstd" = 1 ]
-  then
+  #then
     # Zstandard uploading is broken in docker buildx!
 
     DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
@@ -64,7 +64,7 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
 
     stat myimage.tar || true
 
-  fi
+  #fi
 
   DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
   docker push ghcr.io/workinright/openpilot-base
