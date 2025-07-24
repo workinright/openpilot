@@ -53,4 +53,5 @@ runs:
         find . -type f -not -executable -not -perm 644 -exec chmod 644 {} \;
     # build our docker image
     - shell: bash
+      echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
       run: eval ${{ env.BUILD }}
