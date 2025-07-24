@@ -35,7 +35,7 @@ flags=
 ##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
 ##then
   mkdir ./myimage
-  flags="--output type=oci,dest=./myimage,compression=zstd,force-recompress=true,tar=false"
+  flags="--output type=oci,dest=./myimage,compression=uncompressed,force-recompress=true,tar=false"
 ##fi
 
 date
