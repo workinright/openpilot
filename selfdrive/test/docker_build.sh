@@ -35,11 +35,11 @@ date
 #echo output $output
 sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' ' -f1)" || true
 
-echo sha1
-echo "$sha256_10"
-echo sha12
-echo "$sha256_11"
-echo shaend
+#echo sha1
+#echo "$sha256_10"
+#echo sha12
+#echo "$sha256_11"
+#echo shaend
 
 if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ]
 then
