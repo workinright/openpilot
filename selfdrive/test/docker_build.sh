@@ -23,10 +23,10 @@ sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN
 echo AAA $AAA "$(cat "$HOME/github_credentials")"
 if [ ! -e "$HOME/github_credentials" ] && [ ! -z "$AAA" ]
 then
-  echo -n "$AAA" > "$HOME/github_credentials"
+  echo "$AAA" > "$HOME/github_credentials"
 fi
 echo AAB $AAA "$(cat "$HOME/github_credentials")"
-DOCKER_BUILDKIT=1 docker login ghcr.io "$(cat "$HOME/github_credentials")"
+DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
 
 DOCKER_BUILDKIT=1 docker buildx build --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 
