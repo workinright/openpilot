@@ -28,7 +28,6 @@ then
   echo "$AAA" > "$HOME/github_credentials"
 fi
 echo AAB $AAA "$(cat "$HOME/github_credentials")"
-DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
 
 output="$(DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
 echo output $output
@@ -42,5 +41,6 @@ echo shaend
 
 if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ]
 then
+  DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
   docker push ghcr.io/workinright/openpilot-base
 fi
