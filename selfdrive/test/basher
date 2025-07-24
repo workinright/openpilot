@@ -89,7 +89,7 @@ basher_layers() {
             mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id"
 
             #mkfifo "$ATOMIC_TARGET_DIR/$sha2561" ;
-            sha256="$(mediaType2="$mediaType1" ; curl -L -H "Authorization: Bearer $TOKEN1" \
+            sha256="$(mediaType2="$mediaType1" ; curl -q -L -H "Authorization: Bearer $TOKEN1" \
                 "https://ghcr.io/v2/$REPO1/blobs/sha256:$sha2561" | \
                     #{ head -c 2 | grep -a -q -P '^1f8b' && echo pigz >/dev/stderr ; pigz -d || echo none > /dev/stderr ; cat -; } \
                     { \
