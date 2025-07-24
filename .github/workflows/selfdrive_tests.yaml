@@ -253,8 +253,6 @@ jobs:
       id: setup-step
     - shell: bash
       run: git lfs pull
-    - shell: bash
-      run: git lfs pull
     - name: Cache test routes
       id: routes-cache
       uses: actions/cache@v4
@@ -346,6 +344,8 @@ jobs:
         submodules: true
     - name: aaaa
       run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
+    - shell: bash
+      run: git lfs pull
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Build openpilot
