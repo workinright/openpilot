@@ -251,6 +251,8 @@ jobs:
       run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
+    - shell: bash
+      run: git lfs pull
     - name: Cache test routes
       id: routes-cache
       uses: actions/cache@v4
@@ -282,6 +284,8 @@ jobs:
       - name: aaaa
         run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
       - uses: ./.github/workflows/setup-with-retry
+      - shell: bash
+        run: git lfs pull
       - name: Get base car info
         run: |
           ${{ env.RUN }} "scons -j$(nproc) && python3 selfdrive/debug/dump_car_docs.py --path /tmp/openpilot_cache/base_car_docs"
