@@ -30,7 +30,7 @@ fi
 echo AAB $AAA "$(cat "$HOME/github_credentials")"
 DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
 
-DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+DOCKER_BUILDKIT=1 time docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 
 if [ -n "$PUSH_IMAGE" ]; then
   docker push ghcr.io/workinright/openpilot-base
