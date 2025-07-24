@@ -67,6 +67,7 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
 
     mkdir myimage
     tar -xf myimage.tar -C myimage/
+    rm myimage.tar
 
     stat myimage || true
     find myimage
