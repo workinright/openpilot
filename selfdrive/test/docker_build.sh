@@ -61,7 +61,7 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
   DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
     
     output2="$(DOCKER_BUILDKIT=1 docker buildx build $flags --progress=plain --load --builder mybuilder --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
-    #echo output2 $output2
+    echo output2 $output2
 
     stat myimage || true
     ls myimage
