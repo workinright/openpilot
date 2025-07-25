@@ -85,7 +85,9 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
 
   DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
 
-  $HOME/oras cp --from-oci-layout ./myimage/:latest ghcr.io/workinright/openpilot-base:latest
+  pwd
+
+  ./oras cp --from-oci-layout ./myimage/:latest ghcr.io/workinright/openpilot-base:latest
 
   #docker push ghcr.io/workinright/openpilot-base
 ##fi
