@@ -57,8 +57,8 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
   #then
     # Zstandard uploading is broken in docker buildx!
 
-    wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
-      | pigz -d | tar xf -
+    #wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
+    #  | pigz -d | tar xf -
 
     DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
   DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
@@ -80,15 +80,18 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
     file -bi myimage/blobs/sha256/*
     du -sh myimage/blobs/sha256/*
     zstd -l file -bi myimage/blobs/sha256/*
-    sha256sum myimage/blobs/sha256/*
+    #sha256sum myimage/blobs/sha256/*
 
   #fi
 
-  DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
+  #DOCKER_BUILDKIT=1 docker login ghcr.io $(cat "$HOME/github_credentials")
 
-  pwd
+  #pwd
 
-  ./oras cp --from-oci-layout ./myimage:latest ghcr.io/workinright/openpilot-base
+  #./oras cp --from-oci-layout ./myimage:latest ghcr.io/workinright/openpilot-base
+
+  cd myimage
+  "$(dirname "$0")/basher_upload"
 
   #docker push ghcr.io/workinright/openpilot-base
 ##fi

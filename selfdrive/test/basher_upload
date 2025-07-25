@@ -1,0 +1,81 @@
+#!/bin/bash
+
+REGISTRY_URL="https://ghcr.io"
+USERNAME="workinright"
+PASSWORD="$(cat "$HOME/github_credentials" | rev | cut -d' ' -f1 | rev)"
+
+# Get the token for authentication
+TOKEN=$(curl -L -s \
+    -u "${USERNAME}:${PASSWORD}" \
+    "$REGISTRY_URL/token?scope=repository:${USERNAME}/openpilot-base:push" | jq -r .token)
+echo TOKEN $TOKEN
+
+OCI_IMAGE_DIR="."
+
+#for LAYER in "$OCI_IMAGE_DIR/blobs/sha256"/*
+#do
+    #echo $LAYER
+    #LAYER_DIGEST="$(sha256sum $LAYER | awk '{print $1}')"
+
+    # Create a blob upload session for the layer
+    
+
+
+    layers="$(jq -r '.layers[]' "blobs/sha256/ecfc86c0f544a3cc7c3bf03fb82ff524833fb9074b02b9fb83dfbfb75c75b45c" | tr -d '\n' | sed 's/}/} \n/g')"
+
+    i=0
+    while read layer
+    do
+        sha256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2)"
+        mediaType="$(echo -n "$layer" | jq -r '.mediaType')"
+        
+        location="$(curl -s -D - -X POST \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: $mediaType" \
+        -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
+        --data-binary @blobs/sha256/$sha256 "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" \
+        | grep location | cut -d':' -f2 | cut -d' ' -f2)"
+
+        curl -X PUT \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: $mediaType" \
+        -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
+        --data-binary @blobs/sha256/$sha256 "$REGISTRY_URL/$location?digest=sha256:$sha256"
+
+        ((++i))
+    done <<< "$layers"
+
+
+    echo "Uploaded layer: $LAYER"
+#done
+
+IMAGE_NAME="workinright/openpilot-base"
+IMAGE_TAG="latest"
+
+MANIFEST=$(cat <<EOF
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+  "config": {
+    "mediaType": "application/vnd.docker.container.image.v2+json",
+    "digest": "sha256:$(sha256sum "blobs/sha256/e19afde1b0bb789e2166cf48805063a128ff7fc45d2800296e681e1e70db95d3" | awk '{ print $1 }')",
+    "size": $(stat -c %s "blobs/sha256/e19afde1b0bb789e2166cf48805063a128ff7fc45d2800296e681e1e70db95d3")
+  },
+  "layers": [
+    $(for layer in "$OCI_IMAGE_DIR/blobs/sha256"/*; do
+      echo "{\"digest\": \"sha256:$(sha256sum "$layer" | awk '{ print $1 }')\"},"
+    done | sed '$ s/,$//')
+  ]
+}
+EOF
+)
+
+echo "$MANIFEST"
+
+curl -X PUT \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/vnd.docker.distribution.manifest.v2+json" \
+    -d @blobs/sha256/ecfc86c0f544a3cc7c3bf03fb82ff524833fb9074b02b9fb83dfbfb75c75b45c \
+    "$REGISTRY_URL/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"
+
+echo "Pushed manifest for image ${IMAGE_NAME}:${IMAGE_TAG}"
