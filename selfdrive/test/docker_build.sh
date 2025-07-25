@@ -74,6 +74,8 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
     find myimage
     ls myimage
     file -bi myimage/blobs/sha256/*
+    du -sh myimage/blobs/sha256/*
+    zstd -l file -bi myimage/blobs/sha256/*
     sha256sum myimage/blobs/sha256/*
 
   #fi
