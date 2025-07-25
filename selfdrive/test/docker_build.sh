@@ -87,7 +87,7 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
 
   pwd
 
-  ./oras cp --from-oci-layout ./myimage/:latest ghcr.io/workinright/openpilot-base:latest
+  ./oras cp --from-oci-layout ./myimage ghcr.io/workinright/openpilot-base:latest
 
   #docker push ghcr.io/workinright/openpilot-base
 ##fi
