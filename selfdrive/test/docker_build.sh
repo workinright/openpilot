@@ -68,12 +68,13 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
     ls
     mkdir myimage
     tar -xf $HOME/myimage.tar -C myimage/
-    rm myimage.tar
+    rm $HOME/myimage.tar
 
     stat myimage || true
     find myimage
     ls myimage
     file -bi myimage/blobs/sha256/*
+    sha256sum myimage/blobs/sha256/*
 
   #fi
 
