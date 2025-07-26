@@ -92,6 +92,7 @@ flags=
   #./oras cp --from-oci-layout ./myimage:latest ghcr.io/workinright/openpilot-base
 
   cd myimage
+  ls
   "../$(dirname "$0")/basher_upload"
 
   #docker push ghcr.io/workinright/openpilot-base
