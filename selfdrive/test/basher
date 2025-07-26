@@ -80,6 +80,14 @@ basher_layers() {
         mediaType="$(echo -n "$layer" | jq -r '.mediaType')"
         echo mediaType "$mediaType"
 
+        #decompressor=
+        #if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+        #then
+        #    decompressor=
+        #elif [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
+        #    decompressor=
+        #fi
+
         tmp_dir=$(($$+i))
 
         # TODO detect zstd/pigz/pixz
@@ -104,7 +112,7 @@ basher_layers() {
                     then
                         f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
                     else
-                        cat -
+                        zstd -d
                     fi 
                     } \
                     \
