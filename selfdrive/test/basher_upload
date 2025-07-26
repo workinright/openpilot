@@ -71,8 +71,8 @@ MANIFEST=$(cat <<EOF
   "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
   "config": {
     "mediaType": "application/vnd.docker.container.image.v2+json",
-    "digest": "sha256:$(sha256sum "blobs/sha256/e19afde1b0bb789e2166cf48805063a128ff7fc45d2800296e681e1e70db95d3" | awk '{ print $1 }')",
-    "size": $(stat -c %s "blobs/sha256/e19afde1b0bb789e2166cf48805063a128ff7fc45d2800296e681e1e70db95d3")
+    "digest": "sha256:$(sha256sum "blobs/sha256/$manifest_sha256" | awk '{ print $1 }')",
+    "size": $(stat -c %s "blobs/sha256/$manifest_sha256")
   },
   "layers": [
     $(for layer in "$OCI_IMAGE_DIR/blobs/sha256"/*; do
