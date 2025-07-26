@@ -20,8 +20,8 @@ OCI_IMAGE_DIR="."
     # Create a blob upload session for the layer
     
 
-
-    layers="$(jq -r '.layers[]' index.json | tr -d '\n' | sed 's/}/} \n/g')"
+    # TODO manifest - one for platform, on both upload and download
+    layers="$(jq -r '.layers[]' "blobs/sha256/$(jq -r '.manifests[0].digest' index.json | cut -d':' -f2)" | tr -d '\n' | sed 's/}/} \n/g')"
 
     i=0
     while read layer
