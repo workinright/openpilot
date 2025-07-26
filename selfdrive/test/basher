@@ -155,8 +155,8 @@ basher_layers() {
 
     echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json &>/dev/null
     sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR""
-    #sudo systemctl start docker #&
-    sudo dockerd -D -l debug --log-driver none &
+    sudo systemctl start docker #&
+    #sudo dockerd -D -l debug --log-driver none &
 }
 
 basher_layer() {
