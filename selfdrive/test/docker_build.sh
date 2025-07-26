@@ -38,9 +38,9 @@ flags=
   flags="--output type=image,dest=$HOME/myimage.tar,compression=uncompressed,force-recompress=true"
 ##fi
 
-date
+#####date
 #####output="$(DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
-date
+#####date
 #echo output $output
 #echo output $output
 #####sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' ' -f1)" || true
