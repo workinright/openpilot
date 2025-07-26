@@ -39,11 +39,11 @@ flags=
 ##fi
 
 date
-output="$(DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
+#####output="$(DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
 date
 #echo output $output
 #echo output $output
-sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' ' -f1)" || true
+#####sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' ' -f1)" || true
 
 #echo sha1
 #echo "$sha256_10"
@@ -60,26 +60,26 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
     #wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
     #  | pigz -d | tar xf -
 
-    DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
-  DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+    #####DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
+  #####DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
     
     #output2="$(
-    echo docker buildx build --builder mybuilder --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true --platform $PLATFORM --progress=plain -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+    #####docker buildx build --builder mybuilder --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true --platform $PLATFORM --progress=plain -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
     #DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true --platform $PLATFORM --progress=plain -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
     #2>&1)"
     #echo output2 $output2
 
-    ls
-    mkdir myimage
-    tar -xf $HOME/myimage.tar -C myimage/
-    rm $HOME/myimage.tar
+    #####ls
+    #####mkdir myimage
+    #####tar -xf $HOME/myimage.tar -C myimage/
+    #####rm $HOME/myimage.tar
 
-    stat myimage || true
-    find myimage
-    ls myimage
-    file -bi myimage/blobs/sha256/*
-    du -sh myimage/blobs/sha256/*
-    zstd -l file -bi myimage/blobs/sha256/*
+    #####stat myimage || true
+    #####find myimage
+    #####ls myimage
+    #####file -bi myimage/blobs/sha256/*
+    #####du -sh myimage/blobs/sha256/*
+    #####zstd -l file -bi myimage/blobs/sha256/*
     #sha256sum myimage/blobs/sha256/*
 
   #fi
@@ -90,8 +90,8 @@ sha256_11="$(echo "$output" | grep sha256 | tail -n1 | cut -d':' -f2 | cut -d' '
 
   #./oras cp --from-oci-layout ./myimage:latest ghcr.io/workinright/openpilot-base
 
-  cd myimage
-  "$(dirname "$0")/basher_upload"
+  #####cd myimage
+  #####"$(dirname "$0")/../basher_upload"
 
   #docker push ghcr.io/workinright/openpilot-base
 ##fi
