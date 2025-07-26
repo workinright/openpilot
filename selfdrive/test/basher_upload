@@ -39,7 +39,7 @@ OCI_IMAGE_DIR="."
         -H "Authorization: Bearer $TOKEN" \
         -H "Content-Type: application/octet-stream" \
         -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
-         "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | tr -d '\r'grep location | cut -d':' -f2 | cut -d' ' -f2)"
+         "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
 
         echo LOCATION $location
 
