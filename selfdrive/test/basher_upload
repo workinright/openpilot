@@ -5,9 +5,9 @@ USERNAME="workinright"
 PASSWORD="$(cat "$HOME/github_credentials" | rev | cut -d' ' -f1 | rev)"
 
 # Get the token for authentication
-TOKEN=$(curl -L -s \
+TOKEN="$(curl -L -s \
     -u "${USERNAME}:${PASSWORD}" \
-    "$REGISTRY_URL/token?scope=repository:${USERNAME}/openpilot-base:push" | jq -r .token)
+    "$REGISTRY_URL/token?scope=repository:${USERNAME}/openpilot-base:push" | jq -r .token)"
 echo TOKEN $TOKEN
 
 OCI_IMAGE_DIR="."
@@ -21,26 +21,38 @@ OCI_IMAGE_DIR="."
     
 
 
-    layers="$(jq -r '.layers[]' "blobs/sha256/ecfc86c0f544a3cc7c3bf03fb82ff524833fb9074b02b9fb83dfbfb75c75b45c" | tr -d '\n' | sed 's/}/} \n/g')"
+    layers="$(jq -r '.layers[]' "$(jq -r '.[0].Config' manifest.json)" | tr -d '\n' | sed 's/}/} \n/g')"
 
     i=0
     while read layer
     do
         sha256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2)"
         mediaType="$(echo -n "$layer" | jq -r '.mediaType')"
+
+        #echo curl -s -D - -X POST \
+        #-H "Authorization: Bearer $TOKEN" \
+        #-H "Content-Type: $mediaType" \
+        #-H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
+        #--data-binary @blobs/sha256/$sha256 "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/"
         
-        location="$(curl -s -D - -X POST \
+        location="$(curl -s -D /proc/self/fd/1 -X POST \
         -H "Authorization: Bearer $TOKEN" \
-        -H "Content-Type: $mediaType" \
+        -H "Content-Type: application/octet-stream" \
         -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
-        --data-binary @blobs/sha256/$sha256 "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" \
-        | grep location | cut -d':' -f2 | cut -d' ' -f2)"
+         "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
+
+        echo LOCATION $location
+
+        echo abcd $location ${REGISTRY_URL} ?digest=sha256%3A ${sha256}
 
         curl -X PUT \
-        -H "Authorization: Bearer $TOKEN" \
-        -H "Content-Type: $mediaType" \
-        -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
-        --data-binary @blobs/sha256/$sha256 "$REGISTRY_URL/$location?digest=sha256:$sha256"
+          -H "Authorization: Bearer $TOKEN" \
+          -H "Content-Type: application/octet-stream" \
+          -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
+          --data-binary @blobs/sha256/$sha256 "$REGISTRY_URL$location?digest=sha256:$sha256"
+
+
+        echo "${REGISTRY_URL}${location}?digest=sha256%3A$sha256"
 
         ((++i))
     done <<< "$layers"
