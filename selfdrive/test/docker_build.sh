@@ -97,3 +97,5 @@ flags=
 
   #docker push ghcr.io/workinright/openpilot-base
 ##fi
+
+docker run openpilot-base:latest bash
