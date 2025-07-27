@@ -14,8 +14,8 @@ basher_layers() {
     TAG="latest"
     IMAGE="ghcr.io/$REPO"
 
-    #sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
-    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
+    #sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
+    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256" \
@@ -158,8 +158,8 @@ basher_layers() {
 
     echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json &>/dev/null
     sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR""
-    #sudo systemctl start docker #&
-    sudo dockerd -D -l debug --log-driver none &
+    sudo systemctl start docker #&
+    #sudo dockerd -D -l debug --log-driver none &
 }
 
 basher_layer() {
