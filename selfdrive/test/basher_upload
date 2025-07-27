@@ -24,6 +24,9 @@ OCI_IMAGE_DIR="."
     manifest_sha256="$(jq -r '.manifests[0].digest' index.json | cut -d':' -f2)"
     layers="$(jq -r '.layers[]' "blobs/sha256/$manifest_sha256" | tr -d '\n' | sed 's/}/} \n/g')"
 
+    config_mediaType="$(jq -r '.config.mediaType' "blobs/sha256/manifest_sha256")"
+    config_digest="$(jq -r '.config.digest' "blobs/sha256/manifest_sha256" | cut -d':' -f2)"
+
     i=0
     while read layer
     do
@@ -62,33 +65,31 @@ OCI_IMAGE_DIR="."
     echo "Uploaded layer: $LAYER"
 #done
 
+location="$(curl -s -D /proc/self/fd/1 -X POST \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/octet-stream" \
+    -H "Content-Length: $(stat --format=%s blobs/sha256/$config_digest)" \
+        "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
+
+    echo LOCATION $location
+
+    echo abcd $location ${REGISTRY_URL} ?digest=sha256%3A ${sha256}
+
+    curl -X PUT \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "Content-Type: application/octet-stream" \
+        -H "Content-Length: $(stat --format=%s blobs/sha256/$config_digest)" \
+        --data-binary @blobs/sha256/$config_digest "$REGISTRY_URL$location?digest=sha256:$config_digest"
+
 IMAGE_NAME="workinright/openpilot-base"
 IMAGE_TAG="latest"
-
-MANIFEST=$(cat <<EOF
-{
-  "schemaVersion": 2,
-  "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
-  "config": {
-    "mediaType": "application/vnd.docker.container.image.v2+json",
-    "digest": "sha256:$(sha256sum "blobs/sha256/$manifest_sha256" | awk '{ print $1 }')",
-    "size": $(stat -c %s "blobs/sha256/$manifest_sha256")
-  },
-  "layers": [
-    $(for layer in "$OCI_IMAGE_DIR/blobs/sha256"/*; do
-      echo "{\"digest\": \"sha256:$(sha256sum "$layer" | awk '{ print $1 }')\"},"
-    done | sed '$ s/,$//')
-  ]
-}
-EOF
-)
 
 echo "$MANIFEST"
 
 curl -X PUT \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/vnd.docker.distribution.manifest.v2+json" \
-    -d @blobs/sha256/$manifest_sha256 \
+    --data-binary @blobs/sha256/$manifest_sha256 \
     "$REGISTRY_URL/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"
 
 echo "Pushed manifest for image ${IMAGE_NAME}:${IMAGE_TAG}"
