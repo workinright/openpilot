@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 REGISTRY_URL="https://ghcr.io"
 USERNAME="workinright"
