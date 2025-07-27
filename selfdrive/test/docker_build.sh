@@ -18,7 +18,7 @@ fi
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 
-#sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker"" || true
+sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker"" || true
 
 sha256_10="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
 echo sha256_10 $sha256_10
@@ -61,19 +61,19 @@ flags=
     #wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
     #  | pigz -d | tar xf -
 
-  DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
-  DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+  ######DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
+  ######DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
     
     #output2="$(
-    DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true --platform $PLATFORM --progress=plain -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
     ######DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true --platform $PLATFORM --progress=plain -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+    #######DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true --platform $PLATFORM --progress=plain -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
     #2>&1)"
     #echo output2 $output2
 
     #####ls
-    mkdir myimage
-    tar -xf $HOME/myimage.tar -C myimage/
-    rm $HOME/myimage.tar
+    ######mkdir myimage
+    ######tar -xf $HOME/myimage.tar -C myimage/
+    ######rm $HOME/myimage.tar
 
     #####stat myimage || true
     #####find myimage
@@ -91,11 +91,11 @@ flags=
 
   #./oras cp --from-oci-layout ./myimage:latest ghcr.io/workinright/openpilot-base
 
-  cd myimage
+  ######cd myimage
   ######ls
-  "../$(dirname "$0")/basher_upload"
+  ######"../$(dirname "$0")/basher_upload"
 
   #docker push ghcr.io/workinright/openpilot-base
 ##fi
 
-#docker run openpilot-base:latest bash
+docker run openpilot-base:latest bash
