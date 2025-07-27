@@ -24,8 +24,8 @@ OCI_IMAGE_DIR="."
     manifest_sha256="$(jq -r '.manifests[0].digest' index.json | cut -d':' -f2)"
     layers="$(jq -r '.layers[]' "blobs/sha256/$manifest_sha256" | tr -d '\n' | sed 's/}/} \n/g')"
 
-    config_mediaType="$(jq -r '.config.mediaType' "blobs/sha256/manifest_sha256")"
-    config_digest="$(jq -r '.config.digest' "blobs/sha256/manifest_sha256" | cut -d':' -f2)"
+    config_mediaType="$(jq -r '.config.mediaType' "blobs/sha256/$manifest_sha256")"
+    config_digest="$(jq -r '.config.digest' "blobs/sha256/$manifest_sha256" | cut -d':' -f2)"
 
     i=0
     while read layer
