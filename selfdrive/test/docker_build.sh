@@ -25,6 +25,7 @@ source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
 basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" "$REMOTE_TAG" || true
+# TODO: files are already identical, but now check are also the permissions matching!
 
 if [ "$notrebuild_flag" != 1 ]
 then
