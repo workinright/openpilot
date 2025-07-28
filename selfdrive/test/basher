@@ -151,6 +151,19 @@ basher_layers() {
         mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}" "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer
+
+        if [ -e "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" ] && \
+            diff -q "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" \
+            "$(dirname "$0"/Dockerfile.openpilot_base)" >/dev/null 2>/dev/null
+        then
+            echo "the dockerfile is confirmed to not having to be rebuilt at step1"
+            notrebuild_flag=1
+        else
+            echo "probably will have to be rebuilt?"
+
+        fi
+
+
         ((++i))
     done <<< "$layers"
 
@@ -158,8 +171,6 @@ basher_layers() {
 
     echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json &>/dev/null
     sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR""
-    sudo systemctl start docker #&
-    #sudo dockerd -D -l debug --log-driver none &
 }
 
 basher_layer() {
