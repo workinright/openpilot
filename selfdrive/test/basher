@@ -152,12 +152,12 @@ basher_layers() {
 
         basher_layer
 
-        file "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile"
-        ls "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
+        sudo file "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile"
+        sudo ls "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
         echo "$(dirname "$0")/../../Dockerfile.openpilot_base"
 
-        if [ -e "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" ] && \
-            diff -q "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" \
+        if sudo stat "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" >/dev/null && \
+            sudo diff -q "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" \
             "$(dirname "$0")/../../Dockerfile.openpilot_base" >/dev/null
         then
             echo "the dockerfile is confirmed to not having to be rebuilt at step1"
