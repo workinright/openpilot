@@ -43,7 +43,6 @@ jobs:
   git_lfs_pull:
     name: git_lfs_pull1
     runs-on: ubuntu-24.04
-    needs: [build_release]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -88,13 +87,11 @@ jobs:
 
   build:
     runs-on: ubuntu-24.04
-    needs: [sometest]
+    needs: [sometest, git_lfs_pull]
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
-    - shell: bash
-      run: git lfs pull
     - name: Setup docker push
       #if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'workinright/openpilot'
       run: |
