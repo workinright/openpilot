@@ -33,5 +33,4 @@ runs:
     # build our docker image
     - shell: bash
       run: |
-        echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
         eval ${{ env.BUILD }}

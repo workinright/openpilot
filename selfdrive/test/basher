@@ -10,8 +10,8 @@ basher_pull() {
     ATOMIC_TARGET_DIR="$2"
     _PLATFORM="$3"
     IMAGE="$4"
-    REPO="$(echo -n "$REPO" | cut -d'/' -f2-)"
-    TAG="$(echo -n "$REPO" | rev | cut -d':' -f1 | rev)"
+    REPO="$(echo -n "$IMAGE" | cut -d'/' -f2-)"
+    TAG="$(echo -n "$IMAGE" | rev | cut -d':' -f1 | rev)"
 
     sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
