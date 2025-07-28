@@ -43,6 +43,7 @@ jobs:
   git_lfs_pull:
     name: git_lfs_pull1
     runs-on: ubuntu-24.04
+    needs: [git_lfs_pull]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -59,7 +60,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       STRIPPED_DIR: /tmp/releasepilot
-    needs: [sometest, git_lfs_pull]
+    needs: [sometest]
     steps:
     - uses: actions/checkout@v4
       with:
