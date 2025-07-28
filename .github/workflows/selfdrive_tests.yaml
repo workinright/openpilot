@@ -39,13 +39,10 @@ jobs:
           submodules: true
       - name: sometest
         uses: ./.github/workflows/sometest
-
-  build_release:
-    name: build release
+  
+  git_lfs_pull:
+    name: git_lfs_pull1
     runs-on: ubuntu-24.04
-    env:
-      STRIPPED_DIR: /tmp/releasepilot
-    needs: [sometest]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -56,6 +53,17 @@ jobs:
         timeout_minutes: 2
         max_attempts: 3
         command: git lfs pull
+
+  build_release:
+    name: build release
+    runs-on: ubuntu-24.04
+    env:
+      STRIPPED_DIR: /tmp/releasepilot
+    needs: [sometest, git_lfs_pull]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Build devel
       timeout-minutes: 1
       run: |
