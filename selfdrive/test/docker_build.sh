@@ -23,7 +23,7 @@ fi
 
 docker login ghcr.io $AAA
 echo echo
-cat $HOME/.docker/config.json
+cat $HOME/.docker/config.json | hexdump
 echo echo
 
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
