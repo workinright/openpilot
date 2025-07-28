@@ -39,20 +39,6 @@ jobs:
           submodules: true
       - name: sometest
         uses: ./.github/workflows/sometest
-  
-  git_lfs_pull:
-    name: git_lfs_pull1
-    runs-on: ubuntu-24.04
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - name: Getting LFS files
-      uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e
-      with:
-        timeout_minutes: 2
-        max_attempts: 3
-        command: git lfs pull
 
   build_release:
     name: build release
@@ -64,6 +50,12 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
+    - name: Getting LFS files
+      uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e
+      with:
+        timeout_minutes: 2
+        max_attempts: 3
+        command: git lfs pull
     - name: Build devel
       timeout-minutes: 1
       run: |
@@ -87,7 +79,7 @@ jobs:
 
   build:
     runs-on: ubuntu-24.04
-    needs: [sometest, git_lfs_pull]
+    needs: [sometest]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -98,13 +90,14 @@ jobs:
         echo "PUSH_IMAGE=true" >> "$GITHUB_ENV"
         echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
     - uses: ./.github/workflows/setup-with-retry
+    - shell: bash
+      run: git lfs pull
     - uses: ./.github/workflows/compile-openpilot
       timeout-minutes: 30
 
   build_mac:
     name: build macOS
     runs-on: macos-latest
-    needs: [git_lfs_pull]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -123,6 +116,7 @@ jobs:
       env:
         # package install has DeprecationWarnings
         PYTHONWARNINGS: default
+    - run: git lfs pull
     - name: Getting scons cache
       uses: ./.github/workflows/auto-cache
       with:
@@ -163,8 +157,7 @@ jobs:
       ((github.event_name != 'pull_request') ||
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
-      || fromJSON('["ubuntu-24.04"]') }
-    needs: [git_lfs_pull]
+      || fromJSON('["ubuntu-24.04"]') }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -173,6 +166,7 @@ jobs:
       run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
+    - run: git lfs pull
     - name: Build openpilot
       run: ${{ env.RUN }} "scons -j$(nproc)"
     - name: Run unit tests
@@ -192,13 +186,14 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
-    needs: [sometest, git_lfs_pull]
+    needs: [sometest]
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
     - name: aaaa
       run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
+    - run: git lfs pull
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Cache test routes
@@ -248,7 +243,6 @@ jobs:
       fail-fast: false
       matrix:
         job: [0, 1, 2, 3]
-    needs: [git_lfs_pull]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -257,6 +251,8 @@ jobs:
       run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
+    - shell: bash
+      run: git lfs pull
     - name: Cache test routes
       id: routes-cache
       uses: actions/cache@v4
@@ -279,15 +275,17 @@ jobs:
     runs-on: ubuntu-latest
     #if: github.event_name == 'pull_request'
     if: false  # TODO: run this in opendbc?
-    needs: [git_lfs_pull]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
           ref: ${{ github.event.pull_request.base.ref }}
+      - run: git lfs pull
       - name: aaaa
         run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
       - uses: ./.github/workflows/setup-with-retry
+      - shell: bash
+        run: git lfs pull
       - name: Get base car info
         run: |
           ${{ env.RUN }} "scons -j$(nproc) && python3 selfdrive/debug/dump_car_docs.py --path /tmp/openpilot_cache/base_car_docs"
@@ -340,13 +338,14 @@ jobs:
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
     if: (github.repository == 'workinright/openpilot') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'workinright/openpilot'))
-    needs: [git_lfs_pull]
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
     - name: aaaa
       run: echo "AAA=$DOCKER_LOGIN" >> "$GITHUB_ENV"
+    - shell: bash
+      run: git lfs pull
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Build openpilot
