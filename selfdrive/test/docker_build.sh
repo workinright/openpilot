@@ -21,6 +21,11 @@ then
   echo "$AAA" > "$HOME/github_credentials"
 fi
 
+docker login ghcr.io $AAA
+echo echo
+cat $HOME/.docker/config.json
+echo echo
+
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
