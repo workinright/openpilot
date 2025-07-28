@@ -20,12 +20,12 @@ then
   echo "$AAA" > "$HOME/github_credentials"
 fi
 
+source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
+source $SCRIPT_DIR/basher
+
 echo echo
 echo docker buildx build --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
 echo echo
-
-source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
-source $SCRIPT_DIR/basher
 
 basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" || true
 echo notrebuild_flag $notrebuild_flag
