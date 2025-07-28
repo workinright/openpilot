@@ -152,9 +152,9 @@ basher_layers() {
 
         basher_layer
 
-        sudo file "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile"
-        sudo ls "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
-        echo "$(dirname "$0")/../../Dockerfile.openpilot_base"
+        #sudo file "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile"
+        #sudo ls "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
+        #echo "$(dirname "$0")/../../Dockerfile.openpilot_base"
 
         if sudo stat "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" &>/dev/null && \
             sudo diff -q "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" \
@@ -162,9 +162,8 @@ basher_layers() {
         then
             echo "the dockerfile is confirmed to not having to be rebuilt at step1"
             notrebuild_flag=1
-        else
-            echo "probably will have to be rebuilt?"
-
+        #else
+            #echo "probably will have to be rebuilt?"
         fi
 
 
