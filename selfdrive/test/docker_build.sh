@@ -15,6 +15,7 @@ else
   TAG_SUFFIX=""
 fi
 
+# TODO: credentials
 if [ ! -e "$HOME/github_credentials" ] && [ ! -z "$AAA" ]
 then
   echo "$AAA" > "$HOME/github_credentials"
@@ -25,24 +26,53 @@ source $SCRIPT_DIR/basher
 
 basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" "$REMOTE_TAG" || true
 
-echo MANIFEST "$MANIFEST"
+if [ "$notrebuild_flag" != 1 ]
+then
+  sha256_docker="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
+  if [ "$sha256_docker" != "$MANIFEST_DIGEST" ]
+  then
+    DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
+    DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+
+    DOCKER_BUILDKIT=1 docker buildx build
+      --builder mybuilder \
+      --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true \
+      --platform $PLATFORM \
+      --progress=plain \
+      -f $OPENPILOT_DIR/$DOCKER_FILE \
+      $OPENPILOT_DIR
+    
+    # TODO: here load the just-built image
+
+    if [ -n "$PUSH_IMAGE" ]
+    then
+      #basher_upload "myimage.tar" "$PLATFORM" "$REMOTE_TAG"
+
+      mkdir myimage
+      tar -xf $HOME/myimage.tar -C myimage/
+      basher_upload "myimage" "$PLATFORM" "$REMOTE_TAG"
+    else
+      echo "not pushing"
+    fi
+  fi
+fi
 
 
-sha256_10="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
+
 #echo sha256_10 $sha256_10
 
 
 
 
-flags=
-##if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
+#####flags=
+## && [ "$sha256_10" != "$sha256_11" ] && [ "$use_zstd" = 1 ]
 ##then
   #mkdir ./myimage
-  flags="--output type=image,dest=$HOME/myimage.tar,compression=uncompressed,force-recompress=true"
+  #####flags="--output type=image,dest=$HOME/myimage.tar,compression=uncompressed,force-recompress=true"
 ##fi
 
-if [ ! "$notrebuild_flag" = 1 ]
-then
+#if [ ! "$notrebuild_flag" = 1 ]
+#then
 
 #####date
 #output="$(DOCKER_BUILDKIT=1 docker buildx build --progress=plain --load --platform $PLATFORM --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t ghcr.io/workinright/openpilot-base -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR 2>&1)"
@@ -57,8 +87,8 @@ then
 #echo "$sha256_11"
 #echo shaend
 
-if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ]
-then
+#if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ]
+#then
   ##if [ "$use_zstd" = 1 ]
   #then
     # Zstandard uploading is broken in docker buildx!
@@ -66,17 +96,15 @@ then
     #wget -O - "https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz" \
     #  | pigz -d | tar xf -
 
-  DOCKER_BUILDKIT=1 docker buildx create --name mybuilder --driver docker-container --use
-  DOCKER_BUILDKIT=1 docker buildx inspect --bootstrap
+  
     
     #output2="$(
-    DOCKER_BUILDKIT=1 docker buildx build --builder mybuilder --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true --platform $PLATFORM --progress=plain -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+    
     #2>&1)"
     #echo output2 $output2
 
     #####ls
-    mkdir myimage
-    tar -xf $HOME/myimage.tar -C myimage/
+    
     ######rm $HOME/myimage.tar
 
     #####stat myimage || true
@@ -95,13 +123,13 @@ then
 
   #./oras cp --from-oci-layout ./myimage:latest ghcr.io/workinright/openpilot-base
 
-  cd myimage
+  #cd myimage
   ######ls
-  "../$(dirname "$0")/basher_upload"
+  #"../$(dirname "$0")/basher_upload"
 
   #docker push ghcr.io/workinright/openpilot-base
-fi
+#fi
 
 #docker run openpilot-base:latest bash
 
-fi
+#fi
