@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-###set -e
-#set -x
+set -e
 
 # To build sim and docs, you can run the following to mount the scons cache to the same place as in CI:
 # mkdir -p .ci_cache/scons_cache
@@ -16,27 +15,24 @@ else
   TAG_SUFFIX=""
 fi
 
-source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
-
-#sudo bash -c "source $SCRIPT_DIR/basher ; CONFIG_DIGEST="$CONFIG_DIGEST" ; TOKEN="$TOKEN" ; REPO="$REPO" ; TAG="$TAG" ; IMAGE="$IMAGE" ; OUTPUT_DIR="$OUTPUT_DIR" ; basher_layers "/var/lib/docker2" "/var/lib/docker"" || true
-source $SCRIPT_DIR/basher
-notrebuild_flag=0
-basher_layers "/var/lib/docker2" "/var/lib/docker" || true
-echo notrebuild_flag $notrebuild_flag
-
-
-sudo systemctl start docker #&
-#sudo dockerd -D -l debug --log-driver none &
-
-sha256_10="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
-#echo sha256_10 $sha256_10
-
-#echo AAA $AAA "$(cat "$HOME/github_credentials")"
 if [ ! -e "$HOME/github_credentials" ] && [ ! -z "$AAA" ]
 then
   echo "$AAA" > "$HOME/github_credentials"
 fi
-#echo AAB $AAA "$(cat "$HOME/github_credentials")"
+
+echo echo
+echo docker buildx build --provenance false --pull --platform $PLATFORM --load --cache-to type=inline --cache-from type=registry,ref=$REMOTE_TAG -t $DOCKER_IMAGE:latest -t $REMOTE_TAG -t $LOCAL_TAG -f $OPENPILOT_DIR/$DOCKER_FILE $OPENPILOT_DIR
+echo echo
+
+source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
+source $SCRIPT_DIR/basher
+
+basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" || true
+echo notrebuild_flag $notrebuild_flag
+
+sha256_10="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
+#echo sha256_10 $sha256_10
+
 
 
 
