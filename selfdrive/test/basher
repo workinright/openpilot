@@ -154,7 +154,7 @@ basher_layers() {
 
         if [ -e "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" ] && \
             diff -q "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" \
-            "$(dirname "$0"/../../Dockerfile.openpilot_base)" >/dev/null
+            "$(dirname "$0")/../../Dockerfile.openpilot_base" >/dev/null
         then
             echo "the dockerfile is confirmed to not having to be rebuilt at step1"
             notrebuild_flag=1
