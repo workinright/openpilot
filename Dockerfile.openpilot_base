@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-COPY Dockerfile.openpilot_base /
+COPY Dockerfile.openpilot_base /Dockerfile
 
 ENV PYTHONUNBUFFERED=1
 

@@ -1,6 +1,6 @@
 FROM ghcr.io/commaai/openpilot-base:latest
 
-COPY Dockerfile.openpilot /
+COPY Dockerfile.openpilot /Dockerfile
 
 ENV PYTHONUNBUFFERED=1
 
