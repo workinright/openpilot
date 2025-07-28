@@ -15,27 +15,19 @@ else
   TAG_SUFFIX=""
 fi
 
-# TODO: credentials
-if [ ! -e "$HOME/github_credentials" ] && [ ! -z "$AAA" ]
-then
-  echo "$AAA" > "$HOME/github_credentials"
-fi
-
-docker login ghcr.io $AAA
-echo echo
-cat $HOME/.docker/config.json | xxd
-echo echo
-
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
 basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" "$REMOTE_TAG" || true
 # TODO: files are already identical, but now check are also the permissions matching!
 
-if [ "$notrebuild_flag" != 1 ]
+force_rebuild=1
+force_push=1
+
+if [ "$notrebuild_flag" != 1 ] || [ "$force_rebuild" = 1 ]
 then
   sha256_docker="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
-  if [ "$sha256_docker" != "$MANIFEST_DIGEST" ]
+  if [ "$sha256_docker" != "$MANIFEST_DIGEST" ] || [ "$force_rebuild" = 1 ]
   then
     docker buildx create --name mybuilder --driver docker-container --use
     docker buildx inspect --bootstrap
@@ -51,14 +43,14 @@ then
 
     # TODO: here load the just-built image
 
-    if [ -n "$PUSH_IMAGE" ]
+    if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ]
     then
-      #basher_upload "myimage.tar" "$PLATFORM" "$REMOTE_TAG"
+      #basher_push "myimage.tar" "$REMOTE_TAG"
 
       # TODO: remove the need for this, proper argument parsing
       mkdir myimage
       tar -xf $HOME/myimage.tar -C myimage/
-      basher_upload "myimage" "$PLATFORM" "$REMOTE_TAG"
+      basher_push "myimage" "$REMOTE_TAG"
 
       rm myimage.tar
     else

@@ -227,11 +227,18 @@ basher_layer() {
 
 basher_push() {
 
-    cd myimage
+    IMAGE_FILE="$1"
+    REMOTE_TAG="$2"
 
-    REGISTRY_URL="https://ghcr.io"
-    USERNAME="workinright"
-    PASSWORD="$(cat "$HOME/github_credentials" | rev | cut -d' ' -f1 | rev)"
+    REGISTRY_PROTOCOL="https://"
+    REGISTRY_DOMAIN="$(echo -n "$REGISTER_TAG" | cut -d'/' -f1)"
+    REGISTRY_URL="$REGISTRY_PROTOCOL$REGISTRY_DOMAIN"
+
+    credentials="$(jq -r '.auths.$REGISTRY_DOMAIN.auth' $HOME/.docker/config.json | base64 -d)"
+    USERNAME="$(echo -n "$credentials" | cut -d':' -f1)"
+    PASSWORD="$(echo -n "$credentials" | cut -d':' -f2)"
+
+    cd myimage
 
     # Get the token for authentication
     TOKEN="$(curl -L -s \

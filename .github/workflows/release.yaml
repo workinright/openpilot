@@ -9,7 +9,6 @@ jobs:
     name: build master-ci
     env:
       ImageOS: ubuntu24
-      DOCKER_LOGIN: -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
     container:
       image: ghcr.io/workinright/openpilot-base:latest
     runs-on: ubuntu-latest
