@@ -1,4 +1,4 @@
-name: 'sometest'
+name: 'setup-cache'
 
 inputs:
   docker_hub_pat:

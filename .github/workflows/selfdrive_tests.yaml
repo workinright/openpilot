@@ -30,22 +30,22 @@ env:
   PYTEST: pytest --continue-on-collection-errors --durations=0 --durations-min=5 -n logical
 
 jobs:
-  sometest:
-    name: sometest1
+  setup-cache:
+    name: setup cache
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: sometest
-        uses: ./.github/workflows/sometest
+      - name: setup-cache
+        uses: ./.github/workflows/setup-cache
 
   build_release:
     name: build release
     runs-on: ubuntu-24.04
     env:
       STRIPPED_DIR: /tmp/releasepilot
-    needs: [sometest]
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -79,7 +79,7 @@ jobs:
 
   build:
     runs-on: ubuntu-24.04
-    needs: [sometest]
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -138,7 +138,7 @@ jobs:
       || fromJSON('["ubuntu-24.04"]') }}
     env:
       PYTHONWARNINGS: default
-    needs: [sometest]
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -186,7 +186,7 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
-    needs: [sometest]
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
