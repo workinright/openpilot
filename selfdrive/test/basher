@@ -91,7 +91,7 @@ basher_layers() {
         tmp_dir=$(($$+i))
 
         # TODO detect zstd/pigz/pixz
-        mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
+        sudo mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
         # TODO -D >(cat - | grep Content-Length) 
         (
             mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO1="$REPO"; sha2561="$sha256" ; new_id1="$new_id"
@@ -147,7 +147,7 @@ basher_layers() {
 
         assign_id "$newsha256"
 
-        mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id"
+        sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id"
         mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}" "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
 
         basher_layer
@@ -169,7 +169,7 @@ basher_layers() {
 
     wait $stop_docker_pid
 
-    echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json &>/dev/null
+    echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json >/dev/null
     sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR""
 }
 
@@ -199,47 +199,47 @@ basher_layer() {
         exit 3
     fi
     
-    mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
-    mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/work"
+    sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
+    sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/work"
 
-    echo -n "$new_id2" > "$ATOMIC_TARGET_DIR/overlay2/$new_id/link"
-    ln -s "../$new_id/diff" "$ATOMIC_TARGET_DIR/overlay2/l/$new_id2"
+    echo -n "$new_id2" | sudo tee "$ATOMIC_TARGET_DIR/overlay2/$new_id/link" >/dev/null
+    sudo ln -s "../$new_id/diff" "$ATOMIC_TARGET_DIR/overlay2/l/$new_id2"
 
     if [ $i = 0 ]
     then
         prev_new_ids2="l/$new_id2"
     else
-        echo -n "$prev_new_ids2" > "$ATOMIC_TARGET_DIR/overlay2/$new_id/lower"
+        echo -n "$prev_new_ids2" | sudo tee "$ATOMIC_TARGET_DIR/overlay2/$new_id/lower" >/dev/null
     
         prev_new_ids2="$prev_new_ids2:l/$new_id2"
     fi
 
     if [ "$i" = 1 ]
     then
-        touch "$ATOMIC_TARGET_DIR/overlay2/$new_id/committed"
+        sudo touch "$ATOMIC_TARGET_DIR/overlay2/$new_id/committed"
     fi
 
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
+    sudo mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
     
-    echo -n "$new_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id"
+    echo -n "$new_id" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id" >/dev/null
     
     #cat "$ATOMIC_TARGET_DIR/${orgsha256}_size" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" 2>/dev/null
     # TODO
-    echo -n "0" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
-    rm -f "$ATOMIC_TARGET_DIR/${orgsha256}_size"
+    echo -n "0" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" >/dev/null
+    sudo rm -f "$ATOMIC_TARGET_DIR/${orgsha256}_size"
 
-    echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
+    echo -n "sha256:$sha256" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff" >/dev/null
 
     if [ "$i" != 0 ]
     then
-        echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff"
-        echo -n "sha256:$prev_chain_id" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/parent"
+        echo -n "sha256:$sha256" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff" >/dev/null
+        echo -n "sha256:$prev_chain_id" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/parent" >/dev/null
     fi
 
     echo -n "[{\"Digest\":\"sha256:$sha256\",\"SourceRepository\":\"ghcr.io/workinright/openpilot-base\",\"HMAC\":\"\"}]" \
-        > "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256/$sha256"
+        | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256/$sha256" >/dev/null
     
-    echo -n "sha256:$sha256" > "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256/$sha256"
+    echo -n "sha256:$sha256" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256/$sha256" >/dev/null
     
     prev_sha256="$sha256"
     prev_chain_id="$chain_id"
