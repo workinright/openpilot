@@ -43,7 +43,7 @@ jobs:
   git_lfs_pull:
     name: git_lfs_pull1
     runs-on: ubuntu-24.04
-    needs: [git_lfs_pull]
+    needs: [build_release]
     steps:
     - uses: actions/checkout@v4
       with:
