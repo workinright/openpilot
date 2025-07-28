@@ -64,7 +64,7 @@ then
 #echo shaend
 
 if [ -n "$PUSH_IMAGE" ] && [ "$sha256_10" != "$sha256_11" ]
-##then
+then
   ##if [ "$use_zstd" = 1 ]
   #then
     # Zstandard uploading is broken in docker buildx!
