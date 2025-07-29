@@ -242,7 +242,7 @@ basher_push() {
     REPO_IMAGE="$(echo -n "$REGISTRY_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
     REGISTRY_URL="$REGISTRY_PROTOCOL$REGISTRY_HOSTNAME"
 
-    credentials="$(jq -r '.auths.$REGISTRY_HOSTNAME.auth' $HOME/.docker/config.json | base64 -d)"
+    credentials="$(jq -r ".auths.$REGISTRY_HOSTNAME.auth" $HOME/.docker/config.json | base64 -d)"
     USERNAME="$(echo -n "$credentials" | cut -d':' -f1)"
     PASSWORD="$(echo -n "$credentials" | cut -d':' -f2)"
 
