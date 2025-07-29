@@ -33,19 +33,19 @@ basher_pull() {
     stop_docker_pid=$!
 
     echo "Requesting Bearer token from the registry..."
-    TOKEN="$(curl -L -s "$REGISTRY_URL/token?scope=repository:$repo:pull" | jq -r .token)"
+    TOKEN="$(curl -L -s "$REGISTRY_URL/token?scope=repository:$REPO:pull" | jq -r .token)"
 
-    echo "Fetching manifest for $repo:$TAG"
+    echo "Fetching manifest for $REPO:$TAG"
     MANIFEST="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
         -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
-        "$REGISTRY_URL/v2/$repo/manifests/$TAG")"
+        "$REGISTRY_URL/v2/$REPO/manifests/$TAG")"
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
     echo "Manifest digest: sha256:$MANIFEST_DIGEST"
 
     CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
     echo "Downloading config blob: sha256:$CONFIG_DIGEST"
     CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
-        "$REGISTRY_URL/v2/$repo/blobs/sha256:$CONFIG_DIGEST")"
+        "$REGISTRY_URL/v2/$REPO/blobs/sha256:$CONFIG_DIGEST")"
 
     wait $pid0
     echo "Downloading layer blobs..."
