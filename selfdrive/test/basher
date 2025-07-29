@@ -235,10 +235,10 @@ basher_layer() {
 basher_push() {
 
     IMAGE_FILE="$1"
-    REGISTER_TAG="$2"
+    REGISTER_NAME_TAG="$2"
 
     REGISTER_PROTOCOL="https://"
-    REGISTER_HOSTNAME="$(echo -n "$REGISTER_TAG" | cut -d'/' -f1)"
+    REGISTER_HOSTNAME="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f1)"
     REPO="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2)"
     REPO_IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
     REGISTER_URL="$REGISTER_PROTOCOL$REGISTER_HOSTNAME"
