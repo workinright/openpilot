@@ -9,16 +9,16 @@ basher_pull() {
     TARGET_DIR="$1"
     ATOMIC_TARGET_DIR="$2"
     _PLATFORM="$3"
-    REGISTRY_NAME_TAG="$4"
+    REGISTER_NAME_TAG="$4"
 
-    REGISTRY_HOSTNAME="$(echo -n "$REGISTRY_NAME_TAG" | cut -d'/' -f1 | cut -d':' -f1)"
-    REPO_IMAGE="$(echo -n "$REGISTRY_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
-    TAG="$(echo -n "$REGISTRY_NAME_TAG" | rev | cut -d':' -f1 | rev)"
+    REGISTER_HOSTNAME="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f1 | cut -d':' -f1)"
+    REPO_IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
+    TAG="$(echo -n "$REGISTER_NAME_TAG" | rev | cut -d':' -f1 | rev)"
 
-    REGISTRY_PROTOCOL="https://"
-    REGISTRY_URL="$REGISTRY_PROTOCOL$REGISTRY_HOSTNAME"
+    REGISTER_PROTOCOL="https://"
+    REGISTER_URL="$REGISTER_PROTOCOL$REGISTER_HOSTNAME"
 
-    echo TARGET_DIR "$TARGET_DIR" ATOMIC_TARGET_DIR "$ATOMIC_TARGET_DIR" _PLATFORM "$_PLATFORM" REGISTRY_NAME_TAG "$REGISTRY_NAME_TAG" REPO_IMAGE "$REPO_IMAGE" TAG "$TAG" REGISTRY_PROTOCOL "$REGISTRY_PROTOCOL" REGISTRY_URL "$REGISTRY_URL"
+    echo TARGET_DIR "$TARGET_DIR" ATOMIC_TARGET_DIR "$ATOMIC_TARGET_DIR" _PLATFORM "$_PLATFORM" REGISTER_NAME_TAG "$REGISTER_NAME_TAG" REPO_IMAGE "$REPO_IMAGE" TAG "$TAG" REGISTER_PROTOCOL "$REGISTER_PROTOCOL" REGISTER_URL "$REGISTER_URL"
 
     sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
@@ -33,19 +33,19 @@ basher_pull() {
     stop_docker_pid=$!
 
     echo "Requesting Bearer token from the registry..."
-    TOKEN="$(curl -L -s "$REGISTRY_URL/token?scope=repository:$REPO_IMAGE:pull" | jq -r .token)"
+    TOKEN="$(curl -L -s "$REGISTER_URL/token?scope=repository:$REPO_IMAGE:pull" | jq -r .token)"
 
     echo "Fetching manifest for $REPO_IMAGE:$TAG"
     MANIFEST="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
         -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
-        "$REGISTRY_URL/v2/$REPO_IMAGE/manifests/$TAG")"
+        "$REGISTER_URL/v2/$REPO_IMAGE/manifests/$TAG")"
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
     echo "Manifest digest: sha256:$MANIFEST_DIGEST"
 
     CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
     echo "Downloading config blob: sha256:$CONFIG_DIGEST"
     CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
-        "$REGISTRY_URL/v2/$REPO_IMAGE/blobs/sha256:$CONFIG_DIGEST")"
+        "$REGISTER_URL/v2/$REPO_IMAGE/blobs/sha256:$CONFIG_DIGEST")"
 
     wait $pid0
     echo "Downloading layer blobs..."
@@ -92,7 +92,7 @@ basher_pull() {
 
             #mkfifo "$ATOMIC_TARGET_DIR/$sha2561" ;
             sha256="$(mediaType2="$mediaType1" ; curl -s -L -H "Authorization: Bearer $TOKEN1" \
-                "$REGISTRY_URL/v2/$REPO_IMAGE1/blobs/sha256:$sha2561" | \
+                "$REGISTER_URL/v2/$REPO_IMAGE1/blobs/sha256:$sha2561" | \
                     #{ head -c 2 | grep -a -q -P '^1f8b' && echo pigz >/dev/stderr ; pigz -d || echo none > /dev/stderr ; cat -; } \
                     { \
                     #( consume=$(awk 'BEGIN{RS="";ORS="\n\n"} {print; exit}' "$ATOMIC_TARGET_DIR/$sha2561");
@@ -237,13 +237,13 @@ basher_push() {
     IMAGE_FILE="$1"
     REGISTER_TAG="$2"
 
-    REGISTRY_PROTOCOL="https://"
-    REGISTRY_HOSTNAME="$(echo -n "$REGISTER_TAG" | cut -d'/' -f1)"
-    REPO="$(echo -n "$REGISTRY_NAME_TAG" | cut -d'/' -f2)"
-    REPO_IMAGE="$(echo -n "$REGISTRY_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
-    REGISTRY_URL="$REGISTRY_PROTOCOL$REGISTRY_HOSTNAME"
+    REGISTER_PROTOCOL="https://"
+    REGISTER_HOSTNAME="$(echo -n "$REGISTER_TAG" | cut -d'/' -f1)"
+    REPO="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2)"
+    REPO_IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
+    REGISTER_URL="$REGISTER_PROTOCOL$REGISTER_HOSTNAME"
 
-    credentials="$(jq -r ".auths.$REGISTRY_HOSTNAME.auth" $HOME/.docker/config.json | base64 -d)"
+    credentials="$(jq -r ".auths.$REGISTER_HOSTNAME.auth" $HOME/.docker/config.json | base64 -d)"
     USERNAME="$(echo -n "$credentials" | cut -d':' -f1)"
     PASSWORD="$(echo -n "$credentials" | cut -d':' -f2)"
 
@@ -252,7 +252,7 @@ basher_push() {
     # Get the token for authentication
     TOKEN="$(curl -L -s \
         -u "${USERNAME}:${PASSWORD}" \
-        "$REGISTRY_URL/token?scope=repository:$REPO:push" | jq -r .token)"
+        "$REGISTER_URL/token?scope=repository:$REPO:push" | jq -r .token)"
     echo TOKEN $TOKEN
 
     OCI_IMAGE_DIR="."
@@ -282,26 +282,26 @@ basher_push() {
             #-H "Authorization: Bearer $TOKEN" \
             #-H "Content-Type: $mediaType" \
             #-H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
-            #--data-binary @blobs/sha256/$sha256 "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/"
+            #--data-binary @blobs/sha256/$sha256 "$REGISTER_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/"
             
             location="$(curl -s -D /proc/self/fd/1 -X POST \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
             -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
-            "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
+            "$REGISTER_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
 
             echo LOCATION $location
 
-            echo abcd $location ${REGISTRY_URL} ?digest=sha256%3A ${sha256}
+            echo abcd $location ${REGISTER_URL} ?digest=sha256%3A ${sha256}
 
             curl -X PUT \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
             -H "Content-Length: $(stat --format=%s blobs/sha256/$sha256)" \
-            --data-binary @blobs/sha256/$sha256 "$REGISTRY_URL$location?digest=sha256:$sha256"
+            --data-binary @blobs/sha256/$sha256 "$REGISTER_URL$location?digest=sha256:$sha256"
 
 
-            echo "${REGISTRY_URL}${location}?digest=sha256%3A$sha256"
+            echo "${REGISTER_URL}${location}?digest=sha256%3A$sha256"
 
             ((++i))
         done <<< "$layers"
@@ -314,17 +314,17 @@ basher_push() {
         -H "Authorization: Bearer $TOKEN" \
         -H "Content-Type: application/octet-stream" \
         -H "Content-Length: $(stat --format=%s blobs/sha256/$config_digest)" \
-            "$REGISTRY_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
+            "$REGISTER_URL/v2/${USERNAME}/openpilot-base/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
 
         echo LOCATION $location
 
-        echo abcd $location ${REGISTRY_URL} ?digest=sha256%3A ${sha256}
+        echo abcd $location ${REGISTER_URL} ?digest=sha256%3A ${sha256}
 
         curl -X PUT \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
             -H "Content-Length: $(stat --format=%s blobs/sha256/$config_digest)" \
-            --data-binary @blobs/sha256/$config_digest "$REGISTRY_URL$location?digest=sha256:$config_digest"
+            --data-binary @blobs/sha256/$config_digest "$REGISTER_URL$location?digest=sha256:$config_digest"
 
     IMAGE_NAME="workinright/openpilot-base"
     IMAGE_TAG="latest"
@@ -335,7 +335,7 @@ basher_push() {
         -H "Authorization: Bearer $TOKEN" \
         -H "Content-Type: application/vnd.docker.distribution.manifest.v2+json" \
         --data-binary @blobs/sha256/$manifest_sha256 \
-        "$REGISTRY_URL/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"
+        "$REGISTER_URL/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"
 
     echo "Pushed manifest for image ${IMAGE_NAME}:${IMAGE_TAG}"
 
