@@ -239,6 +239,7 @@ basher_push() {
 
     REGISTRY_PROTOCOL="https://"
     REGISTRY_HOSTNAME="$(echo -n "$REGISTER_TAG" | cut -d'/' -f1)"
+    REPO="$(echo -n "$REGISTRY_NAME_TAG" | cut -d'/' -f2)"
     REPO_IMAGE="$(echo -n "$REGISTRY_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
     REGISTRY_URL="$REGISTRY_PROTOCOL$REGISTRY_HOSTNAME"
 
@@ -251,7 +252,7 @@ basher_push() {
     # Get the token for authentication
     TOKEN="$(curl -L -s \
         -u "${USERNAME}:${PASSWORD}" \
-        "$REGISTRY_URL/token?scope=repository:$REPO_IMAGE:push" | jq -r .token)"
+        "$REGISTRY_URL/token?scope=repository:$REPO:push" | jq -r .token)"
     echo TOKEN $TOKEN
 
     OCI_IMAGE_DIR="."
