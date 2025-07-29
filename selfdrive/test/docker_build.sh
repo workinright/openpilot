@@ -33,7 +33,7 @@ then
     docker buildx inspect --bootstrap
 
     # Zstandard uploading is broken in docker buildx! Therefore we build it this way, and use our hooks for the upload.
-    docker buildx build
+    docker buildx build \
       --builder mybuilder \
       --platform $PLATFORM \
       --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true \
