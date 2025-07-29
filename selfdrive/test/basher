@@ -245,7 +245,9 @@ basher_push() {
 
     echo IMAGE_FILE "$IMAGE_FILE" REGISTER_NAME_TAG "$REGISTER_NAME_TAG" REGISTER_PROTOCOL "$REGISTER_PROTOCOL" REGISTER_HOSTNAME "$REGISTER_HOSTNAME" REPO "$REPO" REPO_IMAGE "$REPO_IMAGE" REGISTER_URL "$REGISTER_URL"
 
-    credentials="$(jq -r ".auths.$REGISTER_HOSTNAME.auth" $HOME/.docker/config.json | base64 -d)"
+    cat "$HOME/.docker/config.json"
+
+    credentials="$(jq -r ".auths.$REGISTER_HOSTNAME.auth"" $HOME/.docker/config.json| | base64 -d)"
     USERNAME="$(echo -n "$credentials" | cut -d':' -f1)"
     PASSWORD="$(echo -n "$credentials" | cut -d':' -f2)"
 
