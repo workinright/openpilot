@@ -247,7 +247,7 @@ basher_push() {
 
     cat "$HOME/.docker/config.json"
 
-    credentials="$(jq -r ".auths.$REGISTER_HOSTNAME.auth" "$HOME/.docker/config.json" | base64 -d)"
+    credentials="$(jq -r ".auths.\"$REGISTER_HOSTNAME\".auth" "$HOME/.docker/config.json" | base64 -d)"
     USERNAME="$(echo -n "$credentials" | cut -d':' -f1)"
     PASSWORD="$(echo -n "$credentials" | cut -d':' -f2)"
 
