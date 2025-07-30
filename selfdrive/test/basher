@@ -157,7 +157,6 @@ basher_pull() {
 
         sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id"
         sudo mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}" "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
-        sudo mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}_size" "$ATOMIC_TARGET_DIR/overlay2/$new_id/size"
 
         basher_layer
 
@@ -225,6 +224,8 @@ basher_layer() {
     sudo mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
     
     echo -n "$new_id" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id" >/dev/null
+
+    sudo mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}_size" "$ATOMIC_TARGET_DIR/overlay2/$new_id/size"
 
     echo size is
     sudo cat "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
