@@ -43,7 +43,7 @@ basher_pull() {
 
         CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
 
-        CONFIG="$(tar -xOf "$FILE" "blobs/sha256:$CONFIG_DIGEST")"
+        CONFIG="$(tar -xOf "$FILE" "blobs/sha256/$CONFIG_DIGEST")"
     else
         REGISTER_PROTOCOL="://"
         REGISTER_URL="$PROTOCOL://$REGISTER_HOSTNAME"
