@@ -9,16 +9,13 @@ basher_pull() {
     TARGET_DIR="$1"
     ATOMIC_TARGET_DIR="$2"
     _PLATFORM="$3"
-    REGISTER_NAME_TAG="$4"
+    PROTOCOL="$4"
+    REGISTER_NAME_TAG="$5"
+    FILE="$6"
 
     REGISTER_HOSTNAME="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f1 | cut -d':' -f1)"
     REPO_IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
     TAG="$(echo -n "$REGISTER_NAME_TAG" | rev | cut -d':' -f1 | rev)"
-
-    REGISTER_PROTOCOL="https://"
-    REGISTER_URL="$REGISTER_PROTOCOL$REGISTER_HOSTNAME"
-
-    echo TARGET_DIR "$TARGET_DIR" ATOMIC_TARGET_DIR "$ATOMIC_TARGET_DIR" _PLATFORM "$_PLATFORM" REGISTER_NAME_TAG "$REGISTER_NAME_TAG" REPO_IMAGE "$REPO_IMAGE" TAG "$TAG" REGISTER_PROTOCOL "$REGISTER_PROTOCOL" REGISTER_URL "$REGISTER_URL"
 
     sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
@@ -32,20 +29,39 @@ basher_pull() {
     sudo bash -c "TARGET_DIR="$TARGET_DIR" ; systemctl stop docker >/dev/null 2>&1; rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR"" &
     stop_docker_pid=$!
 
-    echo "Requesting Bearer token from the registry..."
-    TOKEN="$(curl -L -s "$REGISTER_URL/token?scope=repository:$REPO_IMAGE:pull" | jq -r .token)"
+    if [ "$PROTOCOL" = "file" ]
+    then
+        MANIFEST="$(tar -xOf "$FILE" manifest.json)"
 
-    echo "Fetching manifest for $REPO_IMAGE:$TAG"
-    MANIFEST="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
-        -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
-        "$REGISTER_URL/v2/$REPO_IMAGE/manifests/$TAG")"
-    MANIFEST_DIGEST="$(echo -n "$MANIFEST" | sha256sum - | cut -d ' ' -f1)"
-    echo "Manifest digest: sha256:$MANIFEST_DIGEST"
+        CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
 
-    CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
-    echo "Downloading config blob: sha256:$CONFIG_DIGEST"
-    CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
-        "$REGISTER_URL/v2/$REPO_IMAGE/blobs/sha256:$CONFIG_DIGEST")"
+        CONFIG="$(tar -xOf "$FILE" "blobs/sha256:$CONFIG_DIGEST")"
+    else
+        REGISTER_PROTOCOL="://"
+        REGISTER_URL="$PROTOCOL://$REGISTER_HOSTNAME"
+
+        echo "Requesting Bearer token from the registry..."
+        TOKEN="$(curl -L -s "$REGISTER_URL/token?scope=repository:$REPO_IMAGE:pull" | jq -r .token)"
+
+        MANIFEST="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
+            "$REGISTER_URL/v2/$REPO_IMAGE/manifests/$TAG")"
+
+        CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
+
+        CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" $FETCH_CONFIG "$REGISTER_URL/v2/$REPO_IMAGE/blobs/sha256:$CONFIG_DIGEST")"
+    fi
+
+    fetch_layer() {
+        layer_hash="$1"
+
+        if [ "$PROTOCOL" = "file" ]
+        then
+            tar -xOf "$FILE" "$layer_hash"
+        else
+            curl -s -L -H "Authorization: Bearer $TOKEN" "$layer_hash"
+        fi
+    }
 
     wait $pid0
     echo "Downloading layer blobs..."
@@ -91,8 +107,7 @@ basher_pull() {
             mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO_IMAGE1="$REPO_IMAGE"; sha2561="$sha256" ; new_id1="$new_id"
 
             #mkfifo "$ATOMIC_TARGET_DIR/$sha2561" ;
-            sha256="$(mediaType2="$mediaType1" ; curl -s -L -H "Authorization: Bearer $TOKEN1" \
-                "$REGISTER_URL/v2/$REPO_IMAGE1/blobs/sha256:$sha2561" | \
+            sha256="$(mediaType2="$mediaType1" ; fetch_layer "$REGISTER_URL/v2/$REPO_IMAGE1/blobs/sha256:$sha2561" | \
                     #{ head -c 2 | grep -a -q -P '^1f8b' && echo pigz >/dev/stderr ; pigz -d || echo none > /dev/stderr ; cat -; } \
                     { \
                     #( consume=$(awk 'BEGIN{RS="";ORS="\n\n"} {print; exit}' "$ATOMIC_TARGET_DIR/$sha2561");
