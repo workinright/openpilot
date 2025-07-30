@@ -225,8 +225,12 @@ basher_layer() {
     
     echo -n "$new_id" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id" >/dev/null
 
-    cat "$ATOMIC_TARGET_DIR/${orgsha256}_size" > "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" 2>/dev/null \
-        || echo -n "0" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" >/dev/null
+    if [ -r "$ATOMIC_TARGET_DIR/${orgsha256}_size" ]
+    then
+        cat "$ATOMIC_TARGET_DIR/${orgsha256}_size" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" 2>/dev/null
+    else
+        echo -n "0" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" >/dev/null
+    fi
     sudo rm -f "$ATOMIC_TARGET_DIR/${orgsha256}_size"
 
     echo size is
