@@ -32,11 +32,13 @@ then
     docker buildx create --name mybuilder --driver docker-container --use
     docker buildx inspect --bootstrap
 
+    IMAGE_PATH="$HOME/myimage.tar"
+
     # Zstandard uploading is broken in docker buildx! Therefore we build it this way, and use our hooks for the upload.
     docker buildx build \
       --builder mybuilder \
       --platform $PLATFORM \
-      --output type=docker,dest=$HOME/myimage.tar,compression=zstd,force-recompress=true \
+      --output type=docker,dest="$IMAGE_PATH",compression=zstd,force-recompress=true \
       --progress=plain \
       -f $OPENPILOT_DIR/$DOCKER_FILE \
       $OPENPILOT_DIR
@@ -45,8 +47,8 @@ then
 
     if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ]
     then
-      basher_push "myimage.tar" "$REMOTE_TAG"
-      rm $HOME/myimage.tar
+      basher_push "$IMAGE_PATH" "$REMOTE_TAG"
+      rm "$IMAGE_PATH"
     else
       echo "not pushing"
     fi
