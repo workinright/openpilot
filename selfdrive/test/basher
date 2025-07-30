@@ -65,9 +65,9 @@ basher_pull() {
 
         if [ "$PROTOCOL" = "file" ]
         then
-            tar -xOf "$FILE" "$layer_hash"
+            tar -xOf "$FILE" "blobs/sha256/$layer_hash"
         else
-            curl -s -L -H "Authorization: Bearer $TOKEN" "$layer_hash"
+            curl -s -L -H "Authorization: Bearer $TOKEN" "$REGISTER_URL/v2/$REPO_IMAGE1/blobs/sha256:$layer_hash"
         fi
     }
 
@@ -115,7 +115,7 @@ basher_pull() {
             mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO_IMAGE1="$REPO_IMAGE"; sha2561="$sha256" ; new_id1="$new_id"
 
             #mkfifo "$ATOMIC_TARGET_DIR/$sha2561" ;
-            sha256="$(mediaType2="$mediaType1" ; fetch_layer "$REGISTER_URL/v2/$REPO_IMAGE1/blobs/sha256:$sha2561" | \
+            sha256="$(mediaType2="$mediaType1" ; fetch_layer "$sha2561" | \
                     #{ head -c 2 | grep -a -q -P '^1f8b' && echo pigz >/dev/stderr ; pigz -d || echo none > /dev/stderr ; cat -; } \
                     { \
                     #( consume=$(awk 'BEGIN{RS="";ORS="\n\n"} {print; exit}' "$ATOMIC_TARGET_DIR/$sha2561");
