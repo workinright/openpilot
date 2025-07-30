@@ -45,13 +45,7 @@ then
 
     if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ]
     then
-      #basher_push "myimage.tar" "$REMOTE_TAG"
-
-      # TODO: remove the need for this, proper argument parsing
-      ###mkdir myimage
-      ###tar -xf $HOME/myimage.tar -C myimage/
-      basher_push "myimage" "$REMOTE_TAG"
-
+      basher_push "myimage.tar" "$REMOTE_TAG"
       rm $HOME/myimage.tar
     else
       echo "not pushing"
