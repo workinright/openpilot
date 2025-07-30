@@ -101,7 +101,7 @@ basher_pull() {
             buffer_size="32M"
             sha2561="$sha256"
             mediaType1="$mediaType"
-            sha256="$(fetch_layer "$sha2561" | \
+            sha256="$(mediaType1="$mediaType1"; fetch_layer "$sha2561" | \
             {
                 if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                 then
