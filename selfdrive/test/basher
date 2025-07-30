@@ -103,19 +103,19 @@ basher_pull() {
             mediaType1="$mediaType"
             sha256="$(fetch_layer "$sha2561" | \
             { \
-                if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
-                then
-                    f2b="$(head -c 2 | xxd -p)"
+                if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ] \
+                then \
+                    f2b="$(head -c 2 | xxd -p)" \
                     echo -n "$f2b" | grep -q '^1f8b' && \
                         cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d \
                     || \
-                        cat <(echo -n "$f2b" | xxd -r -p) -
-                elif [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
-                then
-                    zstd -d
-                else
-                    cat -
-                fi
+                        cat <(echo -n "$f2b" | xxd -r -p) - \
+                elif [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]\
+                then \
+                    zstd -d \
+                else \
+                    cat - \
+                fi \
             } | dd bs=$buffer_size 2>/dev/null | \
                 tee >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) \
                     >(dd bs=$buffer_size 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | \
