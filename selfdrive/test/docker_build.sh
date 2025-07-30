@@ -18,12 +18,15 @@ fi
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
-basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest"
-basher_exit_code=$?
-# TODO: files are already identical, but now check are also the permissions matching!
-
 force_rebuild=1
 force_push=1
+
+if [ "$force_rebuild" != 1 ]
+then
+  basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest"
+  # TODO: files are already identical, but now check are also the permissions matching!
+  basher_exit_code=$?
+fi
 
 if [ "$notrebuild_flag" != 1 ] || [ "$force_rebuild" = 1 ] || [ $basher_exit_code != 0 ]
 then
