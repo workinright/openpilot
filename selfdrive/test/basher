@@ -125,10 +125,10 @@ basher_pull() {
                     #echo -n "$content_length" > "$ATOMIC_TARGET_DIR/${sha2561}_size" ) &
 \
                     # TODO check thread flow here
-                    if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                    if [ "$PROTOCOL" != "file" ] && [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                     then
                         f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
-                    elif [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
+                    elif [ "$PROTOCOL" != "file" ] && [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
                     then
                         zstd -d
                     else
