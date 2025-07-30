@@ -103,10 +103,10 @@ basher_pull() {
             mediaType1="$mediaType"
             sha256="$(mediaType2="$mediaType1" ; fetch_layer "$sha2561" | \
                     { \
-                    if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                    if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                     then
                         f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
-                    elif [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
+                    elif [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
                     then
                         zstd -d
                     else
