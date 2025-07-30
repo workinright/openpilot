@@ -157,7 +157,7 @@ basher_pull() {
 
         sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id"
         sudo mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}" "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
-        sudo mv "${orgsha256}_${newsha256}_size" "$ATOMIC_TARGET_DIR/overlay2/$new_id/size"
+        sudo mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}_size" "$ATOMIC_TARGET_DIR/overlay2/$new_id/size"
 
         basher_layer
 
