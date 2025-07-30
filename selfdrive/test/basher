@@ -5,6 +5,13 @@ assign_id(){
 }
 
 basher_pull() {
+    
+    sete=0
+    if [[ "$-" == *e* ]]
+    then
+        sete=1
+        set +e
+    fi
 
     TARGET_DIR="$1"
     ATOMIC_TARGET_DIR="$2"
@@ -31,7 +38,8 @@ basher_pull() {
 
     if [ "$PROTOCOL" = "file" ]
     then
-        MANIFEST="$(tar -xOf "$FILE" manifest.json)"
+        manifest_sha256="$(tar -xOf "$FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
+        MANIFEST="$(tar -xOf "$FILE" "blobs/sha256/$manifest_sha256")"
 
         CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
 
@@ -175,6 +183,11 @@ basher_pull() {
 
     echo -n "{\"Repositories\":{\"openpilot-base\":{\"openpilot-base:latest\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json >/dev/null
     sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" ; systemctl start docker"
+
+    if [ $sete = 1 ]
+    then
+        set -e
+    fi
 }
 
 basher_layer() {
@@ -283,7 +296,6 @@ basher_push() {
 
         # TODO manifest - one for platform, on both upload and download
         manifest_sha256="$(tar -xOf "$IMAGE_FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
-
         MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256")"
         layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
 
