@@ -101,7 +101,7 @@ basher_pull() {
             buffer_size="32M"
             sha2561="$sha256"
             mediaType1="$mediaType"
-            sha256="$(fetch_layer "$sha2561" |
+            sha256="$(fetch_layer "$sha2561" | \
             {
                 if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                 then
@@ -116,7 +116,7 @@ basher_pull() {
                 else
                     cat -
                 fi
-            } | dd bs=$buffer_size 2>/dev/null |
+            } | dd bs=$buffer_size 2>/dev/null | \
                 tee >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) \
                     >(dd bs=$buffer_size 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") |
                     dd bs=$buffer_size 2>/dev/null | sha256sum - | cut -d' ' -f1
