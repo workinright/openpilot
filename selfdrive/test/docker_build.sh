@@ -48,11 +48,11 @@ then
       #basher_push "myimage.tar" "$REMOTE_TAG"
 
       # TODO: remove the need for this, proper argument parsing
-      mkdir myimage
-      tar -xf $HOME/myimage.tar -C myimage/
+      ###mkdir myimage
+      ###tar -xf $HOME/myimage.tar -C myimage/
       basher_push "myimage" "$REMOTE_TAG"
 
-      #rm myimage.tar
+      rm $HOME/myimage.tar
     else
       echo "not pushing"
     fi

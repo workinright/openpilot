@@ -270,14 +270,15 @@ basher_push() {
         
 
         # TODO manifest - one for platform, on both upload and download
-        manifest_sha256="$(tar -xOf "$HOME/myimage.tar" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
+        manifest_sha256="$(tar -xOf "$IMAGE_FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
 
-        MANIFEST="$(tar -xOf "$HOME/myimage.tar" "blobs/sha256/$manifest_sha256")"
+        MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256")"
         layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
 
         config_mediaType="$(echo -n "$MANIFEST" | jq -r '.config.mediaType' "blobs/sha256/$manifest_sha256")"
         config_digest="$(echo -n "$MANIFEST" | jq -r '.config.digest' "blobs/sha256/$manifest_sha256" | cut -d':' -f2)"
 
+        declare -a pids
         i=0
         while read layer
         do
@@ -299,10 +300,12 @@ basher_push() {
 
             echo abcd $location ${REGISTER_URL} ?digest=sha256%3A ${sha256}
 
-            tar -xOf "$HOME/myimage.tar" "blobs/sha256/$sha256" | curl -X PUT \
+            tar -xOf "$IMAGE_FILE" "blobs/sha256/$sha256" | curl -X PUT \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @- "$REGISTER_URL$location?digest=sha256:$sha256"
+            --data-binary @- "$REGISTER_URL$location?digest=sha256:$sha256" &
+            pids+=($!)
+
 
 
             echo "${REGISTER_URL}${location}?digest=sha256%3A$sha256"
@@ -310,8 +313,11 @@ basher_push() {
             ((++i))
         done <<< "$layers"
 
-
-        echo "Uploaded layer: $LAYER"
+        for pid in ${pids[@]}
+        do
+            wait $pid
+        done
+        #echo "Uploaded layer: $LAYER"
     #done
 
     location="$(curl -s -D /proc/self/fd/1 -X POST \
@@ -323,7 +329,7 @@ basher_push() {
 
         echo abcd $location ${REGISTER_URL} ?digest=sha256%3A ${sha256}
 
-        tar -xOf "$HOME/myimage.tar" "blobs/sha256/$config_digest" | curl -X PUT \
+        tar -xOf "$IMAGE_FILE" "blobs/sha256/$config_digest" | curl -X PUT \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
             --data-binary @- "$REGISTER_URL$location?digest=sha256:$config_digest"
@@ -333,7 +339,7 @@ basher_push() {
 
     echo "$MANIFEST"
 
-    tar -xOf "$HOME/myimage.tar" "blobs/sha256/$manifest_sha256" | curl -X PUT \
+    tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256" | curl -X PUT \
         -H "Authorization: Bearer $TOKEN" \
         -H "Content-Type: application/vnd.docker.distribution.manifest.v2+json" \
         --data-binary @- \
