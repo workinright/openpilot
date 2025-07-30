@@ -278,8 +278,8 @@ basher_push() {
         MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256")"
         layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
 
-        config_mediaType="$(echo -n "$MANIFEST" | jq -r '.config.mediaType' "blobs/sha256/$manifest_sha256")"
-        config_digest="$(echo -n "$MANIFEST" | jq -r '.config.digest' "blobs/sha256/$manifest_sha256" | cut -d':' -f2)"
+        config_mediaType="$(echo -n "$MANIFEST" | jq -r '.config.mediaType')"
+        config_digest="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
 
         declare -a pids
         i=0
