@@ -98,7 +98,7 @@ basher_pull() {
         #    decompressor=
         #fi
 
-        tmp_dir=$(($$+i))
+        tmp_dir=$$_$i
 
         # TODO detect zstd/pigz/pixz
         sudo mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
@@ -129,7 +129,7 @@ basher_pull() {
                     } \
                     \
  \
-                 | dd bs=32M 2>/dev/null | tee >(dd bs=32M 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | dd bs=32M 2>/dev/null | sha256sum - | cut -d' ' -f1 )" ; sudo mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256") &
+                 | dd bs=32M 2>/dev/null | tee >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) >(dd bs=32M 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | dd bs=32M 2>/dev/null | sha256sum - | cut -d' ' -f1 )" ; sudo mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256" ; sudo mv "$ATOMIC_TARGET_DIR/${tmp_dir}_size" "$ATOMIC_TARGET_DIR/${sha2561}_${sha256}_size") &
         pids+=($!)
 
         tmp_dirs+=($var)
@@ -157,6 +157,7 @@ basher_pull() {
 
         sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id"
         sudo mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}" "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
+        sudo mv "${orgsha256}_${newsha256}_size" "$ATOMIC_TARGET_DIR/overlay2/$new_id/size"
 
         basher_layer
 
@@ -224,14 +225,6 @@ basher_layer() {
     sudo mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
     
     echo -n "$new_id" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id" >/dev/null
-
-    if sudo stat "$ATOMIC_TARGET_DIR/${orgsha256}_size" &>/dev/null
-    then
-        sudo cat "$ATOMIC_TARGET_DIR/${orgsha256}_size" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" 2>/dev/null
-    else
-        echo -n "0" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size" >/dev/null
-    fi
-    sudo rm -f "$ATOMIC_TARGET_DIR/${orgsha256}_size"
 
     echo size is
     sudo cat "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
