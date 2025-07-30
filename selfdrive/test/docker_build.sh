@@ -21,8 +21,8 @@ source $SCRIPT_DIR/basher
 basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" "$REMOTE_TAG:latest" || true
 # TODO: files are already identical, but now check are also the permissions matching!
 
-#force_rebuild=1
-#force_push=1
+force_rebuild=1
+force_push=1
 
 if [ "$notrebuild_flag" != 1 ] || [ "$force_rebuild" = 1 ]
 then
