@@ -251,7 +251,7 @@ basher_push() {
 
     echo credentials "$credentials" USERNAME "$USERNAME" PASSWORD "$PASSWORD"
 
-    #cd myimage
+    cd myimage
 
     # Get the token for authentication
     TOKEN="$(curl -L -s \
@@ -270,9 +270,9 @@ basher_push() {
         
 
         # TODO manifest - one for platform, on both upload and download
-        manifest_sha256="$(tar -xOf ../myimage.tar index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
+        manifest_sha256="$(tar -xOf $HOME/myimage.tar index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
 
-        MANIFEST="$(tar -xOf ../myimage.tar "blobs/sha256/$manifest_sha256")"
+        MANIFEST="$(tar -xOf $HOME/myimage.tar "blobs/sha256/$manifest_sha256")"
         layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
 
         config_mediaType="$(echo -n "$MANIFEST" | jq -r '.config.mediaType' "blobs/sha256/$manifest_sha256")"
