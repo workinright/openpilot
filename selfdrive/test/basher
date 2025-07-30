@@ -251,7 +251,7 @@ basher_push() {
 
     echo credentials "$credentials" USERNAME "$USERNAME" PASSWORD "$PASSWORD"
 
-    cd myimage
+    #cd myimage
 
     # Get the token for authentication
     TOKEN="$(curl -L -s \
