@@ -18,13 +18,14 @@ fi
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
-basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest" || true
+basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest"
+basher_exit_code=$?
 # TODO: files are already identical, but now check are also the permissions matching!
 
-#force_rebuild=1
-#force_push=1
+force_rebuild=1
+force_push=1
 
-if [ "$notrebuild_flag" != 1 ] || [ "$force_rebuild" = 1 ]
+if [ "$notrebuild_flag" != 1 ] || [ "$force_rebuild" = 1 ] || [ $basher_exit_code != 0 ]
 then
   sha256_docker="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
   if [ "$sha256_docker" != "$MANIFEST_DIGEST" ] || [ "$force_rebuild" = 1 ]
@@ -43,9 +44,9 @@ then
       -f $OPENPILOT_DIR/$DOCKER_FILE \
       $OPENPILOT_DIR
 
-    # TODO: here load the just-built image
+    basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" file "$REMOTE_TAG:latest" "$IMAGE_PATH"
 
-    if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ]
+    if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ] || [ $basher_exit_code != 0 ]
     then
       basher_push "$IMAGE_PATH" "$REMOTE_TAG"
       rm "$IMAGE_PATH"

@@ -227,10 +227,6 @@ basher_layer() {
 
     sudo mv "$ATOMIC_TARGET_DIR/${orgsha256}_${newsha256}_size" "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
 
-    echo size is
-    sudo cat "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/size"
-    echo size is end
-
     echo -n "sha256:$sha256" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff" >/dev/null
 
     if [ "$i" != 0 ]
