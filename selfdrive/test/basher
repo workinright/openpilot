@@ -299,7 +299,7 @@ basher_push() {
 
             echo abcd $location ${REGISTER_URL} ?digest=sha256%3A ${sha256}
 
-            tar -xOf ../myimage.tar "blobs/sha256/$sha256" | curl -X PUT \
+            tar -xOf $HOME/myimage.tar "blobs/sha256/$sha256" | curl -X PUT \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/octet-stream" \
             --data-binary @- "$REGISTER_URL$location?digest=sha256:$sha256"
