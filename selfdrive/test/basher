@@ -105,8 +105,8 @@ basher_pull() {
             {
                 if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
                 then
-                    f2b="$(head -c 2 | xxd -p)";
-                    echo -n "$f2b" | grep -q '^1f8b' &&
+                    f2b="$(head -c 2 | xxd -p)"; \
+                    echo -n "$f2b" | grep -q '^1f8b' && \
                         cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d \
                     || \
                         cat <(echo -n "$f2b" | xxd -r -p) -
