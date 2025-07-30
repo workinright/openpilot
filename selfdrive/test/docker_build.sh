@@ -18,8 +18,8 @@ fi
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
-force_rebuild=1
-force_push=1
+#force_rebuild=1
+#force_push=1
 
 if [ "$force_rebuild" != 1 ]
 then
@@ -47,14 +47,17 @@ then
       -f $OPENPILOT_DIR/$DOCKER_FILE \
       $OPENPILOT_DIR
 
-    basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" file "$REMOTE_TAG:latest" "$IMAGE_PATH"
+    basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" file "$REMOTE_TAG:latest" "$IMAGE_PATH" &
+    file_pull_pid=$!
 
     if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ] || [ $basher_exit_code != 0 ]
     then
       basher_push "$IMAGE_PATH" "$REMOTE_TAG"
-      rm "$IMAGE_PATH"
     else
       echo "not pushing"
     fi
+
+    wait $file_pull_pid
+    rm "$IMAGE_PATH"
   fi
 fi

@@ -72,7 +72,7 @@ basher_pull() {
     }
 
     wait $pid0
-    echo "Downloading layer blobs..."
+    echo "Loading layer blobs..."
 
     manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
     if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
