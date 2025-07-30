@@ -97,28 +97,27 @@ basher_pull() {
         tmp_dir=$$_$i
         sudo mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
         
+        # TODO check thread flow here
+        sudo mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
         (
-            buffer_size="32M"
-            sha2561="$sha256"
-            mediaType1="$mediaType"
+            mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; TOKEN1="$TOKEN" ; REPO_IMAGE1="$REPO_IMAGE"; sha2561="$sha256" ; new_id1="$new_id"
+
             sha256="$(mediaType2="$mediaType1" ; fetch_layer "$sha2561" | \
-                    { \
-                    if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
-                    then
-                        f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
-                    elif [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
-                    then
-                        zstd -d
-                    else
-                        cat -
-                    fi 
-                    } \
+            { \
+\
+                if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                then
+                    f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
+                elif [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
+                then
+                    zstd -d
+                else
+                    cat -
+                fi 
+            } \
                     \
  \
-                 | dd bs=32M 2>/dev/null | tee >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) >(dd bs=32M 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | dd bs=32M 2>/dev/null | sha256sum - | cut -d' ' -f1 )"
-            sudo mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256"
-            sudo mv "$ATOMIC_TARGET_DIR/${tmp_dir}_size" "$ATOMIC_TARGET_DIR/${sha2561}_${sha256}_size"
-        ) &
+                 | dd bs=32M 2>/dev/null | tee >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) >(dd bs=32M 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | dd bs=32M 2>/dev/null | sha256sum - | cut -d' ' -f1 )" ; sudo mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256" ; sudo mv "$ATOMIC_TARGET_DIR/${tmp_dir}_size" "$ATOMIC_TARGET_DIR/${sha2561}_${sha256}_size") &
         pids+=($!)
 
         tmp_dirs+=($var)
