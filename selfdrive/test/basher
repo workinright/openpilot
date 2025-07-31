@@ -149,7 +149,6 @@ basher_pull() {
             sudo diff -q "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" \
                 "$(dirname "$0")/../../Dockerfile.openpilot_base" >/dev/null
         then
-            echo "the dockerfile is confirmed to not having to be rebuilt at step1"
             notrebuild_flag=1
         fi
 
@@ -158,7 +157,6 @@ basher_pull() {
 
     wait $stop_docker_pid
 
-    echo "{\"Repositories\":{\"$IMAGE\":{\"$IMAGE:$TAG\":\"sha256:$CONFIG_DIGEST\"}}}"
     echo -n "{\"Repositories\":{\"$IMAGE\":{\"$IMAGE:$TAG\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json >/dev/null
     sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" ; systemctl start docker"
 
