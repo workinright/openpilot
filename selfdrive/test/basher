@@ -238,6 +238,7 @@ basher_push() {
     REGISTER_HOSTNAME="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f1)"
     REPO="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2)"
     REPO_IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
+    TAG="$(echo -n "$REGISTER_NAME_TAG" | rev | cut -d':' -f1 | rev)"
     REGISTER_URL="$REGISTER_PROTOCOL$REGISTER_HOSTNAME"
 
     credentials="$(jq -r ".auths.\"$REGISTER_HOSTNAME\".auth" "$HOME/.docker/config.json" | base64 -d)"
@@ -291,12 +292,9 @@ basher_push() {
         -H "Content-Type: application/octet-stream" \
         --data-binary @- "$REGISTER_URL$location?digest=sha256:$config_digest"
 
-    IMAGE_NAME="workinright/openpilot-base"
-    IMAGE_TAG="latest"
-
     tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256" | curl -X PUT \
         -H "Authorization: Bearer $TOKEN" \
         -H "Content-Type: application/vnd.docker.distribution.manifest.v2+json" \
         --data-binary @- \
-        "$REGISTER_URL/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"
+        "$REGISTER_URL/v2/${REPO_IMAGE}/manifests/${TAG}"
 }
