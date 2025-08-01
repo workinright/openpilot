@@ -24,7 +24,6 @@ source $SCRIPT_DIR/basher
 if [ "$force_rebuild" != 1 ]
 then
   basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest"
-  # TODO: files are already identical, but now check are also the permissions matching!
   basher_exit_code=$?
 fi
 

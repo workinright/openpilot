@@ -24,12 +24,19 @@ basher_pull() {
     IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f3 | cut -d':' -f1)"
     TAG="$(echo -n "$REGISTER_NAME_TAG" | rev | cut -d':' -f1 | rev)"
 
-    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/l" \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256" \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256" \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/tmp" \
+    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR"; \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"; \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256"; \
+    chmod 700 "$ATOMIC_TARGET_DIR/image"; \
+    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2"; \
+    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/distribution"; \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256"; \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/tmp"; \
+    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/layerdb"; \
+    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
+    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb"; \
+    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content"; \
+    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
     mkdir -p "$ATOMIC_TARGET_DIR/overlay2/l"" &
     pid0=$!
 
@@ -76,6 +83,7 @@ basher_pull() {
     if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
     then
         echo -n "$CONFIG" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")" >/dev/null
+        sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
     else
         echo "error: the image is already there"
         exit 2
@@ -157,7 +165,8 @@ basher_pull() {
 
     wait $stop_docker_pid
 
-    echo -n "{\"Repositories\":{\"$IMAGE\":{\"$IMAGE:$TAG\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee $ATOMIC_TARGET_DIR/image/overlay2/repositories.json >/dev/null
+    echo -n "{\"Repositories\":{\"$IMAGE\":{\"$IMAGE:$TAG\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json" >/dev/null
+    sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json"
     sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" ; systemctl start docker"
 
     if [ $sete = 1 ]
@@ -191,6 +200,8 @@ basher_layer() {
     
     sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
     sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/work"
+    sudo chmod 710 "$ATOMIC_TARGET_DIR/overlay2/$new_id"
+    sudo chmod 700 "$ATOMIC_TARGET_DIR/overlay2/$new_id/work"
 
     echo -n "$new_id2" | sudo tee "$ATOMIC_TARGET_DIR/overlay2/$new_id/link" >/dev/null
     sudo ln -s "../$new_id/diff" "$ATOMIC_TARGET_DIR/overlay2/l/$new_id2"
@@ -207,9 +218,11 @@ basher_layer() {
     if [ "$i" = 1 ]
     then
         sudo touch "$ATOMIC_TARGET_DIR/overlay2/$new_id/committed"
+        sudo chmod 600 "$ATOMIC_TARGET_DIR/overlay2/$new_id/committed"
     fi
 
     sudo mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
+    sudo chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id"
     
     echo -n "$new_id" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/cache-id" >/dev/null
     echo -n "sha256:$sha256" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id/diff" >/dev/null
@@ -250,7 +263,6 @@ basher_push() {
     TOKEN="$(curl -L -s -u "$USERNAME:$PASSWORD" \
         "$REGISTER_URL/token?scope=repository:$REPO:push" | jq -r .token)"
 
-    # TODO manifest - one for platform, on both upload and download
     manifest_sha256="$(tar -xOf "$IMAGE_FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
     MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256")"
     layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
