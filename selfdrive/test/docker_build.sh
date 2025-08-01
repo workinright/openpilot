@@ -21,42 +21,39 @@ source $SCRIPT_DIR/basher
 #force_rebuild=1
 #force_push=1
 
+basher_exit_code=
 if [ "$force_rebuild" != 1 ]
 then
   basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest"
   basher_exit_code=$?
 fi
 
-if [ "$notrebuild_flag" != 1 ] || [ "$force_rebuild" = 1 ] || [ $basher_exit_code != 0 ]
+if [ "$notrebuild_flag" != 1 ] || [ "$force_rebuild" = 1 ] || [ "$basher_exit_code" != 0 ]
 then
-  sha256_docker="$(docker images --no-trunc --format "{{.ID}}" | cut -d':' -f2 | cut -d' ' -f1)"
-  if [ "$sha256_docker" != "$MANIFEST_DIGEST" ] || [ "$force_rebuild" = 1 ]
+  docker buildx create --name mybuilder --driver docker-container --use
+  docker buildx inspect --bootstrap
+
+  IMAGE_PATH="$HOME/myimage.tar"
+
+  # Zstandard uploading is broken in docker buildx! Therefore we build it this way, and use our hooks for the upload.
+  docker buildx build \
+    --builder mybuilder \
+    --platform $PLATFORM \
+    --output type=docker,dest="$IMAGE_PATH",compression=zstd,force-recompress=true \
+    --progress=plain \
+    -f $OPENPILOT_DIR/$DOCKER_FILE \
+    $OPENPILOT_DIR
+
+  basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" file "$REMOTE_TAG:latest" "$IMAGE_PATH" &
+  file_pull_pid=$!
+
+  if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ] || [ "$basher_exit_code" != 0 ]
   then
-    docker buildx create --name mybuilder --driver docker-container --use
-    docker buildx inspect --bootstrap
-
-    IMAGE_PATH="$HOME/myimage.tar"
-
-    # Zstandard uploading is broken in docker buildx! Therefore we build it this way, and use our hooks for the upload.
-    docker buildx build \
-      --builder mybuilder \
-      --platform $PLATFORM \
-      --output type=docker,dest="$IMAGE_PATH",compression=zstd,force-recompress=true \
-      --progress=plain \
-      -f $OPENPILOT_DIR/$DOCKER_FILE \
-      $OPENPILOT_DIR
-
-    basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" file "$REMOTE_TAG:latest" "$IMAGE_PATH" &
-    file_pull_pid=$!
-
-    if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ] || [ $basher_exit_code != 0 ]
-    then
-      basher_push "$IMAGE_PATH" "$REMOTE_TAG"
-    else
-      echo "not pushing"
-    fi
-
-    wait $file_pull_pid
-    rm "$IMAGE_PATH"
+    basher_push "$IMAGE_PATH" "$REMOTE_TAG"
+  else
+    echo "not pushing"
   fi
+
+  wait $file_pull_pid
+  rm "$IMAGE_PATH"
 fi

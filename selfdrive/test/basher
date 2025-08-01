@@ -24,7 +24,7 @@ basher_pull() {
     IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f3 | cut -d':' -f1)"
     TAG="$(echo -n "$REGISTER_NAME_TAG" | rev | cut -d':' -f1 | rev)"
 
-    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR"; \
+    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$ATOMIC_TARGET_DIR"; then umount "$ATOMIC_TARGET_DIR"; fi; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR"; \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"; \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256"; \
     chmod 700 "$ATOMIC_TARGET_DIR/image"; \
@@ -40,13 +40,13 @@ basher_pull() {
     mkdir -p "$ATOMIC_TARGET_DIR/overlay2/l"" &
     pid0=$!
 
-    sudo bash -c "TARGET_DIR="$TARGET_DIR" ; systemctl stop docker >/dev/null 2>&1; rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR"" &
+    sudo bash -c "TARGET_DIR="$TARGET_DIR" ; ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; systemctl stop docker >/dev/null 2>&1; if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$TARGET_DIR"; then umount "$TARGET_DIR"; fi; rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR"" &
     stop_docker_pid=$!
 
     if [ "$PROTOCOL" = "file" ]
     then
-        manifest_sha256="$(tar -xOf "$FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
-        MANIFEST="$(tar -xOf "$FILE" "blobs/sha256/$manifest_sha256")"
+        MANIFEST_DIGEST="$(tar -xOf "$FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
+        MANIFEST="$(tar -xOf "$FILE" "blobs/sha256/$MANIFEST_DIGEST")"
 
         CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
 
@@ -79,11 +79,11 @@ basher_pull() {
 
     wait $pid0
 
-    manifest_sha256="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
-    if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$manifest_sha256" ]
+    MANIFEST_DIGEST="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
+    if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$MANIFEST_DIGEST" ]
     then
-        echo -n "$CONFIG" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")" >/dev/null
-        sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$manifest_sha256")"
+        echo -n "$CONFIG" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$MANIFEST_DIGEST")" >/dev/null
+        sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$MANIFEST_DIGEST")"
     else
         echo "error: the image is already there"
         exit 2
@@ -109,18 +109,18 @@ basher_pull() {
 
         buffer_size=32M
         (
-            mediaType1="$mediaType" ; tmp_dir="$tmp_dir" ; sha2561="$sha256" ; buffer_size="$buffer_size"
-            sha256="$(mediaType2="$mediaType1" ; fetch_layer "$sha2561" | \
+            sha2561="$sha256"
+            sha256="$( fetch_layer "$sha2561" | \
             { \
-                if [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ]
+                if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ] || [ "$mediaType" = "application/vnd.oci.image.layer.v1.tar+gzip" ]
                 then
                     f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
-                elif [ "$mediaType1" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]
+                elif [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]  || [ "$mediaType" = "application/vnd.oci.image.layer.v1.tar+zstd" ]
                 then
                     zstd -d
                 else
                     cat -
-                fi 
+                fi
             } \
             | dd bs=$buffer_size 2>/dev/null | tee >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) >(dd bs=$buffer_size 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") | dd bs=$buffer_size 2>/dev/null | sha256sum - | cut -d' ' -f1 )" ; sudo mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha2561}_$sha256" ; sudo mv "$ATOMIC_TARGET_DIR/${tmp_dir}_size" "$ATOMIC_TARGET_DIR/${sha2561}_${sha256}_size" \
         ) &
@@ -168,7 +168,7 @@ basher_pull() {
 
     echo -n "{\"Repositories\":{\"$IMAGE\":{\"$IMAGE:$TAG\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json" >/dev/null
     sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json"
-    sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" ; systemctl start docker"
+    sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" ; umount "$ATOMIC_TARGET_DIR" ; systemctl start docker"
 
     if [ $sete = 1 ]
     then
@@ -264,8 +264,8 @@ basher_push() {
     TOKEN="$(curl -L -s -u "$USERNAME:$PASSWORD" \
         "$REGISTER_URL/token?scope=repository:$REPO:push" | jq -r .token)"
 
-    manifest_sha256="$(tar -xOf "$IMAGE_FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
-    MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256")"
+    MANIFEST_DIGEST="$(tar -xOf "$IMAGE_FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
+    MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$MANIFEST_DIGEST")"
     layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
 
     config_mediaType="$(echo -n "$MANIFEST" | jq -r '.config.mediaType')"
@@ -307,7 +307,7 @@ basher_push() {
         -H "Content-Type: application/octet-stream" \
         --data-binary @- "$REGISTER_URL$location?digest=sha256:$config_digest"
 
-    tar -xOf "$IMAGE_FILE" "blobs/sha256/$manifest_sha256" | curl -X PUT \
+    tar -xOf "$IMAGE_FILE" "blobs/sha256/$MANIFEST_DIGEST" | curl -X PUT \
         -H "Authorization: Bearer $TOKEN" \
         -H "Content-Type: application/vnd.docker.distribution.manifest.v2+json" \
         --data-binary @- \
