@@ -86,7 +86,7 @@ basher_pull() {
         sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$MANIFEST_DIGEST")"
     else
         echo "error: the image is already there"
-        exit 2
+        return 2
     fi
 
     layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
@@ -196,7 +196,7 @@ basher_layer() {
     if [ -e "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256/$chain_id" ]
     then
         echo "error: the image is already there"
-        exit 3
+        return 3
     fi
     
     sudo mkdir -p "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff"
