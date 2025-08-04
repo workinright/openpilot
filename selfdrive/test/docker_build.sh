@@ -28,6 +28,7 @@ then
   basher_exit_code=$?
 fi
 
+NOTREBUILD_FLAG=1
 if [ "$NOTREBUILD_FLAG" != 1 ] || [ "$force_rebuild" = 1 ] || [ "$basher_exit_code" != 0 ]
 then
   docker buildx create --name mybuilder --driver docker-container --use
