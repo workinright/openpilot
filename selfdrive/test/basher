@@ -137,7 +137,7 @@ basher_pull() {
         wait $pid
     done
 
-    notrebuild_flag=0
+    NOTREBUILD_FLAG=0
     i=0
     while read layer
     do
@@ -158,7 +158,7 @@ basher_pull() {
             sudo diff -q "$ATOMIC_TARGET_DIR/overlay2/$new_id/diff/Dockerfile" \
                 "$(dirname "$0")/../../Dockerfile.openpilot_base" >/dev/null
         then
-            notrebuild_flag=1
+            NOTREBUILD_FLAG=1
         fi
 
         ((++i))
