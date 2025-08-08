@@ -263,6 +263,11 @@ basher_push() {
 
     TOKEN="$(curl -L -s -u "$USERNAME:$PASSWORD" \
         "$REGISTER_URL/token?scope=repository:$REPO:push" | jq -r .token)"
+    if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]
+    then
+        echo "error: docker register credentials are unknown, make sure you've ran \`docker login\` before!"
+        return 1
+    fi
 
     MANIFEST_DIGEST="$(tar -xOf "$IMAGE_FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
     MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$MANIFEST_DIGEST")"
