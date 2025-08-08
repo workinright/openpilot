@@ -28,9 +28,10 @@ then
   basher_exit_code=$?
 fi
 
-NOTREBUILD_FLAG=1
+#NOTREBUILD_FLAG=1
 if [ "$NOTREBUILD_FLAG" != 1 ] || [ "$force_rebuild" = 1 ] || [ "$basher_exit_code" != 0 ]
 then
+  docker buildx rm "$BUILDER_NAME" >/dev/null 2>/dev/null || true
   docker buildx create --name mybuilder --driver docker-container --use
   docker buildx inspect --bootstrap
 
@@ -50,7 +51,7 @@ then
 
   if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ] || [ "$basher_exit_code" != 0 ]
   then
-    basher_push "$IMAGE_PATH" "$REMOTE_TAG"
+    basher_push "$IMAGE_PATH" "$REMOTE_TAG:latest"
   else
     echo "not pushing"
   fi
