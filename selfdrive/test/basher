@@ -167,7 +167,7 @@ basher_pull() {
 
         buffer_size=32M
         (
-            sha256_uncompressed="$(fetch_layer "$sha256" | uncompress_layer | \
+            sha256_uncompressed="$(fetch_layer "$sha256" | uncompress_layer "$mediaType" | \
             dd bs=$buffer_size 2>/dev/null | \
             tee \
                 >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) \
