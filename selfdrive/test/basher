@@ -91,7 +91,6 @@ basher_pull() {
         MANIFEST="$(curl -L -s -H "Authorization: Bearer $TOKEN" \
             -H "Accept: application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
             "$REGISTER_URL/v2/$REPO_IMAGE/manifests/$TAG")"
-        MANIFEST_DIGEST="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
 
         CONFIG_DIGEST="$(echo -n "$MANIFEST" | jq -r .config.digest | cut -d ':' -f2)"
 
@@ -113,10 +112,10 @@ basher_pull() {
     # wait until the "atomic target dir" is ready
     wait $pid0
 
-    if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$MANIFEST_DIGEST" ]
+    if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$CONFIG_DIGEST" ]
     then
-        echo -n "$CONFIG" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$MANIFEST_DIGEST")" >/dev/null
-        sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$(basename "$MANIFEST_DIGEST")"
+        echo -n "$CONFIG" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$CONFIG_DIGEST" >/dev/null
+        sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$CONFIG_DIGEST"
     else
         echo "error: the image is already there"
         return 2
