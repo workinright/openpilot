@@ -112,6 +112,7 @@ basher_pull() {
     # wait until the "atomic target dir" is ready
     wait $pid0
 
+    # (as root) put the image's `config` blob into the target place, if the image doesn't exist there yet
     if ! [ -e "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$CONFIG_DIGEST" ]
     then
         echo -n "$CONFIG" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256/$CONFIG_DIGEST" >/dev/null
@@ -121,7 +122,7 @@ basher_pull() {
         return 2
     fi
 
-    layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
+    layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/}\n/g')"
 
     i=0
     prev_sha256=
