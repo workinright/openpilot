@@ -245,6 +245,24 @@ basher_layer() {
     prev_chain_id="$chain_id"
 }
 
+upload_layer() {
+    _REGISTER_URL="$1"
+    _REPO_IMAGE="$2"
+    _TOKEN="$3"
+    _IMAGE_FILE="$4"
+    _LAYER_SHA256="$5"
+
+    location="$(curl -s -D - -X POST \
+        -H "Authorization: Bearer $_TOKEN" \
+        -H "Content-Type: application/octet-stream" \
+        "$_REGISTER_URL/v2/$_REPO_IMAGE/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
+
+    tar -xOf "$_IMAGE_FILE" "blobs/sha256/$_LAYER_SHA256" | curl -X PUT \
+        -H "Authorization: Bearer $_TOKEN" \
+        -H "Content-Type: application/octet-stream" \
+        --data-binary @- "$_REGISTER_URL$location?digest=sha256:$_sha256"
+}
+
 basher_push() {
     IMAGE_FILE="$1"
     REGISTER_NAME_TAG="$2"
@@ -273,25 +291,14 @@ basher_push() {
     MANIFEST="$(tar -xOf "$IMAGE_FILE" "blobs/sha256/$MANIFEST_DIGEST")"
     layers="$(echo -n "$MANIFEST" | jq -r '.layers[]' | tr -d '\n' | sed 's/}/} \n/g')"
 
-    config_mediaType="$(echo -n "$MANIFEST" | jq -r '.config.mediaType')"
     config_digest="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
 
     declare -a pids
     i=0
     while read layer
     do
-        sha256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2)"
-        mediaType="$(echo -n "$layer" | jq -r '.mediaType')"
-        
-        location="$(curl -s -D /proc/self/fd/1 -X POST \
-        -H "Authorization: Bearer $TOKEN" \
-        -H "Content-Type: application/octet-stream" \
-        "$REGISTER_URL/v2/$REPO_IMAGE/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
-
-        tar -xOf "$IMAGE_FILE" "blobs/sha256/$sha256" | curl -X PUT \
-        -H "Authorization: Bearer $TOKEN" \
-        -H "Content-Type: application/octet-stream" \
-        --data-binary @- "$REGISTER_URL$location?digest=sha256:$sha256" &
+        LAYER_SHA256="$(echo -n "$layer" | jq -r '.digest' | cut -d':' -f2)"
+        upload_layer "$REGISTER_URL" "$REPO_IMAGE" "$TOKEN" "$IMAGE_FILE" "$LAYER_SHA256" &
         pids+=($!)
 
         ((++i))
@@ -301,16 +308,8 @@ basher_push() {
     do
         wait $pid
     done
-
-    location="$(curl -s -D /proc/self/fd/1 -X POST \
-        -H "Authorization: Bearer $TOKEN" \
-        -H "Content-Type: application/octet-stream" \
-            "$REGISTER_URL/v2/$REPO_IMAGE/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
-
-    tar -xOf "$IMAGE_FILE" "blobs/sha256/$config_digest" | curl -X PUT \
-        -H "Authorization: Bearer $TOKEN" \
-        -H "Content-Type: application/octet-stream" \
-        --data-binary @- "$REGISTER_URL$location?digest=sha256:$config_digest"
+    
+    upload_layer "$REGISTER_URL" "$REPO_IMAGE" "$TOKEN" "$IMAGE_FILE" "$config_digest"
 
     tar -xOf "$IMAGE_FILE" "blobs/sha256/$MANIFEST_DIGEST" | curl -X PUT \
         -H "Authorization: Bearer $TOKEN" \
