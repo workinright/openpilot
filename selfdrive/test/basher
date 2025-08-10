@@ -4,6 +4,7 @@ assign_id(){
 }
 
 basher_pull() {
+    # save the `set -e` status
     sete=0
     if [[ "$-" == *e* ]]
     then
@@ -18,38 +19,62 @@ basher_pull() {
     REGISTER_NAME_TAG="$5"
     FILE="$6"
 
+    # process the arguments into Docker image specs
     REGISTER_HOSTNAME="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f1 | cut -d':' -f1)"
     REPO="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2)"
     REPO_IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f2- | cut -d':' -f1)"
     IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f3 | cut -d':' -f1)"
     TAG="$(echo -n "$REGISTER_NAME_TAG" | rev | cut -d':' -f1 | rev)"
 
+    # (as root, as a child process in parallel) prepare the "atomic target dir":
+    # 1. un-mount the dir, if it was mounted by a previous run of this script
+    # 2. create it, if it doesn't exist
+    # 3. mount a RAM disk (tmpfs) on it
+    # 4. create the required directory structure with the right permissions
     sudo bash -c "\
         ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR"; \
+        \
         if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$ATOMIC_TARGET_DIR"; \
         then \
             umount "$ATOMIC_TARGET_DIR"; \
         fi; \
+        \
         mkdir -p "$ATOMIC_TARGET_DIR"; \
-        mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR"; \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"; \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256"; \
-    chmod 700 "$ATOMIC_TARGET_DIR/image"; \
-    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2"; \
-    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/distribution"; \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256"; \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/tmp"; \
-    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/layerdb"; \
-    mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
-    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb"; \
-    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content"; \
-    chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
-    mkdir -p "$ATOMIC_TARGET_DIR/overlay2/l"" &
+        mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; \
+        chmod 744 "$ATOMIC_TARGET_DIR"; \
+        \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"; \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256"; \
+        chmod 700 "$ATOMIC_TARGET_DIR/image"; \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2"; \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/distribution"; \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256"; \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/tmp"; \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/layerdb"; \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb"; \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content"; \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
+        mkdir -p "$ATOMIC_TARGET_DIR/overlay2/l"; \
+    " &
     pid0=$!
 
-    sudo bash -c "TARGET_DIR="$TARGET_DIR" ; ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; systemctl stop docker >/dev/null 2>&1; if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$TARGET_DIR"; then umount "$TARGET_DIR"; fi; rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR"" &
+    # (as root, as a child process in parallel) prepare the actual Docker daemon storage dir:
+    # 1. stop the Docker daemon (if running) and wait until it terminates
+    # 2. umount the dir, if it was already mounted/bind-mounted (e.g. by a previous run of this script)
+    # 3. remove the dir, re-create it and assign the right permissions
+    sudo bash -c "\
+        TARGET_DIR="$TARGET_DIR"; \
+        ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR"; \
+        \
+        systemctl stop docker >/dev/null 2>&1; \
+        if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$TARGET_DIR"; then umount "$TARGET_DIR"; fi; \
+        rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR" \
+    " &
     stop_docker_pid=$!
 
+    # whether we're importing the image from a file or from a remote register server,
+    # load and parse the image's manifest and the config
     if [ "$PROTOCOL" = "file" ]
     then
         MANIFEST_DIGEST="$(tar -xOf "$FILE" index.json | jq -r '.manifests[0].digest' | cut -d':' -f2)"
@@ -59,7 +84,6 @@ basher_pull() {
 
         CONFIG="$(tar -xOf "$FILE" "blobs/sha256/$CONFIG_DIGEST")"
     else
-        REGISTER_PROTOCOL="://"
         REGISTER_URL="$PROTOCOL://$REGISTER_HOSTNAME"
 
         TOKEN="$(curl -L -s "$REGISTER_URL/token?scope=repository:$REPO_IMAGE:pull" | jq -r .token)"
@@ -73,6 +97,7 @@ basher_pull() {
         CONFIG="$(curl -L -s -H "Authorization: Bearer $TOKEN" $FETCH_CONFIG "$REGISTER_URL/v2/$REPO_IMAGE/blobs/sha256:$CONFIG_DIGEST")"
     fi
 
+    # a sub-function to fetch the layer, as above, depending on the specified source
     fetch_layer() {
         layer_hash="$1"
 
@@ -84,6 +109,7 @@ basher_pull() {
         fi
     }
 
+    # wait until the "atomic target dir" is ready
     wait $pid0
 
     MANIFEST_DIGEST="$(echo -n "$MANIFEST" | jq -r '.config.digest' | cut -d':' -f2)"
