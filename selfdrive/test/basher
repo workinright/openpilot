@@ -335,7 +335,7 @@ basher_push() {
         tar -xOf "$_IMAGE_FILE" "blobs/sha256/$_LAYER_SHA256" | curl -X PUT \
             -H "Authorization: Bearer $_TOKEN" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @- "$_REGISTER_URL$location?digest=sha256:$_sha256"
+            --data-binary @- "$_REGISTER_URL$location?digest=sha256:$_LAYER_SHA256"
     }
 
     declare -a pids
