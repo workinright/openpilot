@@ -18,15 +18,15 @@ fi
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
-#force_rebuild=1
-#force_push=1
+force_rebuild=1
+force_push=1
 
 basher_exit_code=
-if [ "$force_rebuild" != 1 ]
-then
+#if [ "$force_rebuild" != 1 ]
+#then
   basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest"
   basher_exit_code=$?
-fi
+#fi
 
 NOTREBUILD_FLAG=1
 if [ "$NOTREBUILD_FLAG" != 1 ] || [ "$force_rebuild" = 1 ] || [ "$basher_exit_code" != 0 ]
