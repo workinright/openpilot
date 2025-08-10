@@ -109,6 +109,27 @@ basher_pull() {
         fi
     }
 
+    # a sub-function to uncompress the layer
+    uncompress_layer() {
+        _mediaType="$1"
+
+        if [ "$_mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ] || [ "$_mediaType" = "application/vnd.oci.image.layer.v1.tar+gzip" ]
+        then
+            # workaround for the layers which we're told are gzip compressed, but in fact they aren't:
+            # check against the gzip magic (and re-send the magic bytes consumed from the stream)
+            f2b="$(head -c 2 | xxd -p)"
+            echo -n "$f2b" | grep -q '^1f8b' \
+                && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d \
+                || cat <(echo -n "$f2b" | xxd -r -p) -
+        elif [ "$_mediaType" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]  || [ "$_mediaType" = "application/vnd.oci.image.layer.v1.tar+zstd" ]
+        then
+            zstd -d
+        else
+            # uncompressed stream - just pass it over
+            cat -
+        fi
+    }
+
     # wait until the "atomic target dir" is ready
     wait $pid0
 
@@ -146,19 +167,8 @@ basher_pull() {
 
         buffer_size=32M
         (
-            sha256_uncompressed="$(fetch_layer "$sha256" | \
-            { \
-                if [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.gzip" ] || [ "$mediaType" = "application/vnd.oci.image.layer.v1.tar+gzip" ]
-                then
-                    f2b="$(head -c 2 | xxd -p)"; echo -n "$f2b" | grep -q '^1f8b' && cat <(echo -n "$f2b" | xxd -r -p) - | pigz -d || cat <(echo -n "$f2b" | xxd -r -p) -;
-                elif [ "$mediaType" = "application/vnd.docker.image.rootfs.diff.tar.zstd" ]  || [ "$mediaType" = "application/vnd.oci.image.layer.v1.tar+zstd" ]
-                then
-                    zstd -d
-                else
-                    cat -
-                fi
-            } \
-            | dd bs=$buffer_size 2>/dev/null | \
+            sha256_uncompressed="$(fetch_layer "$sha256" | uncompress_layer | \
+            dd bs=$buffer_size 2>/dev/null | \
             tee \
                 >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) \
                 >(dd bs=$buffer_size 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") \
