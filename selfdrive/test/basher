@@ -11,6 +11,13 @@ basher_pull() {
         sete=1
         set +e
     fi
+    restore_sete()
+    {
+        if [ $sete = 1 ]
+        then
+            set -e
+        fi
+    }
 
     TARGET_DIR="$1"
     ATOMIC_TARGET_DIR="$2"
@@ -40,23 +47,23 @@ basher_pull() {
             umount "$ATOMIC_TARGET_DIR"; \
         fi; \
         \
-        mkdir -p "$ATOMIC_TARGET_DIR"; \
-        mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; \
-        chmod 744 "$ATOMIC_TARGET_DIR"; \
+        mkdir -p "$ATOMIC_TARGET_DIR" && \
+        mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" && \
+        chmod 744 "$ATOMIC_TARGET_DIR" && \
         \
-        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"; \
-        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256"; \
-        chmod 700 "$ATOMIC_TARGET_DIR/image"; \
-        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2"; \
-        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/distribution"; \
-        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256"; \
-        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/tmp"; \
-        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/layerdb"; \
-        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
-        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb"; \
-        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content"; \
-        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256"; \
-        mkdir -p "$ATOMIC_TARGET_DIR/overlay2/l"; \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256" && \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256" && \
+        chmod 700 "$ATOMIC_TARGET_DIR/image" && \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2" && \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/distribution" && \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/sha256" && \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/layerdb/tmp" && \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/layerdb" && \
+        mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256" && \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb" && \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content" && \
+        chmod 700 "$ATOMIC_TARGET_DIR/image/overlay2/imagedb/content/sha256" && \
+        mkdir -p "$ATOMIC_TARGET_DIR/overlay2/l" \
     " &
     pid0=$! # the PID of the process is saved
 
@@ -68,9 +75,9 @@ basher_pull() {
         TARGET_DIR="$TARGET_DIR"; \
         ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR"; \
         \
-        systemctl stop docker >/dev/null 2>&1; \
+        systemctl stop docker >/dev/null 2>&1 && \
         if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$TARGET_DIR"; then umount "$TARGET_DIR"; fi; \
-        rm -rf "$TARGET_DIR" ; mkdir -p "$TARGET_DIR" ; chmod 744 "$TARGET_DIR" \
+        rm -rf "$TARGET_DIR" && mkdir -p "$TARGET_DIR" && chmod 744 "$TARGET_DIR" \
     " &
     stop_docker_pid=$! # the PID of the process is saved
 
@@ -228,16 +235,24 @@ basher_pull() {
         ((++i))
     done <<< "$layers"
 
+    # before we write anything to the actual, non-atomic target directory, wait until the daemon is stopped
     wait $stop_docker_pid
 
-    echo -n "{\"Repositories\":{\"$IMAGE\":{\"$IMAGE:$TAG\":\"sha256:$CONFIG_DIGEST\"}}}" | sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json" >/dev/null
+    # (as root) tag the pulled image with the supplied tags
+    echo -n "{\"Repositories\":{\"$IMAGE\":{\"$IMAGE:$TAG\":\"sha256:$CONFIG_DIGEST\"}}}" | \
+        sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json" >/dev/null
     sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json"
-    sudo bash -c "mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" ; umount "$ATOMIC_TARGET_DIR" ; systemctl start docker"
 
-    if [ $sete = 1 ]
-    then
-        set -e
-    fi
+    # (as root) move over the "atomic target dir" mountpoint to the actual target Docker directory, and restart the daemon
+    sudo bash -c "\
+        mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" && \
+        umount "$ATOMIC_TARGET_DIR" && \
+        systemctl start docker"
+
+    # restore the `set -e` state, as saved in the beginning of this function
+    restore_sete
+
+    return 0
 }
 
 basher_layer() {
