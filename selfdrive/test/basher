@@ -165,15 +165,14 @@ basher_pull() {
         tmp_dir=$$_$i
         sudo mkdir -p "$ATOMIC_TARGET_DIR/$tmp_dir"
 
-        buffer_size=32M
+        #buffer_size=32M
         # run a background task ...
         (
             sha256_uncompressed="$(fetch_layer "$sha256" | uncompress_layer "$mediaType" | \
-            dd bs=$buffer_size 2>/dev/null | \
             tee \
                 >(wc -c | tr -d '\n' | sudo tee "$ATOMIC_TARGET_DIR/${tmp_dir}_size" >/dev/null) \
-                >(dd bs=$buffer_size 2>/dev/null | sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") \
-                | dd bs=$buffer_size 2>/dev/null | sha256sum - | cut -d' ' -f1 )"
+                >(sudo tar -xf - -C "$ATOMIC_TARGET_DIR/$tmp_dir") \
+                | sha256sum - | cut -d' ' -f1 )"
             
             sudo mv "$ATOMIC_TARGET_DIR/$tmp_dir" "$ATOMIC_TARGET_DIR/${sha256}_${sha256_uncompressed}"
             sudo mv "$ATOMIC_TARGET_DIR/${tmp_dir}_size" "$ATOMIC_TARGET_DIR/${sha256}_${sha256_uncompressed}_size" \
