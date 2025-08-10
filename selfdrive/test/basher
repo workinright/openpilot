@@ -24,7 +24,14 @@ basher_pull() {
     IMAGE="$(echo -n "$REGISTER_NAME_TAG" | cut -d'/' -f3 | cut -d':' -f1)"
     TAG="$(echo -n "$REGISTER_NAME_TAG" | rev | cut -d':' -f1 | rev)"
 
-    sudo bash -c "ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR" ; if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$ATOMIC_TARGET_DIR"; then umount "$ATOMIC_TARGET_DIR"; fi; mkdir -p "$ATOMIC_TARGET_DIR" ; mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR"; \
+    sudo bash -c "\
+        ATOMIC_TARGET_DIR="$ATOMIC_TARGET_DIR"; \
+        if cat /proc/mounts | cut -d' ' -f2 | grep -Fxq "$ATOMIC_TARGET_DIR"; \
+        then \
+            umount "$ATOMIC_TARGET_DIR"; \
+        fi; \
+        mkdir -p "$ATOMIC_TARGET_DIR"; \
+        mount -t tmpfs -o size=32G tmpfs "$ATOMIC_TARGET_DIR" ; chmod 744 "$ATOMIC_TARGET_DIR"; \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/diffid-by-digest/sha256"; \
     mkdir -p "$ATOMIC_TARGET_DIR/image/overlay2/distribution/v2metadata-by-diffid/sha256"; \
     chmod 700 "$ATOMIC_TARGET_DIR/image"; \
@@ -252,11 +259,13 @@ upload_layer() {
     _IMAGE_FILE="$4"
     _LAYER_SHA256="$5"
 
+    # obtain the upload UUID from the register server
     location="$(curl -s -D - -X POST \
         -H "Authorization: Bearer $_TOKEN" \
         -H "Content-Type: application/octet-stream" \
         "$_REGISTER_URL/v2/$_REPO_IMAGE/blobs/uploads/" | tr -d '\r' | grep location | cut -d':' -f2 | cut -d' ' -f2)"
 
+    # upload the specified layer from the image tar file to the register
     tar -xOf "$_IMAGE_FILE" "blobs/sha256/$_LAYER_SHA256" | curl -X PUT \
         -H "Authorization: Bearer $_TOKEN" \
         -H "Content-Type: application/octet-stream" \
