@@ -18,7 +18,7 @@ fi
 source $SCRIPT_DIR/docker_common.sh $1 "$TAG_SUFFIX"
 source $SCRIPT_DIR/basher
 
-force_rebuild=1
+#force_rebuild=1
 #force_push=1
 
 basher_exit_code=
