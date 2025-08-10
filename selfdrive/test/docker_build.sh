@@ -24,7 +24,7 @@ source $SCRIPT_DIR/basher
 basher_exit_code=
 if [ "$force_rebuild" != 1 ]
 then
-  basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" https "$REMOTE_TAG:latest"
+  basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" "$OPENPILOT_DIR/$DOCKER_FILE" https "$REMOTE_TAG:latest"
   basher_exit_code=$?
 fi
 
@@ -46,7 +46,7 @@ then
     -f $OPENPILOT_DIR/$DOCKER_FILE \
     $OPENPILOT_DIR
 
-  basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" "$OPENPILOT_DIR/$DOCKER_FILE" file "$REMOTE_TAG:latest" "$IMAGE_PATH" &
+  basher_pull "/var/lib/docker" "/var/lib/docker2" "$PLATFORM" "" file "$REMOTE_TAG:latest" "$IMAGE_PATH" &
   file_pull_pid=$!
 
   if [ -n "$PUSH_IMAGE" ] || [ "$force_push" = 1 ] || [ "$basher_exit_code" != 0 ]

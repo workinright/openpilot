@@ -243,7 +243,7 @@ basher_pull() {
         sudo tee "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json" >/dev/null
     sudo chmod 600 "$ATOMIC_TARGET_DIR/image/overlay2/repositories.json"
 
-    # (as root) move over the "atomic target dir" mountpoint to the actual target Docker directory, and restart the daemon
+    # (as root) move over the "atomic target dir" mountpoint to the actual target Docker directory, and re-start the daemon
     sudo bash -c "\
         mount --bind "$ATOMIC_TARGET_DIR" "$TARGET_DIR" && \
         umount "$ATOMIC_TARGET_DIR" && \
