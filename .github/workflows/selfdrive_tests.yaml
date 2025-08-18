@@ -22,14 +22,36 @@ env:
   BASE_IMAGE: openpilot-base
   AZURE_TOKEN: ${{ secrets.AZURE_COMMADATACI_OPENPILOTCI_TOKEN }}
 
-  DOCKER_LOGIN: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-  BUILD: selfdrive/test/docker_build.sh base
+  BUILD: selfdrive/test/build.sh base
 
-  RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
+  RUN: export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate || true ; export PYTHONPATH=/tmp/openpilot ; export CI=1 ; export PYTHONWARNINGS=error ; export FILEREADER_CACHE=1 ; bash -c
 
   PYTEST: pytest --continue-on-collection-errors --durations=0 -n logical
 
 jobs:
+  setup-cache:
+    name: setup cache
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      # build scons cache
+      - id: date
+        shell: bash
+        run: echo "CACHE_COMMIT_DATE=$(git log -1 --pretty='format:%cd' --date=format:'%Y-%m-%d-%H:%M')" >> $GITHUB_ENV
+      - shell: bash
+        run: echo "$CACHE_COMMIT_DATE"
+      - id: scons-cache
+        uses: ./.github/workflows/auto-cache
+        with:
+          path: .ci_cache/scons_cache
+          key: scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
+          restore-keys: |
+            scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
+            scons-${{ runner.arch }}
+      - name: setup-with-retry
+        uses: ./.github/workflows/setup-with-retry
   build_release:
     name: build release
     runs-on: ${{
@@ -40,6 +62,7 @@ jobs:
       || fromJSON('["ubuntu-24.04"]') }}
     env:
       STRIPPED_DIR: /tmp/releasepilot
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -52,7 +75,7 @@ jobs:
         command: git lfs pull
     - name: Build devel
       timeout-minutes: 1
-      run: TARGET_DIR=$STRIPPED_DIR release/build_devel.sh
+      run: "TARGET_DIR=$STRIPPED_DIR release/build_devel.sh"
     - uses: ./.github/workflows/setup-with-retry
     - name: Build openpilot and run checks
       timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 10 || 30) }} # allow more time when we missed the scons cache
@@ -76,15 +99,11 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Setup docker push
-      if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/openpilot'
-      run: |
-        echo "PUSH_IMAGE=true" >> "$GITHUB_ENV"
-        $DOCKER_LOGIN
     - uses: ./.github/workflows/setup-with-retry
     - uses: ./.github/workflows/compile-openpilot
       timeout-minutes: 30
@@ -93,6 +112,7 @@ jobs:
     name: build macOS
     if: false  # temp disable since homebrew install is getting stuck
     runs-on: ${{ ((github.repository == 'commaai/openpilot') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))) && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -112,14 +132,6 @@ jobs:
         # package install has DeprecationWarnings
         PYTHONWARNINGS: default
     - run: git lfs pull
-    - name: Getting scons cache
-      uses: ./.github/workflows/auto-cache
-      with:
-        path: /tmp/scons_cache
-        key: scons-${{ runner.arch }}-macos-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
-        restore-keys: |
-          scons-${{ runner.arch }}-macos-${{ env.CACHE_COMMIT_DATE }}
-          scons-${{ runner.arch }}-macos
     - name: Building openpilot
       run: . .venv/bin/activate && scons -j$(nproc)
 
@@ -133,6 +145,7 @@ jobs:
       || fromJSON('["ubuntu-24.04"]') }}
     env:
       PYTHONWARNINGS: default
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -150,6 +163,7 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -177,6 +191,7 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -227,6 +242,7 @@ jobs:
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
     if: (github.repository == 'commaai/openpilot') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -253,6 +269,7 @@ jobs:
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
     if: false  # FIXME: FrameReader is broken on CI runners
+    needs: [setup-cache]
     steps:
       - uses: actions/checkout@v4
         with:
