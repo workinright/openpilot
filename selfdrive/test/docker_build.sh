@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# create a snapshot
+rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
 
 PYTHONUNBUFFERED=1
 
@@ -77,3 +77,10 @@ sudo -u "$USER" bash -c "cd "/home/$USER" && \
     rm -rf tools/ pyproject.toml uv.lock .cache"
 
 sudo git config --global --add safe.directory /tmp/openpilot
+
+rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m --exclude=/diff_output -m --compare-dest=/state1 -m / /diff_output --delete --delete-excluded \
+    && find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
+    && find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
+    && rm -rf /state1
+
+du -sh /diff_output
