@@ -8,11 +8,15 @@ sudo mount --bind /dev /overlay/dev
 sudo mount --bind /dev/pts /overlay/dev/pts
 sudo mount --bind /proc /overlay/proc
 sudo mount --bind /sys /overlay/sys
+cat /proc/mounts | cut -d" " -f2 | while read line
+do
+    sudo mount --bind "$line" "/overlay$line"
+done
 sudo mount --make-rprivate /
 cd /overlay
 sudo mkdir old
 mount
-exit 0
+#exit 0
 sudo pivot_root . old
 
 PYTHONUNBUFFERED=1
