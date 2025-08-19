@@ -1,7 +1,9 @@
 #!/bin/bash
 
-sudo mkdir -p /state1 /diff_output && sudo mount -t tmpfs tmpfs /state1 && sudo mount -t tmpfs tmpfs /diff_output
-time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
+#sudo mkdir -p /state1 /diff_output && sudo mount -t tmpfs tmpfs /state1 && sudo mount -t tmpfs tmpfs /diff_output
+#time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
+sudo mkdir -p /upper /work
+sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /
 
 PYTHONUNBUFFERED=1
 
@@ -79,9 +81,9 @@ sudo -u "$USER" bash -c "cd "/home/$USER" && \
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
-time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m --exclude=/diff_output -m --compare-dest=/state1 -m / /diff_output --delete --delete-excluded \
-    && time find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
-    && time find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
-    && umount /state1
+#time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m --exclude=/diff_output -m --compare-dest=/state1 -m / /diff_output --delete --delete-excluded \
+#    && time find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
+#    && time find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
+#    && umount /state1
 
-sudo du -sh /diff_output
+sudo du -sh /upper
