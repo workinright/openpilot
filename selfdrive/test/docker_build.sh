@@ -2,6 +2,10 @@
 
 #sudo mkdir -p /state1 /diff_output && sudo mount -t tmpfs tmpfs /state1 && sudo mount -t tmpfs tmpfs /diff_output
 #time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
+
+tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
+tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
+
 sudo mkdir -p /upper /work /overlay
 mounts="$(cat /proc/mounts)"
 sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /overlay
@@ -85,7 +89,7 @@ sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 sudo -u "$USER" cp "$REPO/pyproject.toml" uv.lock "/home/$USER" && \
 #sudo -u "$USER" chown "${USER}:{$USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 
-sudo -u "$USER" cp tools/install_python_dependencies.sh "/home/$USER/tools/"
+sudo -u "$USER" cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 #sudo -u "$USER" chown "${USER}:{$USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
 VIRTUAL_ENV=/home/$USER/.venv
