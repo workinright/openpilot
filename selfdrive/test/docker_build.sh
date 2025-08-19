@@ -8,7 +8,8 @@ DEBIAN_FRONTEND=noninteractive
 
 REPO="/home/runner/work/openpilot/openpilot"
 
-sudo cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
+mkdir -p /tmp/tools
+cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
 sudo /tmp/tools/install_ubuntu_dependencies.sh && \
 
 sudo apt-get install -y --no-install-recommends \
