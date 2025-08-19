@@ -2,9 +2,16 @@
 
 #sudo mkdir -p /state1 /diff_output && sudo mount -t tmpfs tmpfs /state1 && sudo mount -t tmpfs tmpfs /diff_output
 #time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
-sudo mkdir -p /upper /work
-sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /
-mount
+sudo mkdir -p /upper /work /overlay
+sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /overlay
+sudo mount --bind /dev /overlay/dev
+sudo mount --bind /dev/pts /overlay/dev/pts
+sudo mount --bind /proc /overlay/proc
+sudo mount --bind /sys /overlay/sys
+sudo mount --make-rprivate /
+cd /overlay
+mkdir old
+sudo pivot_root . old
 
 PYTHONUNBUFFERED=1
 
