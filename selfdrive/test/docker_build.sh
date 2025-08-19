@@ -100,4 +100,4 @@ sudo git config --global --add safe.directory /tmp/openpilot
 #    && time find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
 #    && umount /state1
 
-sudo du -sh /upper
+sudo du -sh /old/upper
