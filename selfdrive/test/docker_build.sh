@@ -10,7 +10,7 @@ sudo mount --bind /proc /overlay/proc
 sudo mount --bind /sys /overlay/sys
 sudo mount --make-rprivate /
 cd /overlay
-mkdir old
+sudo mkdir old
 sudo pivot_root . old
 
 PYTHONUNBUFFERED=1
