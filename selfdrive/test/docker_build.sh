@@ -3,12 +3,13 @@
 #sudo mkdir -p /state1 /diff_output && sudo mount -t tmpfs tmpfs /state1 && sudo mount -t tmpfs tmpfs /diff_output
 #time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
 sudo mkdir -p /upper /work /overlay
+mounts="$(cat /proc/mounts)"
 sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /overlay
 sudo mount --bind /dev /overlay/dev
 sudo mount --bind /dev/pts /overlay/dev/pts
 sudo mount --bind /proc /overlay/proc
 sudo mount --bind /sys /overlay/sys
-cat /proc/mounts | cut -d" " -f2 | while read line
+echo "$mounts" | cut -d" " -f2 | while read line
 do
     sudo mount --bind "$line" "/overlay$line"
 done
