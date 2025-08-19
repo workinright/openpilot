@@ -16,7 +16,7 @@ sudo apt-get install -y --no-install-recommends \
     apt-utils alien unzip tar curl xz-utils dbus gcc-arm-none-eabi tmux vim libx11-6 wget && \
 sudo rm -rf /var/lib/apt/lists/* && sudo apt-get clean
 
-sudo rm -rf /var/lib/apt/lists/* /tmp/* && \
+sudo rm -rf /var/lib/apt/lists/* && \
     sudo apt-get clean && \
     cd /usr/lib/gcc/arm-none-eabi/* && \
     sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
@@ -46,6 +46,8 @@ mkdir -p /tmp/opencl-driver-intel && \
     ldconfig -f /etc/ld.so.conf.d/libintelopenclexp.conf && \
     cd / && \
     rm -rf /tmp/opencl-driver-intel
+
+rm -rf /tmp/*
 
 NVIDIA_VISIBLE_DEVICES=all
 NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
