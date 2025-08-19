@@ -11,6 +11,7 @@ sudo mount --bind /sys /overlay/sys
 sudo mount --make-rprivate /
 cd /overlay
 sudo mkdir old
+mount
 sudo pivot_root . old
 
 PYTHONUNBUFFERED=1
