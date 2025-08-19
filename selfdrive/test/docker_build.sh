@@ -4,40 +4,27 @@
 
 PYTHONUNBUFFERED=1
 
-echo whoami
-whoami
-
 DEBIAN_FRONTEND=noninteractive
-apt-get update && \
-    apt-get install -y --no-install-recommends sudo tzdata locales ssh pulseaudio xvfb x11-xserver-utils gnome-screenshot python3-tk python3-dev && \
-    rm -rf /var/lib/apt/lists/* && apt-get clean
+sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends \
+        sudo tzdata locales ssh pulseaudio xvfb x11-xserver-utils gnome-screenshot python3-tk python3-dev \
+        apt-utils alien unzip tar curl xz-utils dbus gcc-arm-none-eabi tmux vim libx11-6 wget && \
+    sudo rm -rf /var/lib/apt/lists/* && sudo apt-get clean
 
-sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
+sudo sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && sudo locale-gen
 LANG=en_US.UTF-8
 LANGUAGE=en_US:en
 LC_ALL=en_US.UTF-8
 
-cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
-/tmp/tools/install_ubuntu_dependencies.sh && \
-    rm -rf /var/lib/apt/lists/* /tmp/* && \
-    apt-get clean && \
+sudo cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
+sudo /tmp/tools/install_ubuntu_dependencies.sh && \
+    sudo rm -rf /var/lib/apt/lists/* /tmp/* && \
+    sudo apt-get clean && \
     cd /usr/lib/gcc/arm-none-eabi/* && \
-    rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
+    sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
 
-apt-get update && apt-get install -y --no-install-recommends \
-    apt-utils \
-    alien \
-    unzip \
-    tar \
-    curl \
-    xz-utils \
-    dbus \
-    gcc-arm-none-eabi \
-    tmux \
-    vim \
-    libx11-6 \
-    wget \
-  && rm -rf /var/lib/apt/lists/* && apt-get clean
+sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+  && sudo rm -rf /var/lib/apt/lists/* && sudo apt-get clean
 
 mkdir -p /tmp/opencl-driver-intel && \
     cd /tmp/opencl-driver-intel && \
@@ -64,13 +51,13 @@ NVIDIA_VISIBLE_DEVICES=all
 NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
 QTWEBENGINE_DISABLE_SANDBOX=1
 
-dbus-uuidgen > /etc/machine-id
+sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
 USER=batman
 USER_UID=1001
-useradd -m -s /bin/bash -u "$USER_UID" "$USER"
-usermod -aG sudo "$USER"
-echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
+sudo usermod -aG sudo "$USER"
+sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
 #USER $USER
 
@@ -86,6 +73,4 @@ sudo -u "$USER" bash -c "cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock .cache"
 
-#USER root
-#sudo
-git config --global --add safe.directory /tmp/openpilot
+sudo git config --global --add safe.directory /tmp/openpilot
