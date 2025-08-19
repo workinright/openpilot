@@ -9,13 +9,16 @@ tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 sudo mkdir -p /upper /work /overlay
 mounts="$(cat /proc/mounts)"
 sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /overlay
-sudo mount --bind /dev /overlay/dev
-sudo mount --bind /dev/pts /overlay/dev/pts
-sudo mount --bind /proc /overlay/proc
-sudo mount --bind /sys /overlay/sys
+#sudo mount --bind /dev /overlay/dev
+#sudo mount --bind /dev/pts /overlay/dev/pts
+#sudo mount --bind /proc /overlay/proc
+#sudo mount --bind /sys /overlay/sys
 echo "$mounts" | cut -d" " -f2 | while read line
 do
-    sudo mount --bind "$line" "/overlay$line"
+    if [ "$line" != "/" ]
+    then
+        sudo mount --bind "$line" "/overlay$line"
+    fi
 done
 sudo mount --make-rprivate /
 cd /overlay
