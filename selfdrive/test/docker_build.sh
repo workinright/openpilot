@@ -6,7 +6,7 @@ PYTHONUNBUFFERED=1
 
 DEBIAN_FRONTEND=noninteractive
 
-sudo find /home/runner
+REPO="/home/runner/work/openpilot/openpilot"
 
 sudo cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
 sudo /tmp/tools/install_ubuntu_dependencies.sh && \
