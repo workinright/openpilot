@@ -5,26 +5,26 @@
 PYTHONUNBUFFERED=1
 
 DEBIAN_FRONTEND=noninteractive
-sudo apt-get update && \
-    sudo apt-get install -y --no-install-recommends \
-        sudo tzdata locales ssh pulseaudio xvfb x11-xserver-utils gnome-screenshot python3-tk python3-dev \
-        apt-utils alien unzip tar curl xz-utils dbus gcc-arm-none-eabi tmux vim libx11-6 wget && \
-    sudo rm -rf /var/lib/apt/lists/* && sudo apt-get clean
+
+find /
+
+sudo cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
+sudo /tmp/tools/install_ubuntu_dependencies.sh && \
+
+sudo apt-get install -y --no-install-recommends \
+    sudo tzdata locales ssh pulseaudio xvfb x11-xserver-utils gnome-screenshot python3-tk python3-dev \
+    apt-utils alien unzip tar curl xz-utils dbus gcc-arm-none-eabi tmux vim libx11-6 wget && \
+sudo rm -rf /var/lib/apt/lists/* && sudo apt-get clean
+
+sudo rm -rf /var/lib/apt/lists/* /tmp/* && \
+    sudo apt-get clean && \
+    cd /usr/lib/gcc/arm-none-eabi/* && \
+    sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
 
 sudo sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && sudo locale-gen
 LANG=en_US.UTF-8
 LANGUAGE=en_US:en
 LC_ALL=en_US.UTF-8
-
-sudo cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
-sudo /tmp/tools/install_ubuntu_dependencies.sh && \
-    sudo rm -rf /var/lib/apt/lists/* /tmp/* && \
-    sudo apt-get clean && \
-    cd /usr/lib/gcc/arm-none-eabi/* && \
-    sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
-
-sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-  && sudo rm -rf /var/lib/apt/lists/* && sudo apt-get clean
 
 mkdir -p /tmp/opencl-driver-intel && \
     cd /tmp/opencl-driver-intel && \
