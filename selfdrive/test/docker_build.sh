@@ -2,9 +2,10 @@
 
 # create a snapshot
 
-# TODO: quote all variables
-
 PYTHONUNBUFFERED=1
+
+echo whoami
+whoami
 
 DEBIAN_FRONTEND=noninteractive
 apt-get update && \
