@@ -4,6 +4,7 @@
 #time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
 sudo mkdir -p /upper /work
 sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /
+mount
 
 PYTHONUNBUFFERED=1
 
