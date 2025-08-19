@@ -12,6 +12,7 @@ sudo mount --make-rprivate /
 cd /overlay
 sudo mkdir old
 mount
+exit 0
 sudo pivot_root . old
 
 PYTHONUNBUFFERED=1
