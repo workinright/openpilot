@@ -76,6 +76,8 @@ QTWEBENGINE_DISABLE_SANDBOX=1
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
 cd
+mkdir pydeps
+cd pydeps
 cp "$REPO/pyproject.toml" "$REPO/uv.lock" .
 
 mkdir -p tools
@@ -86,6 +88,8 @@ PATH="$VIRTUAL_ENV/bin:$PATH"
 rm -rf .cache
 tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock .cache ; export UV_BIN="$HOME/.local/bin"
+
+cd
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
