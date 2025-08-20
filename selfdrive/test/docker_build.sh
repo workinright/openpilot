@@ -83,6 +83,7 @@ sudo cp "$REPO/tools/install_python_dependencies.sh" tools/
 
 VIRTUAL_ENV="$HOME/.venv"
 PATH="$VIRTUAL_ENV/bin:$PATH"
+rm -rf .cache
 tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock .cache ; export UV_BIN="$HOME/.local/bin"
 
