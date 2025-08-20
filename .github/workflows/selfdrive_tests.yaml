@@ -191,7 +191,7 @@ jobs:
         key: proc-replay-${{ hashFiles('selfdrive/test/process_replay/ref_commit', 'selfdrive/test/process_replay/test_processes.py') }}
     - name: Build openpilot
       run: |
-        ${{ env.RUN }} "scons -j$(nproc)"
+        ${{ env.RUN }} "echo $PATH ; export UV_BIN="$HOME/.local/bin" ; export PATH="$UV_BIN:$PATH" ; scons -j$(nproc)"
     - name: Run replay
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.dependency-cache.outputs.cache-hit == 'true') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 20 }}
       run: |
@@ -235,7 +235,7 @@ jobs:
       id: setup-step
     - name: Build openpilot
       run: |
-        ${{ env.RUN }} "scons -j$(nproc)"
+        ${{ env.RUN }} "echo $PATH ; export UV_BIN="$HOME/.local/bin" ; export PATH="$UV_BIN:$PATH" ; scons -j$(nproc)"
     - name: Driving test
       timeout-minutes: ${{ (steps.setup-step.outputs.duration < 18) && 1 || 2 }}
       run: |
