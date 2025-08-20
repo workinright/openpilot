@@ -84,10 +84,10 @@ sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 #USER $USER
 
 sudo cp "$REPO/pyproject.toml" uv.lock "/home/$USER" && \
-sudo chown "${USER}:{$USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
+sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
-sudo chown "${USER}:{$USER}" "/home/$USER/tools/install_python_dependencies.sh"
+sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
 VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -103,4 +103,4 @@ sudo git config --global --add safe.directory /tmp/openpilot
 #    && umount /state1
 
 sudo du -sh /old/upper
-tar -Izstd -C /old/upper/ -cf /tmp/rootfs_cache.tar.zstd
+tar -Izstd -C /old/upper/ -cf /tmp/rootfs_cache.tar.zstd /old/upper/
