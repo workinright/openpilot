@@ -4,15 +4,10 @@
 #time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
 
 tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
-tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 
 sudo mkdir -p /upper /work /overlay
 mounts="$(cat /proc/mounts)"
 sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /overlay
-#sudo mount --bind /dev /overlay/dev
-#sudo mount --bind /dev/pts /overlay/dev/pts
-#sudo mount --bind /proc /overlay/proc
-#sudo mount --bind /sys /overlay/sys
 echo "$mounts" | cut -d" " -f2 | while read line
 do
     if [ "$line" != "/" ]
@@ -22,9 +17,8 @@ do
 done
 sudo mount --make-rprivate /
 cd /overlay
-sudo mkdir old
+sudo mkdir -p old
 mount
-#exit 0
 sudo pivot_root . old
 
 PYTHONUNBUFFERED=1
