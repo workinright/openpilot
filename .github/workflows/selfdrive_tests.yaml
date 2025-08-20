@@ -89,6 +89,12 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
     - uses: ./.github/workflows/compile-openpilot
       timeout-minutes: 30
+    - name: Save rootfs cache
+      uses: actions/cache/save@v4
+      #if: github.ref == 'refs/heads/master'
+      with:
+        path: /old/tmp/rootfs_cache.tar.zstd
+        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
 
   build_mac:
     name: build macOS
