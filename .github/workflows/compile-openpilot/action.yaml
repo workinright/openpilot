@@ -6,7 +6,7 @@ runs:
     - shell: bash
       name: Build openpilot with all flags
       run: |
-        ${{ env.RUN }} sudo -u batman "mount ; echo $PATH ; export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; scons -j$(nproc)"
+        sudo -u batman bash -c "mount ; echo $PATH ; export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; scons -j$(nproc)"
         ${{ env.RUN }} "release/check-dirty.sh"
     - shell: bash
       name: Cleanup scons cache and rebuild
