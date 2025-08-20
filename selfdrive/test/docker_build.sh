@@ -89,11 +89,11 @@ sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
 #USER $USER
 
-sudo -u "$USER" cp "$REPO/pyproject.toml" uv.lock "/home/$USER" && \
-#sudo -u "$USER" chown "${USER}:{$USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
+sudo cp "$REPO/pyproject.toml" uv.lock "/home/$USER" && \
+sudo chown "${USER}:{$USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 
-sudo -u "$USER" cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
-#sudo -u "$USER" chown "${USER}:{$USER}" "/home/$USER/tools/install_python_dependencies.sh"
+sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
+sudo chown "${USER}:{$USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
 VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
