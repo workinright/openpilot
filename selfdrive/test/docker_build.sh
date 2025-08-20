@@ -75,21 +75,31 @@ QTWEBENGINE_DISABLE_SANDBOX=1
 
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
-cd
-mkdir pydeps
-cd pydeps
-cp "$REPO/pyproject.toml" "$REPO/uv.lock" .
+USER=batman
+USER_UID=1002
+sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
+sudo usermod -aG sudo "$USER"
+sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
-mkdir -p tools
-sudo cp "$REPO/tools/install_python_dependencies.sh" tools/
+#USER $USER
 
-VIRTUAL_ENV="$HOME/.venv"
+sudo mkdir -p "/home/$USER/tools"
+sudo chown "${USER}:${USER}" "/home/$USER/tools"
+
+sudo cp "$REPO/pyproject.toml" "$REPO/uv.lock" "/home/$USER" && \
+sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
+
+sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
+sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
+
+sudo cat /etc/passwd
+
+VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
-rm -rf .cache
-tools/install_python_dependencies.sh && \
-    rm -rf tools/ pyproject.toml uv.lock .cache ; export UV_BIN="$HOME/.local/bin"
-
-cd
+sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
+    tools/install_python_dependencies.sh && \
+    rm -rf tools/ pyproject.toml uv.lock .cache ; export UV_BIN="$HOME/.local/bin"; \
+  export PATH="$UV_BIN:$PATH" ; source .venv/bin/activate ; uv pip show scons ; scons"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
