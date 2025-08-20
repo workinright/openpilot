@@ -98,7 +98,7 @@ VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
 sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
-    rm -rf tools/ pyproject.toml uv.lock .cache"
+    rm -rf tools/ pyproject.toml uv.lock .cache ; scons"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
