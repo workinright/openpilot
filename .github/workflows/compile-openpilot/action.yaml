@@ -12,7 +12,7 @@ runs:
       name: Cleanup scons cache and rebuild
       run: |
           ${{ env.RUN }} "rm -rf /tmp/scons_cache/* && \
-                          echo $PATH ; export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; scons -j$(nproc) --cache-populate"
+                          cd / ; tar -Izstd -xf /old/tmp/rootfs_cache.tar.zstd ; echo $PATH ; export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; scons -j$(nproc) --cache-populate"
     - name: Save scons cache
       uses: actions/cache/save@v4
       if: github.ref == 'refs/heads/master'
