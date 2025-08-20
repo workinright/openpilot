@@ -158,7 +158,7 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Build openpilot
-      run: ${{ env.RUN }} "scons -j$(nproc)"
+      run: ${{ env.RUN }} "echo $PATH ; export UV_BIN="$HOME/.local/bin" ; export PATH="$UV_BIN:$PATH" ; scons -j$(nproc)"
     - name: Run unit tests
       timeout-minutes: ${{ contains(runner.name, 'nsc') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 20 }}
       run: |
