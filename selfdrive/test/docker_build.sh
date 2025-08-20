@@ -92,6 +92,8 @@ sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
+sudo cat /etc/passwd
+
 VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
 sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; cd "/home/$USER" && \
