@@ -83,6 +83,9 @@ sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
 #USER $USER
 
+sudo mkdir -p "/home/$USER/tools"
+sudo chown "${USER}:${USER}" "/home/$USER/tools"
+
 sudo cp "$REPO/pyproject.toml" uv.lock "/home/$USER" && \
 sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 
@@ -103,4 +106,4 @@ sudo git config --global --add safe.directory /tmp/openpilot
 #    && umount /state1
 
 sudo du -sh /old/upper
-tar -Izstd -C /old/upper/ -cf /tmp/rootfs_cache.tar.zstd /old/upper/
+sudo tar -Izstd -C /old/upper/ -cf /tmp/rootfs_cache.tar.zstd /old/upper/
