@@ -86,7 +86,7 @@ sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 sudo mkdir -p "/home/$USER/tools"
 sudo chown "${USER}:${USER}" "/home/$USER/tools"
 
-sudo cp "$REPO/pyproject.toml" uv.lock "/home/$USER" && \
+sudo cp "$REPO/pyproject.toml" "$REPO/uv.lock" "/home/$USER" && \
 sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
