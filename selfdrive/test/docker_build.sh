@@ -94,9 +94,9 @@ sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
 VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
-sudo -u "$USER" bash -c 'cd "/home/$USER" && \
+sudo -u "$USER" bash -c "echo $USER ; cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
-    rm -rf tools/ pyproject.toml uv.lock .cache'
+    rm -rf tools/ pyproject.toml uv.lock .cache"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
