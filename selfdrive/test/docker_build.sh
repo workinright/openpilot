@@ -4,6 +4,7 @@ ROOTFS_FILE_PATH="/tmp/rootfs_cache.tar.zstd"
 if [ -e "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
+    ls "$ROOTFS_FILE_PATH"
     tar -Ipixz -xf "$ROOTFS_FILE_PATH"
 
     exit 0
