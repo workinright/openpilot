@@ -52,18 +52,18 @@ jobs:
         command: git lfs pull
     - name: Build devel
       timeout-minutes: 1
-      run: TARGET_DIR=$STRIPPED_DIR release/build_devel.sh
+      run: mkdir "$STRIPPED_DIR"; TARGET_DIR=$STRIPPED_DIR release/build_devel.sh
     - uses: ./.github/workflows/setup-with-retry
     - name: Build openpilot and run checks
       timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 10 || 30) }} # allow more time when we missed the scons cache
       run: |
         cd $STRIPPED_DIR
-        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner/work ; python3 system/manager/build.py ; sudo chown -R runner:runner /home/runner"
+        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner ; python3 system/manager/build.py ; sudo chown -R runner:runner /home/runner"
     - name: Run tests
       timeout-minutes: 1
       run: |
         cd $STRIPPED_DIR
-        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner/work; release/check-dirty.sh ; sudo chown -R runner:runner /home/runner"
+        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner; release/check-dirty.sh ; sudo chown -R runner:runner /home/runner"
     - name: Check submodules
       if: github.repository == 'commaai/openpilot'
       timeout-minutes: 3
