@@ -109,7 +109,7 @@ sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export XDG_CON
 sudo git config --global --add safe.directory /tmp/openpilot
 
 sudo du -sh /old/upper
-rm -rf /old/tmp/rootfs_cache.tar.zstd
+sudo rm -rf /old/tmp/rootfs_cache.tar.zstd
 sudo tar -Izstd -C /old/upper/ -cf /old/tmp/rootfs_cache.tar.zstd /old/upper/
 
 stat /tmp/rootfs_cache.tar.zstd
