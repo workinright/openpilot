@@ -25,7 +25,7 @@ env:
   DOCKER_LOGIN: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
   BUILD: selfdrive/test/docker_build.sh base
 
-  RUN: sudo -u batman bash -c "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner/work" ; sudo -u batman bash -c
+  RUN: sudo -u batman bash -c export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner/work;
 
   PYTEST: pytest --continue-on-collection-errors --durations=0 -n logical
 
@@ -58,12 +58,12 @@ jobs:
       timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 10 || 30) }} # allow more time when we missed the scons cache
       run: |
         cd $STRIPPED_DIR
-        ${{ env.RUN }} "python3 system/manager/build.py"
+        ${{ env.RUN }} "python3 system/manager/build.py ; sudo chown -R runner:runner /home/runner"
     - name: Run tests
       timeout-minutes: 1
       run: |
         cd $STRIPPED_DIR
-        ${{ env.RUN }} "release/check-dirty.sh"
+        ${{ env.RUN }} "release/check-dirty.sh ; sudo chown -R runner:runner /home/runner"
     - name: Check submodules
       if: github.repository == 'commaai/openpilot'
       timeout-minutes: 3
@@ -140,7 +140,7 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
     - name: Static analysis
       timeout-minutes: 1
-      run: ${{ env.RUN }} "scripts/lint/lint.sh"
+      run: ${{ env.RUN }} "scripts/lint/lint.sh ; sudo chown -R runner:runner /home/runner"
 
   unit_tests:
     name: unit tests
@@ -157,7 +157,7 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Build openpilot
-      run: ${{ env.RUN }} "scons -j$(nproc)"
+      run: ${{ env.RUN }} "scons -j$(nproc) ; sudo chown -R runner:runner /home/runner"
     - name: Run unit tests
       timeout-minutes: ${{ contains(runner.name, 'nsc') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 20 }}
       run: |
