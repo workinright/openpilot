@@ -111,6 +111,6 @@ sudo git config --global --add safe.directory /tmp/openpilot
 sudo du -sh /old/upper
 sudo rm -rf /old/tmp/rootfs_cache.tar.zstd
 sudo tar -Izstd -C /old/upper/ -cf /old/tmp/rootfs_cache.tar.zstd /old/upper/
-mv /old/tmp/rootfs_cache.tar.zstd /tmp/rootfs_cache.tar.zstd
+sudo mv /old/tmp/rootfs_cache.tar.zstd /tmp/rootfs_cache.tar.zstd
 
 #stat /tmp/rootfs_cache.tar.zstd
