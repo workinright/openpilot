@@ -1,7 +1,15 @@
 #!/bin/bash
 
-#sudo mkdir -p /state1 /diff_output && sudo mount -t tmpfs tmpfs /state1 && sudo mount -t tmpfs tmpfs /diff_output
-#time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m / /state1 --delete --delete-excluded
+ROOTFS_FILE_PATH="/tmp/rootfs_cache.tar.zstd"
+if [ -e "$ROOTFS_FILE_PATH" ]
+then
+    echo "restoring rootfs from the native build cache"
+    tar -Ipixz -xf "$ROOTFS_FILE_PATH"
+
+    exit 0
+else
+    echo "no native build cache entry restored, rebuilding"
+fi
 
 tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 
@@ -28,7 +36,7 @@ DEBIAN_FRONTEND=noninteractive
 REPO="/home/runner/work/openpilot/openpilot"
 
 mkdir -p /tmp/tools
-cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/ # $REPO TODO
+cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/
 sudo /tmp/tools/install_ubuntu_dependencies.sh && \
 
 sudo apt-get install -y --no-install-recommends \
@@ -81,8 +89,6 @@ sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
 sudo usermod -aG sudo "$USER"
 sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
-#USER $USER
-
 sudo mkdir -p "/home/$USER/tools"
 sudo chown "${USER}:${USER}" "/home/$USER/tools"
 
@@ -92,8 +98,6 @@ sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
-sudo cat /etc/passwd
-
 VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
 sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
@@ -102,11 +106,6 @@ sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export XDG_CON
   export PATH="$UV_BIN:$PATH" ; source .venv/bin/activate ; uv pip show scons ; scons"
 
 sudo git config --global --add safe.directory /tmp/openpilot
-
-#time sudo rsync -a --info=progress2 -m --exclude=/dev -m --exclude=/proc -m --exclude=/sys -m --exclude=/state1 -m --exclude=/diff_output -m --compare-dest=/state1 -m / /diff_output --delete --delete-excluded \
-#    && time find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
-#    && time find /diff_output -type d -empty -exec rmdir -p --ignore-fail-on-non-empty {} + 2>/dev/null || true \
-#    && umount /state1
 
 sudo du -sh /old/upper
 sudo tar -Izstd -C /old/upper/ -cf /old/tmp/rootfs_cache.tar.zstd /old/upper/
