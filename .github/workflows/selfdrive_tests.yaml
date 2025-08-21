@@ -25,8 +25,7 @@ env:
   DOCKER_LOGIN: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
   BUILD: selfdrive/test/docker_build.sh base
 
-  #RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
-  RUN: bash -c
+  RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
 
   PYTEST: pytest --continue-on-collection-errors --durations=0 -n logical
 
@@ -89,12 +88,6 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
     - uses: ./.github/workflows/compile-openpilot
       timeout-minutes: 30
-    - name: Save rootfs cache
-      uses: actions/cache/save@v4
-      #if: github.ref == 'refs/heads/master'
-      with:
-        path: /old/tmp/rootfs_cache.tar.zstd
-        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
 
   build_mac:
     name: build macOS
@@ -164,12 +157,13 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Build openpilot
-      run: ${{ env.RUN }} "echo $PATH ; export UV_BIN="$HOME/.local/bin" ; export PATH="$UV_BIN:$PATH" ; scons -j$(nproc)"
+      run: ${{ env.RUN }} "scons -j$(nproc)"
     - name: Run unit tests
       timeout-minutes: ${{ contains(runner.name, 'nsc') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 20 }}
       run: |
         ${{ env.RUN }} "source selfdrive/test/setup_xvfb.sh && \
-                        $PYTEST --collect-only -m 'not slow' &> /dev/null && \
+                        # Pre-compile Python bytecode so each pytest worker doesn't need to
+                        $PYTEST --collect-only -m 'not slow' -qq && \
                         MAX_EXAMPLES=1 $PYTEST -m 'not slow' && \
                         ./selfdrive/ui/tests/create_test_translations.sh && \
                         QT_QPA_PLATFORM=offscreen ./selfdrive/ui/tests/test_translations && \
@@ -197,7 +191,7 @@ jobs:
         key: proc-replay-${{ hashFiles('selfdrive/test/process_replay/ref_commit', 'selfdrive/test/process_replay/test_processes.py') }}
     - name: Build openpilot
       run: |
-        ${{ env.RUN }} "echo $PATH ; export UV_BIN="$HOME/.local/bin" ; export PATH="$UV_BIN:$PATH" ; scons -j$(nproc)"
+        ${{ env.RUN }} "scons -j$(nproc)"
     - name: Run replay
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.dependency-cache.outputs.cache-hit == 'true') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 20 }}
       run: |
@@ -241,7 +235,7 @@ jobs:
       id: setup-step
     - name: Build openpilot
       run: |
-        ${{ env.RUN }} "echo $PATH ; export UV_BIN="$HOME/.local/bin" ; export PATH="$UV_BIN:$PATH" ; scons -j$(nproc)"
+        ${{ env.RUN }} "scons -j$(nproc)"
     - name: Driving test
       timeout-minutes: ${{ (steps.setup-step.outputs.duration < 18) && 1 || 2 }}
       run: |
