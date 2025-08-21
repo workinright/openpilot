@@ -57,7 +57,7 @@ runs:
       run: eval ${{ env.BUILD }}
     - name: Save rootfs cache
       uses: actions/cache/save@v4
-      if: github.ref == 'refs/heads/master'
+      #if: github.ref == 'refs/heads/master'
       with:
         path: /tmp/rootfs_cache.tar.zstd
         key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
