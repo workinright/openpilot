@@ -47,7 +47,7 @@ runs:
     - id: rootfs-cache
       uses: ./.github/workflows/auto-cache
       with:
-        path: /tmp/rootfs_cache/rootfs_cache.tar.zstd
+        path: /tmp/rootfs_cache
         key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
         restore-keys: |
           rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
