@@ -112,4 +112,4 @@ sudo du -sh /old/upper
 sudo rm -rf /old/tmp/rootfs_cache.tar.zstd
 sudo tar -Izstd -C /old/upper/ -cf /old/tmp/rootfs_cache.tar.zstd /old/upper/
 
-stat /tmp/rootfs_cache.tar.zstd
+#stat /tmp/rootfs_cache.tar.zstd
