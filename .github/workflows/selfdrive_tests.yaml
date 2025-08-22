@@ -161,7 +161,7 @@ jobs:
     - name: Run unit tests
       timeout-minutes: ${{ contains(runner.name, 'nsc') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 20 }}
       run: |
-        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner/work; source selfdrive/test/setup_xvfb.sh && \
+        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; source selfdrive/test/setup_xvfb.sh && \
                         # Pre-compile Python bytecode so each pytest worker doesn't need to
                         $PYTEST --collect-only -m 'not slow' -qq && \
                         MAX_EXAMPLES=1 $PYTEST -m 'not slow' && \
