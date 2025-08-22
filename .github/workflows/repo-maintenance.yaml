@@ -7,19 +7,43 @@ on:
 
 env:
   BASE_IMAGE: openpilot-base
-  BUILD: selfdrive/test/docker_build.sh base
-  RUN: docker run --shm-size 2G -v $PWD:/tmp/openpilot -w /tmp/openpilot -e CI=1 -e PYTHONWARNINGS=error -e FILEREADER_CACHE=1 -e PYTHONPATH=/tmp/openpilot -e NUM_JOBS -e JOB_ID -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v $GITHUB_WORKSPACE/.ci_cache/scons_cache:/tmp/scons_cache -v $GITHUB_WORKSPACE/.ci_cache/comma_download_cache:/tmp/comma_download_cache -v $GITHUB_WORKSPACE/.ci_cache/openpilot_cache:/tmp/openpilot_cache $BASE_IMAGE /bin/bash -c
+  BUILD: selfdrive/test/build.sh base
+  RUN: export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate || true ; export PYTHONPATH=/tmp/openpilot ; export CI=1 ; export PYTHONWARNINGS=error ; export FILEREADER_CACHE=1 ; bash -c
 
 jobs:
+  setup-cache:
+    name: setup cache
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      # build scons cache
+      - id: date
+        shell: bash
+        run: echo "CACHE_COMMIT_DATE=$(git log -1 --pretty='format:%cd' --date=format:'%Y-%m-%d-%H:%M')" >> $GITHUB_ENV
+      - shell: bash
+        run: echo "$CACHE_COMMIT_DATE"
+      - id: scons-cache
+        uses: ./.github/workflows/auto-cache
+        with:
+          path: .ci_cache/scons_cache
+          key: scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
+          restore-keys: |
+            scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
+            scons-${{ runner.arch }}
+      - name: setup-with-retry
+        uses: ./.github/workflows/setup-with-retry
   update_translations:
     runs-on: ubuntu-latest
     if: github.repository == 'commaai/openpilot'
+    needs: [setup-cache]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/setup-with-retry
       - name: Update translations
         run: |
-          ${{ env.RUN }} "rm -rf /home/runner/.venv ; cp -pR /home/runner/venv /home/runner/.venv; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; python3 selfdrive/ui/update_translations.py --vanish"
+          ${{ env.RUN }} "python3 selfdrive/ui/update_translations.py --vanish"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83
         with:
