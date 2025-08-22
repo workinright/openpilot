@@ -9,7 +9,7 @@ then
     #tar -tf "$ROOTFS_FILE_PATH"
     sudo tar -xf "$ROOTFS_FILE_PATH"
     rm "$ROOTFS_FILE_PATH"
-    cd "$ROOTFS_FILE_PATH"
+    cd
 
     exit 0
 else
