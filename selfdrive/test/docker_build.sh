@@ -116,6 +116,7 @@ sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL
     sudo chown -R runner:runner /home/runner/.local/bin ; \
     sudo chown runner:runner /home/runner ; \
     sudo chown -R runner:runner /home/runner/.venv ; \
+    sudo mv /home/runner/.venv /home/runner/venv
     export UV_BIN="/home/runner/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate"
 
 sudo git config --global --add safe.directory /tmp/openpilot
