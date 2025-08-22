@@ -48,7 +48,7 @@ runs:
       uses: ./.github/workflows/auto-cache
       with:
         path: /tmp/rootfs_cache/rootfs_cache.tar.zstd
-        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ env.LAST_COMMIT_HASH }}
+        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}-${{ env.LAST_COMMIT_HASH }}
     # build our docker image
     - shell: bash
       run: eval ${{ env.BUILD }}
@@ -57,4 +57,4 @@ runs:
       #if: github.ref == 'refs/heads/master'
       with:
         path: /tmp/rootfs_cache/rootfs_cache.tar.zstd
-        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ env.LAST_COMMIT_HASH }}
+        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}-${{ env.LAST_COMMIT_HASH }}
