@@ -1,15 +1,15 @@
 #!/bin/bash
 
-ROOTFS_FILE_PATH="/tmp/rootfs_cache/rootfs_cache.tar.zstd"
+ROOTFS_FILE_PATH="/tmp/rootfs_cache/rootfs_cache.tar"
 
 if [ -f "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
     cd /
-    tar -Izstd -tf "$ROOTFS_FILE_PATH"
-    sudo tar -Izstd -xf "$ROOTFS_FILE_PATH"
-    cd
-    cat /etc/passwd
+    tar -tf "$ROOTFS_FILE_PATH"
+    sudo tar -xf "$ROOTFS_FILE_PATH"
+    rm "$ROOTFS_FILE_PATH"
+    cd "$ROOTFS_FILE_PATH"
 
     exit 0
 else
@@ -31,7 +31,6 @@ done
 sudo mount --make-rprivate /
 cd /overlay
 sudo mkdir -p old
-mount
 sudo pivot_root . old
 
 PYTHONUNBUFFERED=1
@@ -113,10 +112,10 @@ sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export XDG_CON
 sudo git config --global --add safe.directory /tmp/openpilot
 
 sudo du -sh /old/upper
-sudo rm -rf /old/tmp/rootfs_cache.tar.zstd
+sudo rm -rf /old/tmp/rootfs_cache.tar
 cd /old/upper
-sudo tar -Izstd -cf /old/tmp/rootfs_cache.tar.zstd .
+sudo tar -cf /old/tmp/rootfs_cache.tar .
 mkdir -p /tmp/rootfs_cache
-sudo mv /old/tmp/rootfs_cache.tar.zstd /tmp/rootfs_cache/rootfs_cache.tar.zstd
+sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 
-#stat /tmp/rootfs_cache.tar.zstd
+#stat /tmp/rootfs_cache.tar
