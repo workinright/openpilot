@@ -103,9 +103,9 @@ sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
 export VIRTUAL_ENV=/home/runner/.venv
-sudo mkdir -p /home/runner/.venv
-sudo chown batman:batman /home/runner/.venv
-sudo chown batman:batman /home/runner
+#sudo mkdir -p /home/runner/.venv
+#sudo chown batman:batman /home/runner/.venv
+#sudo chown batman:batman /home/runner
 PATH="$VIRTUAL_ENV/bin:$PATH"
 sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/runner/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
