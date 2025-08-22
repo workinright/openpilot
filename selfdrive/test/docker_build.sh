@@ -16,7 +16,7 @@ else
     echo "no native build cache entry restored, rebuilding"
 fi
 
-tac /proc/mounts |  grep /overlay | while read line; do umount "$line"; done
+tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 
 sudo mkdir -p /upper /work /overlay
 mounts="$(cat /proc/mounts)"
