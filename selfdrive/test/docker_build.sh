@@ -87,11 +87,11 @@ QTWEBENGINE_DISABLE_SANDBOX=1
 
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
-USER=batman
-USER_UID=1002
-sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
-sudo usermod -aG sudo "$USER"
-sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
+USER=runner
+#USER_UID=1002
+#sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
+#sudo usermod -aG sudo "$USER"
+#sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
 sudo mkdir -p "/home/$USER/tools"
 sudo chown "${USER}:${USER}" "/home/$USER/tools"
@@ -110,13 +110,6 @@ PATH="$VIRTUAL_ENV/bin:$PATH"
 sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/runner/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock .cache ; \
-    sudo mkdir -p /home/runner/.local/bin ;
-    sudo mv .local/bin/* /home/runner/.local/bin/ ; \
-    sudo mv .local/bin/.* /home/runner/.local/bin/ ; \
-    sudo chown -R runner:runner /home/runner/.local/bin ; \
-    sudo chown runner:runner /home/runner ; \
-    sudo chown -R runner:runner /home/runner/.venv ; \
-    sudo mv /home/runner/.venv /home/runner/venv
     export UV_BIN="/home/runner/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate"
 
 sudo git config --global --add safe.directory /tmp/openpilot
