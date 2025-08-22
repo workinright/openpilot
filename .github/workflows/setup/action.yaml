@@ -49,9 +49,6 @@ runs:
       with:
         path: /tmp/rootfs_cache/rootfs_cache.tar.zstd
         key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ env.LAST_COMMIT_HASH }}
-        restore-keys: |
-          rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
-          rootfs-${{ runner.arch }}
     # build our docker image
     - shell: bash
       run: eval ${{ env.BUILD }}
