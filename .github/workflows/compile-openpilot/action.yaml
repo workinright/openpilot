@@ -7,11 +7,11 @@ runs:
       name: Build openpilot with all flags
       run: |
         ${{ env.RUN }} "find /home/runner/.venv ; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/runner/.venv/bin/activate ; source /home/runner/.venv/bin/activate ; pwd ; scons -j$(nproc)"
-        ${{ env.RUN }} "find /home/runner/.venv ; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/runner/.venv/bin/activate ; source /home/runner/.venv/bin/activate ; pwd ; release/check-dirty.sh"
+        ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/runner/.venv/bin/activate ; source /home/runner/.venv/bin/activate ; pwd ; release/check-dirty.sh"
     - shell: bash
       name: Cleanup scons cache and rebuild
       run: |
-          ${{ env.RUN }} "rm -rf /home/runner/.venv ; cp -pR /home/runner/venv /home/runner/.venv; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; rm -rf /tmp/scons_cache/* && \
+          ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; rm -rf /tmp/scons_cache/* && \
                           scons -j$(nproc) --cache-populate"
     - name: Save scons cache
       uses: actions/cache/save@v4
