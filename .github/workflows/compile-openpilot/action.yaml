@@ -6,8 +6,8 @@ runs:
     - shell: bash
       name: Build openpilot with all flags
       run: |
-        ${{ env.RUN }} "rm -rf /home/runner/.venv ; cp -pR /home/runner/venv /home/runner/.venv ; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/runner/.venv/bin/activate ; source /home/runner/.venv/bin/activate ; pwd ; scons -j$(nproc)"
-        ${{ env.RUN }} "rm -rf /home/runner/.venv ; cp -pR /home/runner/venv /home/runner/.venv; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/runner/.venv/bin/activate ; source /home/runner/.venv/bin/activate ; pwd ; release/check-dirty.sh"
+        ${{ env.RUN }} "find /home/runner/.venv ; rm -rf /home/runner/.venv ; cp -pR /home/runner/venv /home/runner/.venv ; find /home/runner/.venv ; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/runner/.venv/bin/activate ; source /home/runner/.venv/bin/activate ; pwd ; scons -j$(nproc)"
+        ${{ env.RUN }} "find /home/runner/.venv ; rm -rf /home/runner/.venv ; cp -pR /home/runner/venv /home/runner/.venv ; find /home/runner/.venv ; export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/runner/.venv/bin/activate ; source /home/runner/.venv/bin/activate ; pwd ; release/check-dirty.sh"
     - shell: bash
       name: Cleanup scons cache and rebuild
       run: |
