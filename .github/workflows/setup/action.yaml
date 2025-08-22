@@ -40,7 +40,7 @@ runs:
       uses: ./.github/workflows/auto-cache
       with:
         path: .ci_cache/scons_cache
-        key: scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
+        key: scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }} 
         restore-keys: |
           scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
           scons-${{ runner.arch }}
