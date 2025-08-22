@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env
 
 ROOTFS_FILE_PATH="/tmp/rootfs_cache/rootfs_cache.tar"
 
@@ -87,11 +87,11 @@ QTWEBENGINE_DISABLE_SANDBOX=1
 
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
-USER=runner
-#USER_UID=1002
-#sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
-#sudo usermod -aG sudo "$USER"
-#sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
+USER=batman
+USER_UID=1002
+sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
+sudo usermod -aG sudo "$USER"
+sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
 sudo mkdir -p "/home/$USER/tools"
 sudo chown "${USER}:${USER}" "/home/$USER/tools"
@@ -102,24 +102,14 @@ sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
-cd
-ls -a1 | while read line
-do
-    if [ "$line" != "work" ] && [ "$line" != "actions-runner" ]
-    then
-        rm -rf "$line"
-    fi
-done
+sudo chown -R batman:batman work
 
-export VIRTUAL_ENV=/home/runner/.venv
-#sudo mkdir -p /home/runner/.venv
-#sudo chown batman:batman /home/runner/.venv
-#sudo chown batman:batman /home/runner
+export VIRTUAL_ENV=/home/batman/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
-sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/runner/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
+sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/batman/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock .cache ; \
-    export UV_BIN="/home/runner/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate"
+    export UV_BIN="/home/batman/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
