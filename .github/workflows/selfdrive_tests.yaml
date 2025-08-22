@@ -200,7 +200,7 @@ jobs:
     - name: Print diff
       id: print-diff
       if: always()
-      run: cat selfdrive/test/process_replay/diff.txt
+      run: pwd ; cat selfdrive/test/process_replay/diff.txt
     - uses: actions/upload-artifact@v4
       if: always()
       continue-on-error: true
