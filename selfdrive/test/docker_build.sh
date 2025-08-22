@@ -123,7 +123,7 @@ sudo git config --global --add safe.directory /tmp/openpilot
 sudo du -sh /old/upper
 sudo rm -rf /old/tmp/rootfs_cache.tar
 cd /old/upper
-sudo tar -cf /old/tmp/rootfs_cache.tar --exclude old --exclude tmp/rootfs_cache --exclude tmp/rootfs_cache.tar --exclude old/tmp/rootfs_cache --exclude old/tmp/rootfs_cache.tar tmp/.
+sudo tar -cf /old/tmp/rootfs_cache.tar --exclude old --exclude tmp --exclude tmp/rootfs_cache.tar --exclude old/tmp/rootfs_cache --exclude old/tmp/rootfs_cache.tar .
 mkdir -p /tmp/rootfs_cache
 sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 #tar -tf /tmp/rootfs_cache/rootfs_cache.tar
