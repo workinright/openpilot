@@ -157,7 +157,7 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Build openpilot
-      run: ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; sudo chown -R batman:batman /home/runner/work; scons -j$(nproc) ; sudo chown -R runner:runner /home/runner"
+      run: ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; scons -j$(nproc) ; sudo chown -R runner:runner /home/runner"
     - name: Run unit tests
       timeout-minutes: ${{ contains(runner.name, 'nsc') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 20 }}
       run: |
