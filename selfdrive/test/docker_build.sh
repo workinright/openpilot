@@ -6,7 +6,7 @@ if [ -f "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
     cd /
-    tar -tf "$ROOTFS_FILE_PATH"
+    #tar -tf "$ROOTFS_FILE_PATH"
     sudo tar -xf "$ROOTFS_FILE_PATH"
     rm "$ROOTFS_FILE_PATH"
     cd "$ROOTFS_FILE_PATH"
@@ -111,10 +111,8 @@ sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export XDG_CON
     sudo mv .local/bin/* /home/runner/.local/bin/ ; \
     sudo mv .local/bin/.* /home/runner/.local/bin/ ; \
     sudo chown -R runner:runner /home/runner/.local/bin ; \
-    sudo chown -R runner:runner /home/runner/.venv"
-    
-#; export UV_BIN="$HOME/.local/bin"; \
-#export PATH="$UV_BIN:$PATH" ; source .venv/bin/activate ;"
+    sudo chown -R runner:runner /home/runner/.venv ; \
+    export UV_BIN="/home/runner/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
@@ -124,6 +122,6 @@ cd /old/upper
 sudo tar -cf /old/tmp/rootfs_cache.tar .
 mkdir -p /tmp/rootfs_cache
 sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
-tar -tf /tmp/rootfs_cache/rootfs_cache.tar
+#tar -tf /tmp/rootfs_cache/rootfs_cache.tar
 
 #stat /tmp/rootfs_cache.tar
