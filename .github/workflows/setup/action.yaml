@@ -33,24 +33,24 @@ runs:
     # build cache
     - id: date
       shell: bash
-      run: CACHE_COMMIT_DATE="$(git log -1 --pretty='format:%cd' --date=format:'%Y-%m-%d-%H:%M')" ; echo "CACHE_COMMIT_DATE=$CACHE_COMMIT_DATE" >> $GITHUB_ENV ; echo "::set-output name=commit_date::$CACHE_COMMIT_DATE"
+      run: echo "CACHE_COMMIT_DATE=$(git log -1 --pretty='format:%cd' --date=format:'%Y-%m-%d-%H:%M')" >> $GITHUB_ENV
     - shell: bash
-      run: echo "${{ steps.date.outputs.commit_date }}"
+      run: echo "$CACHE_COMMIT_DATE"
     - id: scons-cache
       uses: ./.github/workflows/auto-cache
       with:
         path: .ci_cache/scons_cache
-        key: scons-${{ runner.arch }}-${{ steps.date.outputs.commit_date }}-${{ github.sha }}
+        key: scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
         restore-keys: |
-          scons-${{ runner.arch }}-${{ steps.date.outputs.commit_date }}
+          scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
           scons-${{ runner.arch }}
     - id: rootfs-cache
       uses: ./.github/workflows/auto-cache
       with:
         path: /tmp/rootfs_cache/rootfs_cache.tar.zstd
-        key: rootfs-${{ runner.arch }}-${{ steps.date.outputs.commit_date }}-${{ github.sha }}
+        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
         restore-keys: |
-          rootfs-${{ runner.arch }}-${{ steps.date.outputs.commit_date }}
+          rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
           rootfs-${{ runner.arch }}
     # build our docker image
     - shell: bash
@@ -60,4 +60,4 @@ runs:
       #if: github.ref == 'refs/heads/master'
       with:
         path: /tmp/rootfs_cache/rootfs_cache.tar.zstd
-        key: rootfs-${{ runner.arch }}-${{ steps.date.outputs.commit_date }}-${{ github.sha }}
+        key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
