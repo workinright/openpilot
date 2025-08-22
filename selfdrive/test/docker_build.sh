@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ROOTFS_FILE_PATH="/tmp/rootfs_cache/rootfs_cache.tar"
 
