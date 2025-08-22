@@ -6,6 +6,7 @@ if [ -f "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
     cd /
+    tar -Izstd -tf "$ROOTFS_FILE_PATH"
     sudo tar -Izstd -xf "$ROOTFS_FILE_PATH"
     cd
     cat /etc/passwd
