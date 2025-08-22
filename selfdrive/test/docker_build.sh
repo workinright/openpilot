@@ -8,6 +8,7 @@ then
     cd /
     sudo tar -Izstd -xf "$ROOTFS_FILE_PATH"
     cd
+    cat /etc/passwd
 
     exit 0
 else
