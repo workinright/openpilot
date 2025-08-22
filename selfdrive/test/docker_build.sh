@@ -102,6 +102,15 @@ sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
+sudo mkdir ../test
+mv work ../test/
+cd
+sudo rm -rf * .*
+sudo cp -pR /etc/skel/* .
+sudo chown -R runner:runner .
+mv ../test/work .
+sudo rm -rf ../test
+
 export VIRTUAL_ENV=/home/runner/.venv
 #sudo mkdir -p /home/runner/.venv
 #sudo chown batman:batman /home/runner/.venv
