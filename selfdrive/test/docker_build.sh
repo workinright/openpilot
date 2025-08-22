@@ -6,7 +6,7 @@ if [ -f "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
     cd /
-    tar -tf "$ROOTFS_FILE_PATH"
+    #tar -tf "$ROOTFS_FILE_PATH"
     sudo tar -xf "$ROOTFS_FILE_PATH"
     rm "$ROOTFS_FILE_PATH"
     cd "$ROOTFS_FILE_PATH"
