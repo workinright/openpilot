@@ -105,7 +105,7 @@ sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 cd
 ls -a1 | while read line
 do
-    if [ "$line" != "work" ]
+    if [ "$line" != "work" ] && [ "$line" != "actions-runner" ]
     then
         rm -rf "$line"
     fi
