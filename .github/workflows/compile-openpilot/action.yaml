@@ -6,13 +6,13 @@ runs:
     - shell: bash
       name: Build openpilot with all flags
       run: |
-        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/batman/.venv/bin/activate ; source /home/batman/.venv/bin/activate ; pwd ; scons -j$(nproc)"
-        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/batman/.venv/bin/activate ; source /home/batman/.venv/bin/activate ; pwd ; release/check-dirty.sh"
+        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/batman/.venv/bin/activate ; source /home/batman/.venv/bin/activate ; pwd ; scons -j$(nproc) ; chown -R runner:runner /home/runner"
+        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/batman/.venv/bin/activate ; source /home/batman/.venv/bin/activate ; pwd ; release/check-dirty.sh ; chown -R runner:runner /home/runner "
     - shell: bash
       name: Cleanup scons cache and rebuild
       run: |
           ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; rm -rf /tmp/scons_cache/* && \
-                          scons -j$(nproc) --cache-populate"
+                          scons -j$(nproc) --cache-populate ; chown -R runner:runner /home/runner"
     - name: Save scons cache
       uses: actions/cache/save@v4
       if: github.ref == 'refs/heads/master'
