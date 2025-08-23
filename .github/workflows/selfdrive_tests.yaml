@@ -25,7 +25,7 @@ env:
   DOCKER_LOGIN: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
   BUILD: selfdrive/test/docker_build.sh base
 
-  RUN: sudo -u batman
+  RUN: sudo -u batman bash -c
 
   PYTEST: pytest --continue-on-collection-errors --durations=0 -n logical
 
