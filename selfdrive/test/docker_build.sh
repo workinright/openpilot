@@ -79,8 +79,6 @@ mkdir -p /tmp/opencl-driver-intel && \
     cd / && \
     rm -rf /tmp/opencl-driver-intel
 
-sudo rm -rf /tmp/*
-
 NVIDIA_VISIBLE_DEVICES=all
 NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
 QTWEBENGINE_DISABLE_SANDBOX=1
