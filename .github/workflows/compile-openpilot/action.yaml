@@ -6,7 +6,7 @@ runs:
     - shell: bash
       name: Build openpilot with all flags
       run: |
-        ${{ env.RUN }} "find /home/batman/.venv ; export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/batman/.venv/bin/activate ; source /home/batman/.venv/bin/activate ; pwd ; scons -j$(nproc)"
+        ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/batman/.venv/bin/activate ; source /home/batman/.venv/bin/activate ; pwd ; scons -j$(nproc)"
         ${{ env.RUN }} "export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; cat /home/batman/.venv/bin/activate ; source /home/batman/.venv/bin/activate ; pwd ; release/check-dirty.sh"
     - shell: bash
       name: Cleanup scons cache and rebuild
