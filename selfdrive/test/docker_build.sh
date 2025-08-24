@@ -11,6 +11,9 @@ then
     rm "$ROOTFS_FILE_PATH"
     cd
 
+    sudo cp -pR /home/runner/* /home/batman/
+    sudo chown -R batman:batman /home/batman
+
     exit 0
 else
     echo "no native build cache entry restored, rebuilding"
@@ -118,3 +121,6 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 #tar -tf /tmp/rootfs_cache/rootfs_cache.tar
 
 #stat /tmp/rootfs_cache.tar
+
+sudo cp -pR /home/runner/* /home/batman/
+sudo chown -R batman:batman /home/batman
