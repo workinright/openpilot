@@ -131,4 +131,4 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 ##sudo chown -R runner:runner /home/runner
 
 mount
-ls /tmp/releasepilot
+ls /tmp/releasepilot || true
