@@ -130,5 +130,10 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 ##sudo cp -pR /home/runner/* /home/runner/
 ##sudo chown -R runner:runner /home/runner
 
+
+mkdir /tmp/openpilot
+sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
+
+
 mount
 ls /tmp/releasepilot || true
