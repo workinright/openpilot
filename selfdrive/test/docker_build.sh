@@ -20,6 +20,7 @@ else
 fi
 
 mount
+ls /tmp/releasepilot
 
 tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 
@@ -37,6 +38,8 @@ sudo mount --make-rprivate /
 cd /overlay
 sudo mkdir -p old
 sudo pivot_root . old
+
+mount
 
 PYTHONUNBUFFERED=1
 
@@ -126,3 +129,6 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 
 ##sudo cp -pR /home/runner/* /home/runner/
 ##sudo chown -R runner:runner /home/runner
+
+mount
+ls /tmp/releasepilot
