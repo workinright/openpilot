@@ -52,18 +52,18 @@ jobs:
         command: git lfs pull
     - name: Build devel
       timeout-minutes: 1
-      run: ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/runner/')" ; TARGET_DIR=$STRIPPED_DIR release/build_devel.sh"
+      run: ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/runner/')" ; export PYTHONPATH=/tmp/openpilot ; export CI=1 ; export PYTHONWARNINGS=error ; export FILEREADER_CACHE=1 ; TARGET_DIR=$STRIPPED_DIR release/build_devel.sh"
     - uses: ./.github/workflows/setup-with-retry
     - name: Build openpilot and run checks
       timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 10 || 30) }} # allow more time when we missed the scons cache
       run: |
         cd $STRIPPED_DIR
-        ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/runner/')" ; PYTHONPATH=/tmp/openpilot ; CI=1 ; PYTHONWARNINGS=error ; FILEREADER_CACHE=1 ; python3 system/manager/build.py"
+        ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/runner/')" ; export PYTHONPATH=/tmp/openpilot ; export CI=1 ; export PYTHONWARNINGS=error ; export FILEREADER_CACHE=1 ; python3 system/manager/build.py"
     - name: Run tests
       timeout-minutes: 1
       run: |
         cd $STRIPPED_DIR
-        ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/runner/')" ; release/check-dirty.sh"
+        ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/runner/')" ; export PYTHONPATH=/tmp/openpilot ; export CI=1 ; export PYTHONWARNINGS=error ; export FILEREADER_CACHE=1 ; release/check-dirty.sh"
     - name: Check submodules
       if: github.repository == 'commaai/openpilot'
       timeout-minutes: 3
