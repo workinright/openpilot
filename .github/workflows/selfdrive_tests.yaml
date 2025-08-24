@@ -272,7 +272,7 @@ jobs:
             ${{ env.RUN }} "{ export UV_BIN="/home/batman/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/batman/')" ; PYTHONWARNINGS=ignore &&
                             source selfdrive/test/setup_xvfb.sh &&
                             CACHE_ROOT=/tmp/comma_download_cache python3 selfdrive/ui/tests/test_ui/run.py &&
-                            chmod -R 777 /tmp/comma_download_cache; };"
+                            chmod -R 777 /tmp/comma_download_cache; }; sudo chown -R runner:runner /home/runner"
       - name: Upload Test Report
         uses: actions/upload-artifact@v4
         with:
