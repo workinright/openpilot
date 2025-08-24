@@ -134,6 +134,8 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 mkdir /tmp/openpilot
 sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
 
+sudo chmod 755 /sys/fs/pstore
+
 
 mount
 ls /tmp/releasepilot || true
