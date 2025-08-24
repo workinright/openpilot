@@ -11,13 +11,15 @@ then
     rm "$ROOTFS_FILE_PATH"
     cd
 
-    sudo cp -pR /home/runner/* /home/batman/
-    sudo chown -R batman:batman /home/batman
+    sudo cp -pR /home/runner/* /home/runner/
+    sudo chown -R runner:runner /home/runner
 
     exit 0
 else
     echo "no native build cache entry restored, rebuilding"
 fi
+
+mount
 
 tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 
@@ -103,12 +105,12 @@ sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
-export VIRTUAL_ENV=/home/batman/.venv
+export VIRTUAL_ENV=/home/runner/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
-sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/batman/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
+sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/runner/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock ; \
-    export UV_BIN="/home/batman/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/batman/.venv/bin/activate"
+    export UV_BIN="/home/runner/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
@@ -122,5 +124,5 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 
 #stat /tmp/rootfs_cache.tar
 
-##sudo cp -pR /home/runner/* /home/batman/
-##sudo chown -R batman:batman /home/batman
+##sudo cp -pR /home/runner/* /home/runner/
+##sudo chown -R runner:runner /home/runner
