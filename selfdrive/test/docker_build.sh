@@ -88,11 +88,11 @@ QTWEBENGINE_DISABLE_SANDBOX=1
 
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
-USER=batman
-USER_UID=1002
-sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
-sudo usermod -aG sudo "$USER"
-sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
+USER=runner
+#USER_UID=1002
+#sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
+#sudo usermod -aG sudo "$USER"
+#sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 
 sudo mkdir -p "/home/$USER/tools"
 sudo chown "${USER}:${USER}" "/home/$USER/tools"
@@ -122,5 +122,5 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 
 #stat /tmp/rootfs_cache.tar
 
-sudo cp -pR /home/runner/* /home/batman/
-sudo chown -R batman:batman /home/batman
+##sudo cp -pR /home/runner/* /home/batman/
+##sudo chown -R batman:batman /home/batman

@@ -23,7 +23,7 @@ jobs:
     - uses: ./.github/workflows/setup-with-retry
     - name: Push badges
       run: |
-        ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/batman/')" ; scons -j$(nproc) && python3 selfdrive/ui/translations/create_badges.py"
+        ${{ env.RUN }} "export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate ; pwd ; cd "$(echo $PWD | sed 's/runner/runner/')" ; scons -j$(nproc) && python3 selfdrive/ui/translations/create_badges.py"
 
         rm .gitattributes
 
