@@ -45,7 +45,7 @@ runs:
           scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
           scons-${{ runner.arch }}
     - id: rootfs-cache
-      uses: ./.github/workflows/auto-cache
+      uses: actions/cache/restore@v4
       with:
         path: /tmp/rootfs_cache/rootfs_cache.tar
         key: rootfs-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
