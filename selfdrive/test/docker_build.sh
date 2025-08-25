@@ -11,6 +11,7 @@ then
     rm "$ROOTFS_FILE_PATH"
 
     mkdir -p /tmp/openpilot /tmp/scons_cache /tmp/comma_download_cache /tmp/openpilot_cache
+    sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
     sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/scons_cache /tmp/scons_cache || true
     sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/comma_download_cache /tmp/comma_download_cache || true
     sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/openpilot_cache /tmp/openpilot/openpilot_cache || true
@@ -118,6 +119,7 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 
 
 mkdir -p /tmp/openpilot /tmp/scons_cache /tmp/comma_download_cache /tmp/openpilot_cache
+sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
 sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/scons_cache /tmp/scons_cache || true
 sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/comma_download_cache /tmp/comma_download_cache || true
 sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/openpilot_cache /tmp/openpilot/openpilot_cache || true
