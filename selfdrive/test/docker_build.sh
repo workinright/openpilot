@@ -2,6 +2,8 @@
 
 ROOTFS_FILE_PATH="/tmp/rootfs_cache/rootfs_cache.tar"
 
+find /tmp
+
 if [ -f "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
