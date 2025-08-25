@@ -123,5 +123,6 @@ sudo mount --bind /home/$USER/work/openpilot/openpilot /tmp/openpilot
 sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/scons_cache /tmp/scons_cache || true
 sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/comma_download_cache /tmp/comma_download_cache || true
 sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/openpilot_cache /tmp/openpilot/openpilot_cache || true
+sudo dmesg
 
 sudo chmod 755 /sys/fs/pstore
