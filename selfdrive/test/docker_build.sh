@@ -2,8 +2,6 @@
 
 ROOTFS_FILE_PATH="/tmp/rootfs_cache/rootfs_cache.tar"
 
-find /tmp
-
 if [ -f "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
@@ -13,16 +11,15 @@ then
     rm "$ROOTFS_FILE_PATH"
     cd
 
-    sudo cp -pR /home/runner/* /home/runner/
-    sudo chown -R runner:runner /home/runner
+    mkdir /tmp/openpilot
+    sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
+
+    sudo chmod 755 /sys/fs/pstore
 
     exit 0
 else
     echo "no native build cache entry restored, rebuilding"
 fi
-
-mount
-ls /tmp/releasepilot
 
 tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 
@@ -40,8 +37,6 @@ sudo mount --make-rprivate /
 cd /overlay
 sudo mkdir -p old
 sudo pivot_root . old
-
-mount
 
 PYTHONUNBUFFERED=1
 
@@ -132,12 +127,7 @@ sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
 ##sudo cp -pR /home/runner/* /home/runner/
 ##sudo chown -R runner:runner /home/runner
 
-
 mkdir /tmp/openpilot
 sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
 
-sudo chmod 755 /sys/fs/pstore
-
-
-mount
-ls /tmp/releasepilot || true
+sudo chmod 755 /sys/fs/pstore`
