@@ -6,13 +6,14 @@ if [ -f "$ROOTFS_FILE_PATH" ]
 then
     echo "restoring rootfs from the native build cache"
     cd /
-    #tar -tf "$ROOTFS_FILE_PATH"
     sudo tar -xf "$ROOTFS_FILE_PATH"
-    rm "$ROOTFS_FILE_PATH"
     cd
+    rm "$ROOTFS_FILE_PATH"
 
-    mkdir /tmp/openpilot
-    sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
+    mkdir -p /tmp/openpilot /tmp/scons_cache /tmp/comma_download_cache /tmp/openpilot_cache
+    sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/scons_cache /tmp/scons_cache || true
+    sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/comma_download_cache /tmp/comma_download_cache || true
+    sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/openpilot_cache /tmp/openpilot/openpilot_cache || true
 
     sudo chmod 755 /sys/fs/pstore
 
@@ -42,7 +43,7 @@ PYTHONUNBUFFERED=1
 
 DEBIAN_FRONTEND=noninteractive
 
-REPO="/home/runner/work/openpilot/openpilot"
+REPO="/home/$USER/work/openpilot/openpilot"
 
 mkdir -p /tmp/tools
 cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/
@@ -90,12 +91,6 @@ QTWEBENGINE_DISABLE_SANDBOX=1
 
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
-USER=runner
-#USER_UID=1002
-#sudo useradd -m -s /bin/bash -u "$USER_UID" "$USER"
-#sudo usermod -aG sudo "$USER"
-#sudo bash -c "echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
-
 sudo mkdir -p "/home/$USER/tools"
 sudo chown "${USER}:${USER}" "/home/$USER/tools"
 
@@ -105,12 +100,12 @@ sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
 sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
 sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
 
-export VIRTUAL_ENV=/home/runner/.venv
+export VIRTUAL_ENV=/home/$USER/.venv
 PATH="$VIRTUAL_ENV/bin:$PATH"
-sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/runner/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
+sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/$USER/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
     tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock ; \
-    export UV_BIN="/home/runner/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate"
+    export UV_BIN="/home/$USER/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/$USER/.venv/bin/activate"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
@@ -120,14 +115,11 @@ cd /old/upper
 sudo tar -cf /old/tmp/rootfs_cache.tar --exclude old --exclude tmp --exclude tmp/rootfs_cache.tar --exclude old/tmp/rootfs_cache --exclude old/tmp/rootfs_cache.tar .
 mkdir -p /tmp/rootfs_cache
 sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
-#tar -tf /tmp/rootfs_cache/rootfs_cache.tar
 
-#stat /tmp/rootfs_cache.tar
 
-##sudo cp -pR /home/runner/* /home/runner/
-##sudo chown -R runner:runner /home/runner
-
-mkdir /tmp/openpilot
-sudo mount --bind /home/runner/work/openpilot/openpilot /tmp/openpilot
+mkdir -p /tmp/openpilot /tmp/scons_cache /tmp/comma_download_cache /tmp/openpilot_cache
+sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/scons_cache /tmp/scons_cache || true
+sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/comma_download_cache /tmp/comma_download_cache || true
+sudo mount --bind /home/$USER/work/openpilot/openpilot/.ci_cache/openpilot_cache /tmp/openpilot/openpilot_cache || true
 
 sudo chmod 755 /sys/fs/pstore
