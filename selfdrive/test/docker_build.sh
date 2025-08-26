@@ -34,7 +34,7 @@ else
 fi
 
 # in case this script was run on the same instance before, umount any overlays which were mounted by the previous runs
-tac /proc/mounts | grep overlay | cut -d" " -f1 | while read line; do umount "$line"; done
+tac /proc/mounts | grep overlay | cut -d" " -f2 | while read line; do umount "$line"; done
 
 # in order to be able to build a diff rootfs tarball, we need to commit its initial state by moving it on-the-fly to overlayfs;
 # below, we prepare the system and the new rootfs itself
@@ -132,6 +132,7 @@ source "$HOME/.venv/bin/activate"
 # add a git safe directory for compiling openpilot
 sudo git config --global --add safe.directory /tmp/openpilot
 
+# finally, 
 sudo rm -f "/old/$CACHE_ROOTFS_TARBALL_PATH"
 cd /old/upper
 sudo tar -cf "/old/$CACHE_ROOTFS_TARBALL_PATH" --exclude old --exclude tmp --exclude "$(echo "$CACHE_ROOTFS_TARBALL_PATH" | cut -c2-)" --exclude old/tmp/rootfs_cache.tar .
