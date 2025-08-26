@@ -18,8 +18,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: setup-cache
-        uses: ./.github/workflows/setup-cache
+      # build scons cache
+      - id: date
+        shell: bash
+        run: echo "CACHE_COMMIT_DATE=$(git log -1 --pretty='format:%cd' --date=format:'%Y-%m-%d-%H:%M')" >> $GITHUB_ENV
+      - shell: bash
+        run: echo "$CACHE_COMMIT_DATE"
+      - id: scons-cache
+        uses: ./.github/workflows/auto-cache
+        with:
+          path: .ci_cache/scons_cache
+          key: scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
+          restore-keys: |
+            scons-${{ runner.arch }}-${{ env.CACHE_COMMIT_DATE }}
+            scons-${{ runner.arch }}
+      - name: setup-with-retry
+        uses: ./.github/workflows/setup-with-retry
   update_translations:
     runs-on: ubuntu-latest
     if: github.repository == 'commaai/openpilot'
