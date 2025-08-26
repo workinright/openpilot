@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+REPO="/home/$USER/work/openpilot/openpilot"
 ROOTFS_FILE_PATH="/tmp/rootfs_cache.tar"
 
 if [ -f "$ROOTFS_FILE_PATH" ]
@@ -43,8 +44,6 @@ sudo pivot_root . old
 PYTHONUNBUFFERED=1
 
 DEBIAN_FRONTEND=noninteractive
-
-REPO="/home/$USER/work/openpilot/openpilot"
 
 mkdir -p /tmp/tools
 cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/
