@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ROOTFS_FILE_PATH="/tmp/rootfs_cache/rootfs_cache.tar"
+ROOTFS_FILE_PATH="/tmp/rootfs_cache.tar"
 
 if [ -f "$ROOTFS_FILE_PATH" ]
 then
@@ -113,9 +113,9 @@ sudo git config --global --add safe.directory /tmp/openpilot
 sudo du -sh /old/upper
 sudo rm -rf /old/tmp/rootfs_cache.tar
 cd /old/upper
-sudo tar -cf /old/tmp/rootfs_cache.tar --exclude old --exclude tmp --exclude tmp/rootfs_cache.tar --exclude old/tmp/rootfs_cache --exclude old/tmp/rootfs_cache.tar .
+sudo tar -cf /old/tmp/rootfs_cache.tar --exclude old --exclude tmp/rootfs_cache.tar --exclude old/tmp/rootfs_cache.tar .
 mkdir -p /tmp/rootfs_cache
-sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache/rootfs_cache.tar
+sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache.tar
 
 
 mkdir -p /tmp/openpilot /tmp/scons_cache /tmp/comma_download_cache /tmp/openpilot_cache
