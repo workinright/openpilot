@@ -74,6 +74,7 @@ sudo apt-get install -y --no-install-recommends \
 
 sudo rm -rf /var/lib/apt/lists/*
 sudo apt-get clean
+
 cd /usr/lib/gcc/arm-none-eabi/*
 sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
 cd
