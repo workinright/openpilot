@@ -47,7 +47,7 @@ runs:
     - id: rootfs-cache
       uses: actions/cache/restore@v4
       with:
-        path: /tmp/rootfs_cache/rootfs_cache.tar
+        path: /tmp/rootfs_cache.tar
         key: rootfs-${{ runner.arch }}-${{ env.CACHE_FILE_HASHES }}
     # build our docker image
     - shell: bash
@@ -56,5 +56,5 @@ runs:
       uses: actions/cache/save@v4
       #if: github.ref == 'refs/heads/master'
       with:
-        path: /tmp/rootfs_cache/rootfs_cache.tar
+        path: /tmp/rootfs_cache.tar
         key: rootfs-${{ runner.arch }}-${{ env.CACHE_FILE_HASHES }}
