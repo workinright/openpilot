@@ -7,7 +7,7 @@ on:
 
 env:
   BASE_IMAGE: openpilot-base
-  BUILD: selfdrive/test/docker_build.sh base
+  BUILD: selfdrive/test/build.sh base
   RUN: export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate || true ; export PYTHONPATH=/tmp/openpilot ; export CI=1 ; export PYTHONWARNINGS=error ; export FILEREADER_CACHE=1 ; bash -c
 
 jobs:

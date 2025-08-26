@@ -22,8 +22,7 @@ env:
   BASE_IMAGE: openpilot-base
   AZURE_TOKEN: ${{ secrets.AZURE_COMMADATACI_OPENPILOTCI_TOKEN }}
 
-  DOCKER_LOGIN: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-  BUILD: selfdrive/test/docker_build.sh base
+  BUILD: selfdrive/test/build.sh base
 
   RUN: export UV_BIN="/home/runner/.local/bin" ; export PATH="$UV_BIN:$PATH" ; source /home/runner/.venv/bin/activate || true ; export PYTHONPATH=/tmp/openpilot ; export CI=1 ; export PYTHONWARNINGS=error ; export FILEREADER_CACHE=1 ; bash -c
 
@@ -80,11 +79,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Setup docker push
-      if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/openpilot'
-      run: |
-        echo "PUSH_IMAGE=true" >> "$GITHUB_ENV"
-        $DOCKER_LOGIN
     - uses: ./.github/workflows/setup-with-retry
     - uses: ./.github/workflows/compile-openpilot
       timeout-minutes: 30
