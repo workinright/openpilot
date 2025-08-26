@@ -48,6 +48,7 @@ jobs:
       || fromJSON('["ubuntu-24.04"]') }}
     env:
       STRIPPED_DIR: /tmp/releasepilot
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -84,6 +85,7 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -129,6 +131,7 @@ jobs:
       || fromJSON('["ubuntu-24.04"]') }}
     env:
       PYTHONWARNINGS: default
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -146,6 +149,7 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16", "namespace-experiments:docker.builds.local-cache=separate"]')
       || fromJSON('["ubuntu-24.04"]') }}
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
