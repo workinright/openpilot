@@ -66,41 +66,45 @@ DEBIAN_FRONTEND=noninteractive
 
 mkdir -p /tmp/tools
 cp "$REPO/tools/install_ubuntu_dependencies.sh" /tmp/tools/
-sudo /tmp/tools/install_ubuntu_dependencies.sh && \
+sudo /tmp/tools/install_ubuntu_dependencies.sh
 
 sudo apt-get install -y --no-install-recommends \
     sudo tzdata locales ssh pulseaudio xvfb x11-xserver-utils gnome-screenshot python3-tk python3-dev \
     apt-utils alien unzip tar curl xz-utils dbus gcc-arm-none-eabi tmux vim libx11-6 wget
 
-sudo rm -rf /var/lib/apt/lists/* && \
-    sudo apt-get clean && \
-    cd /usr/lib/gcc/arm-none-eabi/* && \
-    sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp && cd
+sudo rm -rf /var/lib/apt/lists/*
+sudo apt-get clean
+cd /usr/lib/gcc/arm-none-eabi/*
+sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
+cd
 
-sudo sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && sudo locale-gen
+sudo sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+sudo locale-gen
 LANG=en_US.UTF-8
 LANGUAGE=en_US:en
 LC_ALL=en_US.UTF-8
 
-mkdir -p /tmp/opencl-driver-intel && \
-    cd /tmp/opencl-driver-intel && \
-    wget https://github.com/intel/llvm/releases/download/2024-WW14/oclcpuexp-2024.17.3.0.09_rel.tar.gz && \
-    wget https://github.com/oneapi-src/oneTBB/releases/download/v2021.12.0/oneapi-tbb-2021.12.0-lin.tgz && \
-    sudo mkdir -p /opt/intel/oclcpuexp_2024.17.3.0.09_rel && \
-    cd /opt/intel/oclcpuexp_2024.17.3.0.09_rel && \
-    sudo tar -zxvf /tmp/opencl-driver-intel/oclcpuexp-2024.17.3.0.09_rel.tar.gz && \
-    sudo mkdir -p /etc/OpenCL/vendors && \
-    sudo bash -c "echo /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64/libintelocl.so > /etc/OpenCL/vendors/intel_expcpu.icd" && \
-    cd /opt/intel && \
-    sudo tar -zxvf /tmp/opencl-driver-intel/oneapi-tbb-2021.12.0-lin.tgz && \
-    sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbb.so /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64 && \
-    sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbbmalloc.so /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64 && \
-    sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbb.so.12 /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64 && \
-    sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbbmalloc.so.2 /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64 && \
-    sudo mkdir -p /etc/ld.so.conf.d && \
-    sudo bash -c "echo /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64 > /etc/ld.so.conf.d/libintelopenclexp.conf" && \
-    sudo ldconfig -f /etc/ld.so.conf.d/libintelopenclexp.conf && \
-    cd / && rm -rf /tmp/opencl-driver-intel && cd
+mkdir -p /tmp/opencl-driver-intel
+cd /tmp/opencl-driver-intel
+wget https://github.com/intel/llvm/releases/download/2024-WW14/oclcpuexp-2024.17.3.0.09_rel.tar.gz
+wget https://github.com/oneapi-src/oneTBB/releases/download/v2021.12.0/oneapi-tbb-2021.12.0-lin.tgz
+sudo mkdir -p /opt/intel/oclcpuexp_2024.17.3.0.09_rel
+cd /opt/intel/oclcpuexp_2024.17.3.0.09_rel
+sudo tar -zxvf /tmp/opencl-driver-intel/oclcpuexp-2024.17.3.0.09_rel.tar.gz
+sudo mkdir -p /etc/OpenCL/vendors
+sudo bash -c "echo /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64/libintelocl.so > /etc/OpenCL/vendors/intel_expcpu.icd"
+cd /opt/intel
+sudo tar -zxvf /tmp/opencl-driver-intel/oneapi-tbb-2021.12.0-lin.tgz
+sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbb.so /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64
+sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbbmalloc.so /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64
+sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbb.so.12 /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64
+sudo ln -s /opt/intel/oneapi-tbb-2021.12.0/lib/intel64/gcc4.8/libtbbmalloc.so.2 /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64
+sudo mkdir -p /etc/ld.so.conf.d
+sudo bash -c "echo /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64 > /etc/ld.so.conf.d/libintelopenclexp.conf"
+sudo ldconfig -f /etc/ld.so.conf.d/libintelopenclexp.conf
+cd /
+rm -rf /tmp/opencl-driver-intel
+cd
 
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
 
