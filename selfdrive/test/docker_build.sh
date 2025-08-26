@@ -34,7 +34,7 @@ else
 fi
 
 # in case this script was run on the same instance before, umount any overlays which were mounted by the previous runs
-tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
+tac /proc/mounts | grep overlay | cut -d" " -f1 | while read line; do umount "$line"; done
 
 # in order to be able to build a diff rootfs tarball, we need to commit its initial state by moving it on-the-fly to overlayfs;
 # below, we prepare the system and the new rootfs itself
@@ -113,19 +113,22 @@ NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
 QTWEBENGINE_DISABLE_SANDBOX=1
 
 # install and set up the Python dependencies needed
+export VIRTUAL_ENV="$HOME/.venv"
+export PATH="$VIRTUAL_ENV/bin:$PATH"
+
 cp "$REPO/pyproject.toml" "$REPO/uv.lock" "$HOME"
 mkdir -p "$HOME/tools"
 cp "$REPO/tools/install_python_dependencies.sh" "$HOME/tools/"
 
-export VIRTUAL_ENV="$HOME/.venv"
-export PATH="$VIRTUAL_ENV/bin:$PATH"
-
 tools/install_python_dependencies.sh
+
 rm -rf tools/ pyproject.toml uv.lock
+
 export UV_BIN="$HOME/.local/bin"
 export PATH="$UV_BIN:$PATH"
 source "$HOME/.venv/bin/activate"
 
+# add a git safe directory for compiling openpilot
 sudo git config --global --add safe.directory /tmp/openpilot
 
 sudo rm -f "/old/$CACHE_ROOTFS_TARBALL_PATH"
