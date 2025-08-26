@@ -25,7 +25,7 @@ then
     cd
     rm "$CACHE_ROOTFS_TARBALL_PATH"
 
-    # before the next tasks are run, finalise the environment for them
+    # before the next tasks are run, finalize the environment for them
     prepare_mounts
 
     # EXITS HERE - if the rootfs could been prepared entirely from the cache, there's no need for any further action like re-building
@@ -141,5 +141,5 @@ sudo tar -cf "/old/$CACHE_ROOTFS_TARBALL_PATH" --exclude old --exclude tmp --exc
 mkdir -p /tmp/rootfs_cache
 sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache.tar
 
-# before the next tasks are run, finalise the environment for them
+# before the next tasks are run, finalize the environment for them
 prepare_mounts

@@ -29,6 +29,15 @@ env:
   PYTEST: pytest --continue-on-collection-errors --durations=0 -n logical
 
 jobs:
+  setup-cache:
+    name: setup cache
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: setup-cache
+        uses: ./.github/workflows/setup-cache
   build_release:
     name: build release
     runs-on: ${{
@@ -87,6 +96,7 @@ jobs:
     name: build macOS
     if: false  # temp disable since homebrew install is getting stuck
     runs-on: ${{ ((github.repository == 'commaai/openpilot') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))) && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+    needs: [setup-cache]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -106,14 +116,6 @@ jobs:
         # package install has DeprecationWarnings
         PYTHONWARNINGS: default
     - run: git lfs pull
-    - name: Getting scons cache
-      uses: ./.github/workflows/auto-cache
-      with:
-        path: /tmp/scons_cache
-        key: scons-${{ runner.arch }}-macos-${{ env.CACHE_COMMIT_DATE }}-${{ github.sha }}
-        restore-keys: |
-          scons-${{ runner.arch }}-macos-${{ env.CACHE_COMMIT_DATE }}
-          scons-${{ runner.arch }}-macos
     - name: Building openpilot
       run: . .venv/bin/activate && scons -j$(nproc)
 
