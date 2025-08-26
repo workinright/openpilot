@@ -18,15 +18,17 @@ prepare_mounts() {
 
 if [ -f "$CACHE_ROOTFS_TARBALL_PATH" ]
 then
-    # if the rootfs diff tarball (also created by this script) got restored from the CI native cache, unpack it
+    # if the rootfs diff tarball (also created by this script) got restored from the CI native cache, unpack it, upgrading the rootfs
     echo "restoring rootfs from the native build cache"
     cd /
     sudo tar -xf "$CACHE_ROOTFS_TARBALL_PATH" 2>/dev/null || true
     cd
     rm "$CACHE_ROOTFS_TARBALL_PATH"
 
+    # before the next tasks are run, finalise the environment for them
     prepare_mounts
 
+    # EXITS HERE - if the rootfs could been prepared entirely from the cache, there's no need for any further action like re-building
     exit 0
 else
     # otherwise, we'll have to install everything from scratch and build the tarball to be available for the next run
@@ -34,7 +36,7 @@ else
 fi
 
 # in case this script was run on the same instance before, umount any overlays which were mounted by the previous runs
-tac /proc/mounts | grep overlay | cut -d" " -f2 | while read line; do umount "$line"; done
+tac /proc/mounts | grep overlay | cut -d" " -f2 | while read line; do sudo umount "$line"; done
 
 # in order to be able to build a diff rootfs tarball, we need to commit its initial state by moving it on-the-fly to overlayfs;
 # below, we prepare the system and the new rootfs itself
@@ -48,7 +50,7 @@ do
         sudo mount --bind "$line" "/overlay$line"
     fi
 done
-# remove the MS_SHARED flag from the original rootfs, which isn't supported by pivot_root(8) and would make it to fail (see: https://lxc-users.linuxcontainers.narkive.com/pNQKxcnN/pivot-root-failures-when-is-mounted-as-shared)
+# remove the MS_SHARED flag from the original rootfs mount, which isn't supported by pivot_root(8) and would cause it to fail (see: https://lxc-users.linuxcontainers.narkive.com/pNQKxcnN/pivot-root-failures-when-is-mounted-as-shared)
 sudo mount --make-rprivate /
 
 # prepare for the pivot_root(8) and execute, swapping places of the original rootfs and the new one on overlayfs (with its lowerdir still being the original one)
@@ -132,12 +134,12 @@ source "$HOME/.venv/bin/activate"
 # add a git safe directory for compiling openpilot
 sudo git config --global --add safe.directory /tmp/openpilot
 
-# finally, 
-sudo rm -f "/old/$CACHE_ROOTFS_TARBALL_PATH"
+# finally, create the rootfs diff tarball (to be pushed into the CI native cache)
+sudo rm -f "/old/$CACHE_ROOTFS_TARBALL_PATH" # remove the old tarball from previous run, if exists
 cd /old/upper
 sudo tar -cf "/old/$CACHE_ROOTFS_TARBALL_PATH" --exclude old --exclude tmp --exclude "$(echo "$CACHE_ROOTFS_TARBALL_PATH" | cut -c2-)" --exclude old/tmp/rootfs_cache.tar .
 mkdir -p /tmp/rootfs_cache
 sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache.tar
 
-
+# before the next tasks are run, finalise the environment for them
 prepare_mounts
