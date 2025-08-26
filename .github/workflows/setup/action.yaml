@@ -48,7 +48,7 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: /tmp/rootfs_cache/rootfs_cache.tar
-        key: rootfs-aaaaa-${{ runner.arch }}-${{ env.CACHE_FILE_HASHES }}
+        key: rootfs-${{ runner.arch }}-${{ env.CACHE_FILE_HASHES }}
     # build our docker image
     - shell: bash
       run: eval ${{ env.BUILD }}
