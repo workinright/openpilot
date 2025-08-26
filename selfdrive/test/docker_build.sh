@@ -56,10 +56,11 @@ sudo mount --make-rprivate /
 cd /overlay
 sudo mkdir -p old
 sudo pivot_root . old # once this finishes, the system is moved to the new rootfs and all newly open file descriptors will point to it
+cd
 
 # -------- at this point, the original rootfs was committed and all the changes to it done below will be saved to the newly created rootfs diff tarball --------
 
-# install and set up all the native dependencies needed
+# install and set up the native dependencies needed
 PYTHONUNBUFFERED=1
 DEBIAN_FRONTEND=noninteractive
 
@@ -74,7 +75,7 @@ sudo apt-get install -y --no-install-recommends \
 sudo rm -rf /var/lib/apt/lists/* && \
     sudo apt-get clean && \
     cd /usr/lib/gcc/arm-none-eabi/* && \
-    sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp
+    sudo rm -rf arm/ thumb/nofp thumb/v6* thumb/v8* thumb/v7+fp thumb/v7-r+fp.sp && cd
 
 sudo sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && sudo locale-gen
 LANG=en_US.UTF-8
@@ -99,29 +100,27 @@ mkdir -p /tmp/opencl-driver-intel && \
     sudo mkdir -p /etc/ld.so.conf.d && \
     sudo bash -c "echo /opt/intel/oclcpuexp_2024.17.3.0.09_rel/x64 > /etc/ld.so.conf.d/libintelopenclexp.conf" && \
     sudo ldconfig -f /etc/ld.so.conf.d/libintelopenclexp.conf && \
-    cd / && \
-    rm -rf /tmp/opencl-driver-intel
+    cd / && rm -rf /tmp/opencl-driver-intel && cd
 
 sudo bash -c "dbus-uuidgen > /etc/machine-id"
-
-sudo mkdir -p "$HOME/tools"
-
-sudo cp "$REPO/pyproject.toml" "$REPO/uv.lock" "$HOME" && \
-sudo chown "${USER}:${USER}" "$HOME/pyproject.toml" "$HOME/uv.lock"
-
-sudo cp "$REPO/tools/install_python_dependencies.sh" "$HOME/tools/"
-sudo chown "${USER}:${USER}" "$HOME/tools/install_python_dependencies.sh"
 
 NVIDIA_VISIBLE_DEVICES=all
 NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
 QTWEBENGINE_DISABLE_SANDBOX=1
 
-export VIRTUAL_ENV=$HOME/.venv
+# install and set up the Python dependencies needed
+cp "$REPO/pyproject.toml" "$REPO/uv.lock" "$HOME"
+mkdir -p "$HOME/tools"
+cp "$REPO/tools/install_python_dependencies.sh" "$HOME/tools/"
+
+export VIRTUAL_ENV="$HOME/.venv"
 export PATH="$VIRTUAL_ENV/bin:$PATH"
-export VIRTUAL_ENV=$HOME/.venv ; export XDG_CONFIG_HOME="$HOME/.config" ; env ; cd "$HOME" && \
-    tools/install_python_dependencies.sh && \
-    rm -rf tools/ pyproject.toml uv.lock ; \
-    export UV_BIN="$HOME/.local/bin"; export PATH="$UV_BIN:$PATH" ; source $HOME/.venv/bin/activate
+
+tools/install_python_dependencies.sh
+rm -rf tools/ pyproject.toml uv.lock
+export UV_BIN="$HOME/.local/bin"
+export PATH="$UV_BIN:$PATH"
+source "$HOME/.venv/bin/activate"
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
