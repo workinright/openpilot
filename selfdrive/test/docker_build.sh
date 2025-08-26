@@ -1,48 +1,66 @@
 #!/usr/bin/env bash
+set -e
 
-REPO="/home/$USER/work/openpilot/openpilot"
-ROOTFS_FILE_PATH="/tmp/rootfs_cache.tar"
+REPO="$HOME/work/openpilot/openpilot"
+CACHE_ROOTFS_TARBALL_PATH="/tmp/rootfs_cache.tar"
 
-if [ -f "$ROOTFS_FILE_PATH" ]
-then
-    echo "restoring rootfs from the native build cache"
-    cd /
-    sudo tar -xf "$ROOTFS_FILE_PATH"
-    cd
-    rm "$ROOTFS_FILE_PATH"
-
+prepare_mounts() {
+    # create and mount the required volumes where they're expected
     mkdir -p /tmp/openpilot /tmp/scons_cache /tmp/comma_download_cache /tmp/openpilot_cache
     sudo mount --bind "$REPO" /tmp/openpilot
     sudo mount --bind "$REPO/.ci_cache/scons_cache" /tmp/scons_cache || true
     sudo mount --bind "$REPO/.ci_cache/comma_download_cache" /tmp/comma_download_cache || true
     sudo mount --bind "$REPO/.ci_cache/openpilot_cache" /tmp/openpilot_cache || true
 
+    # needed for the unit tests not to fail
     sudo chmod 755 /sys/fs/pstore
+}
+
+if [ -f "$CACHE_ROOTFS_TARBALL_PATH" ]
+then
+    # if the rootfs diff tarball (also created by this script) got restored from the CI native cache, unpack it
+    echo "restoring rootfs from the native build cache"
+    cd /
+    sudo tar -xf "$CACHE_ROOTFS_TARBALL_PATH"
+    cd
+    rm "$CACHE_ROOTFS_TARBALL_PATH"
+
+    prepare_mounts
 
     exit 0
 else
+    # otherwise, we'll have to install everything from scratch and build the tarball to be available for the next run
     echo "no native build cache entry restored, rebuilding"
 fi
 
+# in case this script was run on the same instance before, umount any overlays which were mounted by the previous runs
 tac /proc/mounts | grep /overlay | while read line; do umount "$line"; done
 
-sudo mkdir -p /upper /work /overlay
-mounts="$(cat /proc/mounts)"
-sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /overlay
-echo "$mounts" | cut -d" " -f2 | while read line
+# in order to be able to build a diff rootfs tarball, we need to commit its initial state by moving it on-the-fly to overlayfs;
+# below, we prepare the system and the new rootfs itself
+sudo mkdir -p /upper /work /overlay # prepare directories for overlayfs
+mounts="$(cat /proc/mounts)" # save the original mounts table
+sudo mount -t overlay overlay -o lowerdir=/,upperdir=/upper,workdir=/work /overlay # mount the overlayfs
+echo "$mounts" | cut -d" " -f2 | while read line # bind-mount any mounts under the old rootfs into the new one (overlayfs isn't recursive like e.g. `mount --rbind`)
 do
-    if [ "$line" != "/" ]
+    if [ "$line" != "/" ] # except the rootfs base, to avoid infinite mountpoint loops
     then
         sudo mount --bind "$line" "/overlay$line"
     fi
 done
+# remove the MS_SHARED flag from the original rootfs, which isn't supported by pivot_root(8) and would make it to fail (see: https://lxc-users.linuxcontainers.narkive.com/pNQKxcnN/pivot-root-failures-when-is-mounted-as-shared)
 sudo mount --make-rprivate /
+
+# prepare for the pivot_root(8) and execute, swapping places of the original rootfs and the new one on overlayfs (with its lowerdir still being the original one)
+# (what this achieves is committing the state of the original rootfs and making it read-only, while creating a new, virtual read-write rootfs with all changes written into a separate directory, the upperdir)
 cd /overlay
 sudo mkdir -p old
-sudo pivot_root . old
+sudo pivot_root . old # once this finishes, the system is moved to the new rootfs and all newly open file descriptors will point to it
 
+# -------- at this point, the original rootfs was committed and all the changes to it done below will be saved to the newly created rootfs diff tarball --------
+
+# install and set up all the native dependencies needed
 PYTHONUNBUFFERED=1
-
 DEBIAN_FRONTEND=noninteractive
 
 mkdir -p /tmp/tools
@@ -51,8 +69,7 @@ sudo /tmp/tools/install_ubuntu_dependencies.sh && \
 
 sudo apt-get install -y --no-install-recommends \
     sudo tzdata locales ssh pulseaudio xvfb x11-xserver-utils gnome-screenshot python3-tk python3-dev \
-    apt-utils alien unzip tar curl xz-utils dbus gcc-arm-none-eabi tmux vim libx11-6 wget && \
-sudo rm -rf /var/lib/apt/lists/* && sudo apt-get clean
+    apt-utils alien unzip tar curl xz-utils dbus gcc-arm-none-eabi tmux vim libx11-6 wget
 
 sudo rm -rf /var/lib/apt/lists/* && \
     sudo apt-get clean && \
@@ -85,42 +102,34 @@ mkdir -p /tmp/opencl-driver-intel && \
     cd / && \
     rm -rf /tmp/opencl-driver-intel
 
+sudo bash -c "dbus-uuidgen > /etc/machine-id"
+
+sudo mkdir -p "$HOME/tools"
+
+sudo cp "$REPO/pyproject.toml" "$REPO/uv.lock" "$HOME" && \
+sudo chown "${USER}:${USER}" "$HOME/pyproject.toml" "$HOME/uv.lock"
+
+sudo cp "$REPO/tools/install_python_dependencies.sh" "$HOME/tools/"
+sudo chown "${USER}:${USER}" "$HOME/tools/install_python_dependencies.sh"
+
 NVIDIA_VISIBLE_DEVICES=all
 NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
 QTWEBENGINE_DISABLE_SANDBOX=1
 
-sudo bash -c "dbus-uuidgen > /etc/machine-id"
-
-sudo mkdir -p "/home/$USER/tools"
-sudo chown "${USER}:${USER}" "/home/$USER/tools"
-
-sudo cp "$REPO/pyproject.toml" "$REPO/uv.lock" "/home/$USER" && \
-sudo chown "${USER}:${USER}" "/home/$USER/pyproject.toml" "/home/$USER/uv.lock"
-
-sudo cp "$REPO/tools/install_python_dependencies.sh" "/home/$USER/tools/"
-sudo chown "${USER}:${USER}" "/home/$USER/tools/install_python_dependencies.sh"
-
-export VIRTUAL_ENV=/home/$USER/.venv
-PATH="$VIRTUAL_ENV/bin:$PATH"
-sudo -u "$USER" bash -c "echo $USER ; export HOME="/home/$USER" ; export VIRTUAL_ENV=/home/$USER/.venv ; export XDG_CONFIG_HOME="/home/$USER/.config" ; env ; cd "/home/$USER" && \
+export VIRTUAL_ENV=$HOME/.venv
+export PATH="$VIRTUAL_ENV/bin:$PATH"
+export VIRTUAL_ENV=$HOME/.venv ; export XDG_CONFIG_HOME="$HOME/.config" ; env ; cd "$HOME" && \
     tools/install_python_dependencies.sh && \
     rm -rf tools/ pyproject.toml uv.lock ; \
-    export UV_BIN="/home/$USER/.local/bin"; export PATH="$UV_BIN:$PATH" ; source /home/$USER/.venv/bin/activate"
+    export UV_BIN="$HOME/.local/bin"; export PATH="$UV_BIN:$PATH" ; source $HOME/.venv/bin/activate
 
 sudo git config --global --add safe.directory /tmp/openpilot
 
-sudo du -sh /old/upper
-sudo rm -rf /old/tmp/rootfs_cache.tar
+sudo rm -f "/old/$CACHE_ROOTFS_TARBALL_PATH"
 cd /old/upper
-sudo tar -cf /old/tmp/rootfs_cache.tar --exclude old --exclude tmp/rootfs_cache.tar --exclude old/tmp/rootfs_cache.tar .
+sudo tar -cf "/old/$CACHE_ROOTFS_TARBALL_PATH" --exclude old --exclude tmp --exclude "$(echo "$CACHE_ROOTFS_TARBALL_PATH" | cut -c2-)" --exclude old/tmp/rootfs_cache.tar .
 mkdir -p /tmp/rootfs_cache
 sudo mv /old/tmp/rootfs_cache.tar /tmp/rootfs_cache.tar
 
 
-mkdir -p /tmp/openpilot /tmp/scons_cache /tmp/comma_download_cache /tmp/openpilot_cache
-sudo mount --bind "$REPO" /tmp/openpilot
-sudo mount --bind "$REPO/.ci_cache/scons_cache" /tmp/scons_cache || true
-sudo mount --bind "$REPO/.ci_cache/comma_download_cache" /tmp/comma_download_cache || true
-sudo mount --bind "$REPO/.ci_cache/openpilot_cache" /tmp/openpilot_cache || true
-
-sudo chmod 755 /sys/fs/pstore
+prepare_mounts
