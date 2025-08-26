@@ -21,7 +21,7 @@ then
     # if the rootfs diff tarball (also created by this script) got restored from the CI native cache, unpack it
     echo "restoring rootfs from the native build cache"
     cd /
-    sudo tar -xf "$CACHE_ROOTFS_TARBALL_PATH"
+    sudo tar -xf "$CACHE_ROOTFS_TARBALL_PATH" 2>/dev/null || true
     cd
     rm "$CACHE_ROOTFS_TARBALL_PATH"
 
